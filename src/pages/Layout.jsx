@@ -375,20 +375,6 @@ function LayoutContent({ currentUser, currentPageName, visibleNavItems, handleLo
             </SidebarTrigger>
           </div>
 
-          {/* Mobile Header */}
-          <header className="bg-black/80 backdrop-blur-lg border-b border-gray-800 px-6 py-4 md:hidden shadow-sm sticky top-0 z-10">
-            <div className="flex items-center justify-center">
-                <span className="text-xl font-bold text-white">
-                    {currentPageName}
-                </span>
-            </div>
-          </header>
-
-          {/* Desktop Header */}
-          <header className="hidden md:flex bg-black/80 backdrop-blur-lg border-b border-gray-800 px-6 py-3 shadow-sm sticky top-0 z-10 items-center justify-center gap-4">
-            <span className="text-xl font-bold text-white">{currentPageName}</span>
-          </header>
-
           <div className="flex-1 overflow-auto">
             {currentUser && (!currentUser.country || !currentUser.postcode) && currentPageName !== 'Onboarding' && currentPageName !== 'BusinessOnboarding' && (
                 <div className="bg-yellow-900/50 border-b border-yellow-800 p-3 text-center text-sm text-yellow-300">
