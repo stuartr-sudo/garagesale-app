@@ -239,14 +239,14 @@ export default function ItemDetail() {
         </Button>
       </div>
 
-      <div className="max-w-7xl mx-auto">
-        {/* Desktop/Mobile Layout: Aligned heights */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Combined Image & Details Card */}
-          <div className="lg:col-span-2">
-            <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10 overflow-hidden h-full flex flex-col">
-              {/* Main Image - Compact */}
-              <div className="relative h-48 md:h-56 lg:h-64 flex-shrink-0">
+      <div className="max-w-7xl mx-auto transform scale-90">
+        {/* Desktop/Mobile Layout: New structured layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Left Column - Image, Title, Price, Description */}
+          <div className="lg:col-span-2 space-y-4">
+            {/* Image Carousel Card */}
+            <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10 overflow-hidden">
+              <div className="relative h-56 md:h-64 lg:h-72">
                 <img
                   src={primaryImage}
                   alt={item.title}
@@ -270,7 +270,7 @@ export default function ItemDetail() {
                       <button
                         key={idx}
                         onClick={() => setSelectedImage(idx)}
-                        className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                        className={`flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all ${
                           selectedImage === idx
                             ? 'border-pink-500 scale-105'
                             : 'border-gray-700 hover:border-gray-600'
@@ -286,26 +286,13 @@ export default function ItemDetail() {
                   </div>
                 </div>
               )}
+            </Card>
 
-              {/* Item Details - Combined with image */}
-              <CardContent className="p-3 md:p-4 space-y-3 flex-grow">
-                {/* Title and Price - Most Important Info */}
+            {/* Title Card */}
+            <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
+              <CardContent className="p-4">
                 <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h1 className="text-xl md:text-2xl font-bold text-white mb-1">{item.title}</h1>
-                    <div className="flex items-center gap-2 text-gray-400 text-xs">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {formatDistanceToNow(new Date(item.created_date), { addSuffix: true })}
-                      </div>
-                      {item.location && (
-                        <div className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
-                          {item.location}
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  <h1 className="text-xl md:text-2xl font-bold text-white">{item.title}</h1>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -315,24 +302,58 @@ export default function ItemDetail() {
                     <Share2 className="w-4 h-4" />
                   </Button>
                 </div>
+                <div className="flex items-center gap-2 text-gray-400 text-xs mt-1">
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3" />
+                    {formatDistanceToNow(new Date(item.created_date), { addSuffix: true })}
+                  </div>
+                  {item.location && (
+                    <div className="flex items-center gap-1">
+                      <MapPin className="w-3 h-3" />
+                      {item.location}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
 
-                {/* Price and Condition - Prominent Display */}
-                <div className="flex items-center justify-between">
-                  <div className="text-2xl md:text-3xl font-bold text-cyan-400">
+            {/* Price, Condition, Category Row */}
+            <div className="grid grid-cols-3 gap-4">
+              {/* Price Card */}
+              <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
+                <CardContent className="p-4 text-center">
+                  <div className="text-xs text-gray-400 mb-1">Price</div>
+                  <div className="text-xl md:text-2xl font-bold text-cyan-400">
                     {item.price === 0 ? 'Free' : `$${item.price}`}
                   </div>
-                  <div className="flex gap-2">
-                    <Badge variant="secondary" className="capitalize bg-blue-900/50 text-blue-300 border-blue-700 text-xs">
-                      {item.condition?.replace('_', ' ')}
-                    </Badge>
-                    <Badge variant="outline" className="capitalize bg-purple-900/50 text-purple-300 border-purple-700 text-xs">
-                      <Tag className="w-3 h-3 mr-1" />
-                      {item.category?.replace('_', ' ')}
-                    </Badge>
-                  </div>
-                </div>
+                </CardContent>
+              </Card>
 
-                {/* Description - Expandable */}
+              {/* Condition Card */}
+              <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
+                <CardContent className="p-4 text-center">
+                  <div className="text-xs text-gray-400 mb-1">Condition</div>
+                  <Badge variant="secondary" className="capitalize bg-blue-900/50 text-blue-300 border-blue-700">
+                    {item.condition?.replace('_', ' ')}
+                  </Badge>
+                </CardContent>
+              </Card>
+
+              {/* Category Card */}
+              <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
+                <CardContent className="p-4 text-center">
+                  <div className="text-xs text-gray-400 mb-1">Category</div>
+                  <Badge variant="outline" className="capitalize bg-purple-900/50 text-purple-300 border-purple-700">
+                    {item.category?.replace('_', ' ')}
+                  </Badge>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Description Card */}
+            <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
+              <CardContent className="p-4">
+                <h3 className="text-sm font-semibold text-gray-400 mb-2">Description</h3>
                 <div>
                   <p className={`text-gray-300 leading-relaxed text-sm ${isDescriptionExpanded ? '' : 'line-clamp-3'}`}>
                     {item.description}
@@ -360,7 +381,6 @@ export default function ItemDetail() {
                     </button>
                   )}
                 </div>
-
               </CardContent>
             </Card>
           </div>
