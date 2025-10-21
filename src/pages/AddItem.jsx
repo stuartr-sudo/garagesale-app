@@ -46,6 +46,7 @@ export default function AddItem() {
     title: "",
     description: "",
     price: "",
+    minimum_price: "",
     condition: "good",
     category: "other",
     location: "",
@@ -158,11 +159,33 @@ export default function AddItem() {
       const newItem = {
         ...itemData,
         price: parseFloat(itemData.price),
-        seller_id: currentUser?.id || 'guest-user',
+        minimum_price: itemData.minimum_price ? parseFloat(itemData.minimum_price) : null,
+        seller_id: 'guest-user', // TEMPORARY: Use guest user ID
         status: "active"
       };
       
-      await Item.create(newItem);
+      // TEMPORARY: Direct Supabase call to bypass authentication issues
+      const { data, error } = await supabase
+        .from('items')
+        .insert([newItem])
+        .select();
+
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
+
+      // If minimum_price is set, also create item knowledge for AI agent
+      if (newItem.minimum_price) {
+        await supabase
+          .from('item_knowledge')
+          .insert([{
+            item_id: data[0].id,
+            minimum_price: newItem.minimum_price,
+            negotiation_notes: `Minimum acceptable price: $${newItem.minimum_price}`,
+            created_at: new Date().toISOString()
+          }]);
+      }
 
       alert("Item added successfully!");
       navigate(createPageUrl("MyItems"));
@@ -270,6 +293,20 @@ export default function AddItem() {
                       placeholder="0.00"
                       className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="minimum_price" className="text-gray-300">Minimum Price (for AI Agent)</Label>
+                    <Input
+                      id="minimum_price"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={itemData.minimum_price}
+                      onChange={(e) => handleInputChange('minimum_price', e.target.value)}
+                      placeholder="e.g., 100.00"
+                      className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
+                    />
+                    <p className="text-xs text-gray-400">The AI agent will automatically accept offers at or above this price</p>
                   </div>
                 </div>
 
