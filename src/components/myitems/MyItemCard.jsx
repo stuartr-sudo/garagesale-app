@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Trash2, Eye, EyeOff, CheckCircle } from "lucide-react";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 
 const statusConfig = {
     active: { text: "Active", color: "bg-lime-900/50 text-lime-300 border-lime-700" },
@@ -27,12 +29,20 @@ const conditionColors = {
 };
 
 export default function MyItemCard({ item, onDelete, onStatusChange }) {
+  const navigate = useNavigate();
   const primaryImage = item.image_urls?.[0] || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop";
 
   const currentStatus = statusConfig[item.status] || statusConfig.inactive;
 
+  const handleCardClick = () => {
+    navigate(createPageUrl(`ItemDetail/${item.id}`));
+  };
+
   return (
-    <Card className="bg-gray-900 shadow-lg shadow-fuchsia-950/20 hover:shadow-pink-500/20 transition-all duration-300 border border-gray-800 rounded-2xl overflow-hidden group hover:scale-[1.02] flex flex-col h-full">
+    <Card 
+      onClick={handleCardClick}
+      className="bg-gray-900 shadow-lg shadow-fuchsia-950/20 hover:shadow-pink-500/20 transition-all duration-300 border border-gray-800 rounded-2xl overflow-hidden group hover:scale-[1.02] flex flex-col h-full cursor-pointer"
+    >
       <div className="relative aspect-square overflow-hidden">
         <img
           src={primaryImage}
@@ -56,6 +66,7 @@ export default function MyItemCard({ item, onDelete, onStatusChange }) {
               <Button
                 variant="secondary"
                 size="icon"
+                onClick={(e) => e.stopPropagation()}
                 className="bg-gray-800/90 hover:bg-gray-700 shadow-md text-white rounded-full h-8 w-8"
               >
                 <MoreHorizontal className="w-4 h-4" />
@@ -63,24 +74,24 @@ export default function MyItemCard({ item, onDelete, onStatusChange }) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 bg-gray-800 border-gray-700">
               {item.status === "active" && (
-                <DropdownMenuItem onClick={() => onStatusChange("inactive")} className="text-white hover:bg-gray-700">
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onStatusChange("inactive"); }} className="text-white hover:bg-gray-700">
                   <EyeOff className="w-4 h-4 mr-2" />
                   Mark as Inactive
                 </DropdownMenuItem>
               )}
               {item.status === "inactive" && (
-                <DropdownMenuItem onClick={() => onStatusChange("active")} className="text-white hover:bg-gray-700">
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onStatusChange("active"); }} className="text-white hover:bg-gray-700">
                   <Eye className="w-4 h-4 mr-2" />
                   Mark as Active
                 </DropdownMenuItem>
               )}
               {item.status !== "sold" && (
-                <DropdownMenuItem onClick={() => onStatusChange("sold")} className="text-white hover:bg-gray-700">
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onStatusChange("sold"); }} className="text-white hover:bg-gray-700">
                   <CheckCircle className="w-4 h-4 mr-2" />
                   Mark as Sold
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem onClick={onDelete} className="text-red-400 hover:bg-gray-700 focus:bg-red-900/50">
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onDelete(); }} className="text-red-400 hover:bg-gray-700 focus:bg-red-900/50">
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete Item
               </DropdownMenuItem>
