@@ -82,10 +82,10 @@ export default function ItemCard({ item, seller, onPurchase }) {
           <div className="relative flex-1 overflow-visible min-w-0">
             <Button
               onClick={handlePurchaseClick}
-              className="w-full h-11 bg-pink-600 hover:bg-pink-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-pink-500/20 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-sm sm:text-base"
+              className="w-full h-11 bg-pink-600 hover:bg-pink-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-pink-500/20 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-1.5 text-xs px-3"
             >
-              <ShoppingCart className="w-4 h-4" />
-              {item.price === 0 ? "Claim" : "Buy"}
+              <ShoppingCart className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="truncate">{item.price === 0 ? "Claim" : "Buy"}</span>
             </Button>
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <ExplosionEffect isExploding={isBuyExploding} particleCount={80} intensity="epic" />
@@ -97,7 +97,7 @@ export default function ItemCard({ item, seller, onPurchase }) {
             <TradeButton 
               targetItem={item} 
               targetSeller={seller}
-              className="w-full h-11 rounded-xl font-semibold text-sm sm:text-base"
+              className="w-full h-11 rounded-xl font-semibold text-xs px-3"
             />
           </div>
         </div>

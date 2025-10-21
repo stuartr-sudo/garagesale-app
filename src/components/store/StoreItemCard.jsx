@@ -37,14 +37,14 @@ export default function StoreItemCard({ item, onPurchase, isRedirecting }) {
           <Button
             onClick={() => onPurchase(item.stripe_price_id)}
             disabled={isRedirecting}
-            className="h-11 bg-gradient-to-r from-pink-500 to-fuchsia-600 hover:from-pink-600 hover:to-fuchsia-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-pink-500/20 transition-all duration-300 flex items-center justify-center gap-2"
+            className="h-11 bg-gradient-to-r from-pink-500 to-fuchsia-600 hover:from-pink-600 hover:to-fuchsia-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-pink-500/20 transition-all duration-300 flex items-center justify-center gap-1.5 text-xs px-3"
           >
             {isRedirecting ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-3.5 h-3.5 animate-spin flex-shrink-0" />
             ) : (
-              <ShoppingCart className="w-4 h-4" />
+              <ShoppingCart className="w-3.5 h-3.5 flex-shrink-0" />
             )}
-            Buy Now
+            <span className="truncate">Buy Now</span>
           </Button>
         </div>
       </CardContent>

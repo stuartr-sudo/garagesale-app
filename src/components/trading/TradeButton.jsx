@@ -22,10 +22,10 @@ export default function TradeButton({ targetItem, targetSeller, className = "" }
         <Button
           onClick={handleTradeClick}
           variant="outline"
-          className={`w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 border-orange-400 text-white font-semibold shadow-lg hover:shadow-orange-500/20 transition-all duration-300 transform hover:scale-105 ${className}`}
+          className={`w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 border-orange-400 text-white font-semibold shadow-lg hover:shadow-orange-500/20 transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-1.5 ${className}`}
         >
-          <RefreshCw className="w-4 h-4 mr-2" />
-          Make Offer
+          <RefreshCw className="w-3.5 h-3.5 flex-shrink-0" />
+          <span className="truncate">Make Offer</span>
         </Button>
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <ExplosionEffect isExploding={isExploding} particleCount={70} intensity="high" />
