@@ -45,6 +45,11 @@ import FloatingCameraButton from "@/components/camera/FloatingCameraButton";
 
 const navigationItems = [
   {
+    title: "Home",
+    url: createPageUrl("Home"),
+    icon: Home,
+  },
+  {
     title: "Marketplace",
     url: createPageUrl("Marketplace"),
     icon: Store,

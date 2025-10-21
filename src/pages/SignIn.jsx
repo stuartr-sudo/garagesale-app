@@ -20,13 +20,7 @@ export default function SignIn() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
 
-  // TEMPORARILY: Auto-redirect to marketplace
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      navigate(createPageUrl('Marketplace'));
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [navigate]);
+  // Removed auto-redirect - let users actually sign in
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -50,11 +44,15 @@ export default function SignIn() {
   };
 
   const handleGoogleSignIn = async () => {
-    // TEMPORARILY: Skip OAuth and show message
-    setError('Authentication is temporarily disabled. You can access all features without signing in.');
-    setTimeout(() => {
+    try {
+      setLoading(true);
+      await User.signInWithGoogle();
       navigate(createPageUrl('Marketplace'));
-    }, 2000);
+    } catch (err) {
+      setError(err.message || 'Google sign-in failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
