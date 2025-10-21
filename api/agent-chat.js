@@ -6,7 +6,7 @@
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const supabaseUrl = process.env.VITE_SUPABASE_URL?.trim();
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 const openaiApiKey = process.env.VITE_OPENAI_API_KEY;
 
@@ -48,13 +48,17 @@ export default async function handler(req, res) {
     }
 
     // Get item details
+    console.log('Querying item with ID:', item_id);
     const { data: item, error: itemError } = await supabase
       .from('items')
       .select('*')
       .eq('id', item_id)
       .single();
 
+    console.log('Item query result:', { item, itemError });
+
     if (itemError || !item) {
+      console.error('Item not found:', itemError);
       return res.status(404).json({ error: 'Item not found' });
     }
 
