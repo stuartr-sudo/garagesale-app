@@ -296,10 +296,10 @@ export default function SpecialOffers() {
                     <SelectTrigger className="bg-gray-900 border-gray-700 text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-gray-900 border-gray-700">
-                      <SelectItem value="bogo">Buy One Get One Free (BOGO)</SelectItem>
-                      <SelectItem value="percentage_off">Percentage Off</SelectItem>
-                      <SelectItem value="bulk_discount">Bulk Discount</SelectItem>
+                    <SelectContent className="bg-gray-900 border-gray-700 text-white">
+                      <SelectItem value="bogo" className="text-white hover:bg-gray-800 focus:bg-gray-800 cursor-pointer">Buy One Get One Free (BOGO)</SelectItem>
+                      <SelectItem value="percentage_off" className="text-white hover:bg-gray-800 focus:bg-gray-800 cursor-pointer">Percentage Off</SelectItem>
+                      <SelectItem value="bulk_discount" className="text-white hover:bg-gray-800 focus:bg-gray-800 cursor-pointer">Bulk Discount</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
