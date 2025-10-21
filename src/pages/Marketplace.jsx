@@ -451,24 +451,24 @@ export default function Marketplace() {
         </div>
       </div>
 
-      {selectedItem &&
-      <PurchaseModal
-        item={selectedItem}
-        seller={sellers[selectedItem.seller_id]}
-        onClose={() => setSelectedItem(null)}
-        onSuccess={() => {
-          setSelectedItem(null);
-          loadItems();
-        }} />
+      {selectedItem && (
+        <PurchaseModal
+          item={selectedItem}
+          seller={sellers[selectedItem.seller_id]}
+          onClose={() => setSelectedItem(null)}
+          onSuccess={() => {
+            setSelectedItem(null);
+            loadItems();
+          }}
+        />
+      )}
 
-      }
-
-      {selectedAd &&
-      <AdModal
-        ad={selectedAd}
-        onClose={() => setSelectedAd(null)} />
-
-      }
+      {selectedAd && (
+        <AdModal
+          ad={selectedAd}
+          onClose={() => setSelectedAd(null)}
+        />
+      )}
 
       {/* Onboarding Tour */}
       {showOnboarding && (
