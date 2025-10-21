@@ -240,13 +240,13 @@ export default function ItemDetail() {
       </div>
 
       <div className="max-w-7xl mx-auto">
-        {/* Mobile-First Layout: Image, Price, and Key Info Above Fold */}
+        {/* Desktop/Mobile Layout: Aligned heights */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Images & Details */}
-          <div className="lg:col-span-2 space-y-4">
-            {/* Main Image - Compact height for above-the-fold */}
-            <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10 overflow-hidden">
-              <div className="relative h-64 md:h-80 lg:h-96">
+          {/* Left Column - Combined Image & Details Card */}
+          <div className="lg:col-span-2">
+            <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10 overflow-hidden h-full flex flex-col">
+              {/* Main Image - Compact */}
+              <div className="relative h-48 md:h-56 lg:h-64 flex-shrink-0">
                 <img
                   src={primaryImage}
                   alt={item.title}
@@ -262,35 +262,33 @@ export default function ItemDetail() {
                 )}
               </div>
             
-            {/* Thumbnail Gallery */}
-            {validImages.length > 1 && (
-              <div className="p-4 bg-slate-950/50 border-t border-gray-800">
-                <div className="flex gap-2 overflow-x-auto">
-                  {validImages.map((img, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setSelectedImage(idx)}
-                      className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
-                        selectedImage === idx
-                          ? 'border-pink-500 scale-105'
-                          : 'border-gray-700 hover:border-gray-600'
-                      }`}
-                    >
-                      <img
-                        src={img}
-                        alt={`${item.title} ${idx + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </button>
-                  ))}
+              {/* Thumbnail Gallery */}
+              {validImages.length > 1 && (
+                <div className="p-3 bg-slate-950/50 border-t border-gray-800">
+                  <div className="flex gap-2 overflow-x-auto">
+                    {validImages.map((img, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setSelectedImage(idx)}
+                        className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                          selectedImage === idx
+                            ? 'border-pink-500 scale-105'
+                            : 'border-gray-700 hover:border-gray-600'
+                        }`}
+                      >
+                        <img
+                          src={img}
+                          alt={`${item.title} ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
-          </Card>
+              )}
 
-            {/* Compact Item Details - Above the fold on mobile */}
-            <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
-              <CardContent className="p-3 md:p-4 space-y-3">
+              {/* Item Details - Combined with image */}
+              <CardContent className="p-3 md:p-4 space-y-3 flex-grow">
                 {/* Title and Price - Most Important Info */}
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -335,13 +333,12 @@ export default function ItemDetail() {
                 </div>
 
                 {/* Description - Compact */}
-                <p className="text-gray-300 leading-relaxed text-sm line-clamp-2">
+                <p className="text-gray-300 leading-relaxed text-sm line-clamp-3">
                   {item.description}
                 </p>
 
               </CardContent>
             </Card>
-
           </div>
 
         {/* Right Column - AI Agent, then Buy Now and Seller Info */}
