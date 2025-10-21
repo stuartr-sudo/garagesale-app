@@ -3,6 +3,54 @@ import React, { useState, useEffect } from "react";
 import { Advertisement } from "@/api/entities";
 import { ArrowRight, Zap, Star, Clock } from "lucide-react";
 
+// Placeholder advertisements for demo purposes
+const DEMO_ADS = {
+  top_banner: {
+    id: "demo_top_banner",
+    title: "🎉 Welcome to Our Marketplace!",
+    description: "Discover amazing local deals and connect with sellers in your community. Start browsing today!",
+    image_url: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=200&h=120&fit=crop",
+    placement: "top_banner",
+    status: "active",
+    priority: 1,
+    impression_count: 1250,
+    click_count: 87
+  },
+  local_deals: {
+    id: "demo_local_deals",
+    title: "Local Artisan Market",
+    description: "Handcrafted goods from local makers. Support your community!",
+    image_url: "https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=400&h=400&fit=crop",
+    placement: "local_deals",
+    status: "active",
+    priority: 2,
+    impression_count: 890,
+    click_count: 65
+  },
+  bottom_banner: {
+    id: "demo_bottom_banner",
+    title: "Premium Featured Listing",
+    description: "Get your items seen by more buyers with featured placement",
+    image_url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=400&fit=crop",
+    placement: "bottom_banner",
+    status: "active",
+    priority: 3,
+    impression_count: 567,
+    click_count: 43
+  },
+  between_items: {
+    id: "demo_between_items",
+    title: "📦 Safe Shipping Available",
+    description: "Shop with confidence - secure shipping on all items",
+    image_url: "https://images.unsplash.com/photo-1566576721346-d4a3b4eaeb55?w=100&h=100&fit=crop",
+    placement: "between_items",
+    status: "active",
+    priority: 4,
+    impression_count: 1456,
+    click_count: 92
+  }
+};
+
 export default function AdBanner({ placement = "top_banner", className = "", onAdClick }) {
   const [ads, setAds] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
@@ -26,18 +74,30 @@ export default function AdBanner({ placement = "top_banner", className = "", onA
         return startValid && endValid;
       });
       
-      setAds(activeAds);
+      // If no real ads found, use demo ad for this placement
+      if (activeAds.length === 0 && DEMO_ADS[placement]) {
+        setAds([DEMO_ADS[placement]]);
+      } else {
+        setAds(activeAds);
+      }
     } catch (error) {
       console.error("Error loading ads:", error);
+      // On error, show demo ad if available
+      if (DEMO_ADS[placement]) {
+        setAds([DEMO_ADS[placement]]);
+      }
     }
     setLoading(false);
   };
 
   const handleAdClick = async (ad) => {
     try {
-      await Advertisement.update(ad.id, {
-        click_count: (ad.click_count || 0) + 1
-      });
+      // Only update click count for real ads (not demo ads)
+      if (!ad.id.startsWith('demo_')) {
+        await Advertisement.update(ad.id, {
+          click_count: (ad.click_count || 0) + 1
+        });
+      }
       
       if (onAdClick) {
         onAdClick(ad);
@@ -50,6 +110,9 @@ export default function AdBanner({ placement = "top_banner", className = "", onA
   };
 
   const trackImpression = async (adId) => {
+    // Skip tracking for demo ads
+    if (adId.startsWith('demo_')) return;
+    
     try {
       const ad = await Advertisement.get(adId);
       await Advertisement.update(adId, {
