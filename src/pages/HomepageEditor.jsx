@@ -122,7 +122,8 @@ export default function HomepageEditor() {
         return <div className="p-8 text-center">Loading editor...</div>;
     }
 
-    if (currentUser?.role !== 'admin') {
+    // Allow admin and super_admin roles
+    if (currentUser?.role !== 'admin' && currentUser?.role !== 'super_admin') {
         return (
             <div className="p-8 text-center">
                 <h1 className="text-2xl font-bold text-red-600">Access Denied</h1>

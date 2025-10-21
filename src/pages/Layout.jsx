@@ -229,8 +229,9 @@ export default function Layout({ children, currentPageName }) {
   */
 
   // Show sidebar even when not authenticated, but with limited navigation
+  // Allow admin and super_admin to see admin-only items
   const visibleNavItems = navigationItems.filter(item => 
-    !item.adminOnly || (currentUser?.role === 'admin')
+    !item.adminOnly || (currentUser?.role === 'admin' || currentUser?.role === 'super_admin')
   );
 
   return (

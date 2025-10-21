@@ -212,7 +212,13 @@ export default function Advertisements() {
     { value: "local_deals", label: "Local Deal Card" },
   ];
 
-  if (currentUser?.role !== 'admin' && currentUser?.account_type !== 'business') {
+  // Allow admin, super_admin roles, or business accounts
+  const hasAccess = 
+    currentUser?.role === 'admin' || 
+    currentUser?.role === 'super_admin' || 
+    currentUser?.account_type === 'business';
+
+  if (!hasAccess) {
     return (
       <div className="p-8 text-center">
         <h1 className="text-2xl font-bold text-red-400">Access Denied</h1>
