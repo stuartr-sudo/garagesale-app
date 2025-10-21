@@ -215,7 +215,9 @@ export default function Layout({ children, currentPageName }) {
     );
   }
 
-  // Redirect non-logged-in users to Home page
+  // Redirect non-logged-in users to Home page (disabled for now to allow login)
+  // TODO: Re-enable after login flow is working
+  /*
   useEffect(() => {
     const isPublicPage = publicPages.includes(currentPageName);
     const homePath = createPageUrl("Home");
@@ -224,6 +226,7 @@ export default function Layout({ children, currentPageName }) {
       navigate(homePath);
     }
   }, [currentUser, loading, currentPageName, navigate, location.pathname]);
+  */
 
   // Show sidebar even when not authenticated, but with limited navigation
   const visibleNavItems = navigationItems.filter(item => 
