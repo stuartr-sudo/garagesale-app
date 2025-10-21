@@ -268,7 +268,7 @@ export default function PurchaseModal({ item, seller, onClose, onSuccess }) {
                 <Button
                   variant="outline"
                   onClick={onClose}
-                  className="flex-1 h-12 rounded-xl border-gray-600 text-white hover:bg-gray-800"
+                  className="flex-1 h-12 rounded-xl bg-gray-800 border-2 border-gray-600 text-white hover:bg-gray-700 hover:border-gray-500"
                 >
                   Cancel
                 </Button>
@@ -385,7 +385,7 @@ export default function PurchaseModal({ item, seller, onClose, onSuccess }) {
                 <Button
                   variant="outline"
                   onClick={() => setStep(1)}
-                  className="flex-1 h-12 rounded-xl border-gray-600 text-white hover:bg-gray-800"
+                  className="flex-1 h-12 rounded-xl bg-gray-800 border-2 border-gray-600 text-white hover:bg-gray-700 hover:border-gray-500"
                 >
                   Back
                 </Button>
