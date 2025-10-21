@@ -215,7 +215,7 @@ export default function Layout({ children, currentPageName }) {
 
         <Sidebar 
           className="border-r-0 bg-black/80 backdrop-blur-lg shadow-2xl border-r border-gray-800 z-10" 
-          collapsible="icon"
+          collapsible="offcanvas"
           variant="sidebar"
         >
           <SidebarHeader className="border-b border-gray-800 shrink-0">
