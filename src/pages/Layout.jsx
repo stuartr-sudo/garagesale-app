@@ -132,22 +132,15 @@ export default function Layout({ children, currentPageName }) {
       try {
         const user = await User.me();
         setCurrentUser(user);
-
-        // Handle onboarding redirects
-        if (user && (!user.country || !user.postcode)) {
-          if (user.account_type === 'business' && currentPageName !== 'BusinessOnboarding') {
-            navigate(createPageUrl('BusinessOnboarding'));
-          } else if (user.account_type === 'individual' && currentPageName !== 'Onboarding') {
-            navigate(createPageUrl('Onboarding'));
-          }
-        }
-
       } catch (error) {
-        setCurrentUser(null);
-        // If user is not authenticated and page is not public, redirect to Home
-        if (!publicPages.includes(currentPageName)) {
-           navigate(createPageUrl("Home"));
-        }
+        // TEMPORARILY DISABLED: Allow access without authentication
+        // Create a mock user for testing
+        setCurrentUser({
+          id: 'guest-user',
+          email: 'guest@example.com',
+          full_name: 'Guest User',
+          account_type: 'individual'
+        });
       } finally {
         setLoading(false);
       }
@@ -173,13 +166,9 @@ export default function Layout({ children, currentPageName }) {
     );
   }
 
+  // TEMPORARILY DISABLED: Allow all pages without authentication
   if (!currentUser) {
-    // If user is not logged in, render the page only if it's public.
-    if (publicPages.includes(currentPageName)) {
-      return <div className="w-full">{children}</div>;
-    }
-    // Otherwise, the useEffect hook will handle redirection. Show nothing while redirecting.
-    return null;
+    return <div className="w-full">{children}</div>;
   }
 
   const visibleNavItems = navigationItems.filter(item => !item.adminOnly || currentUser?.role === 'admin');
