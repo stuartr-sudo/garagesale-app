@@ -251,10 +251,10 @@ export default function ItemDetail() {
                     {item.price === 0 ? 'Free' : `$${item.price}`}
                   </div>
                   <div className="flex gap-2">
-                    <Badge variant="secondary" className="capitalize">
+                    <Badge variant="secondary" className="capitalize bg-blue-900/50 text-blue-300 border-blue-700">
                       {item.condition?.replace('_', ' ')}
                     </Badge>
-                    <Badge variant="outline" className="capitalize">
+                    <Badge variant="outline" className="capitalize bg-purple-900/50 text-purple-300 border-purple-700">
                       <Tag className="w-3 h-3 mr-1" />
                       {item.category?.replace('_', ' ')}
                     </Badge>
@@ -286,38 +286,9 @@ export default function ItemDetail() {
 
           </div>
 
-        {/* Right Column - Buy Now, Seller Info, and AI Agent Chat */}
+        {/* Right Column - AI Agent, then Buy Now and Seller Info */}
         <div className="lg:col-span-1 space-y-4">
-          {/* Action Button - Prominent */}
-          <Button
-            onClick={() => setShowPurchaseModal(true)}
-            className="w-full h-12 md:h-14 bg-gradient-to-r from-pink-600 to-fuchsia-600 hover:from-pink-700 hover:to-fuchsia-700 text-white font-bold text-base md:text-lg rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300"
-          >
-            <ShoppingCart className="w-5 h-5 mr-2" />
-            {item.price === 0 ? 'Claim This Item' : 'Buy Now'}
-          </Button>
-
-          {/* Seller Info - Compact */}
-          {seller && (
-            <Card className="bg-gray-900 border-gray-800">
-              <CardContent className="p-4">
-                <h3 className="font-semibold text-white mb-3 text-sm">Seller Information</h3>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-white font-medium">{seller.full_name}</div>
-                    {seller.rating_count > 0 && (
-                      <div className="flex items-center gap-1 text-yellow-400 text-xs mt-1">
-                        <Star className="w-3 h-3 fill-yellow-400" />
-                        <span>{seller.average_rating?.toFixed(1)} ({seller.rating_count} reviews)</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* AI Agent Chat - Below Buy Now and Seller Info */}
+          {/* AI Agent Chat - At the top */}
           {hasAgentEnabled ? (
             <AgentChat
               itemId={item.id}
@@ -389,6 +360,35 @@ export default function ItemDetail() {
               <p className="text-gray-400">
                 AI Assistant not available for this item
               </p>
+            </Card>
+          )}
+
+          {/* Action Button - Below AI Agent */}
+          <Button
+            onClick={() => setShowPurchaseModal(true)}
+            className="w-full h-12 md:h-14 bg-gradient-to-r from-pink-600 to-fuchsia-600 hover:from-pink-700 hover:to-fuchsia-700 text-white font-bold text-base md:text-lg rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300"
+          >
+            <ShoppingCart className="w-5 h-5 mr-2" />
+            {item.price === 0 ? 'Claim This Item' : 'Buy Now'}
+          </Button>
+
+          {/* Seller Info - Below Buy Now */}
+          {seller && (
+            <Card className="bg-gray-900 border-gray-800">
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-white mb-3 text-sm">Seller Information</h3>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-white font-medium">{seller.full_name}</div>
+                    {seller.rating_count > 0 && (
+                      <div className="flex items-center gap-1 text-yellow-400 text-xs mt-1">
+                        <Star className="w-3 h-3 fill-yellow-400" />
+                        <span>{seller.average_rating?.toFixed(1)} ({seller.rating_count} reviews)</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
             </Card>
           )}
         </div>
