@@ -13,6 +13,7 @@ import AgentChat from '@/components/agent/AgentChat';
 import { createPageUrl } from '@/utils';
 import PurchaseModal from '@/components/marketplace/PurchaseModal';
 import MoreFromSeller from '@/components/marketplace/MoreFromSeller';
+import SmartRecommendations from '@/components/recommendations/SmartRecommendations';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
@@ -37,7 +38,18 @@ export default function ItemDetail() {
     // Scroll to top when page loads
     window.scrollTo(0, 0);
     loadItem();
+    trackItemView();
   }, [id]);
+
+  const trackItemView = async () => {
+    try {
+      // Increment view count
+      await supabase.rpc('increment_item_view_count', { item_id: id });
+    } catch (error) {
+      console.error('Error tracking view:', error);
+      // Silent fail - don't interrupt user experience
+    }
+  };
 
   const loadItem = async () => {
     setLoading(true);
@@ -496,6 +508,31 @@ export default function ItemDetail() {
       {seller && (
         <MoreFromSeller sellerId={seller.id} currentItemId={item.id} />
       )}
+
+      {/* Smart Recommendations - Similar Items */}
+      <SmartRecommendations 
+        currentItemId={item.id}
+        currentItem={item}
+        algorithm="similar"
+        title="Similar Items You Might Like"
+        limit={6}
+      />
+
+      {/* Smart Recommendations - Trending */}
+      <SmartRecommendations 
+        currentItemId={item.id}
+        currentItem={item}
+        algorithm="trending"
+        limit={6}
+      />
+
+      {/* Smart Recommendations - Price Based */}
+      <SmartRecommendations 
+        currentItemId={item.id}
+        currentItem={item}
+        algorithm="price"
+        limit={6}
+      />
       
       {/* Purchase Modal */}
       {showPurchaseModal && (

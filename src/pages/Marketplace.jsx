@@ -14,6 +14,7 @@ import AdBanner from "../components/marketplace/AdBanner";
 import AdModal from "../components/marketplace/AdModal"; // Added import
 import OnboardingTour from "../components/onboarding/OnboardingTour";
 import SearchFilters from "../components/marketplace/SearchFilters";
+import SmartRecommendations from "../components/recommendations/SmartRecommendations";
 import { supabase } from '@/lib/supabase';
 
 // Define a set of demo items to display if no real items are available
@@ -366,6 +367,14 @@ export default function Marketplace() {
 
           {/* Top Banner Ad */}
           <AdBanner placement="top_banner" onAdClick={handleAdClick} className="mb-8" />
+
+          {/* Trending Items Recommendations */}
+          <SmartRecommendations 
+            algorithm="trending"
+            title="🔥 Trending Now"
+            limit={6}
+            showViewAll={false}
+          />
 
           {/* Search and Filters - New Component */}
           <div className="mb-8" data-tour="filters">
