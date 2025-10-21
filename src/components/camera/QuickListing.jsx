@@ -129,6 +129,13 @@ export default function QuickListing({ onClose, onSuccess }) {
         imageUrls = [capturedImage];
       }
 
+      // Get current user session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session?.user) {
+        throw new Error("Please log in to create listings");
+      }
+
       const listingData = {
         title: formData.title,
         description: formData.description,
@@ -136,7 +143,7 @@ export default function QuickListing({ onClose, onSuccess }) {
         minimum_price: formData.minimum_price ? parseFloat(formData.minimum_price) : null,
         category: formData.category,
         condition: formData.condition,
-        seller_id: 'guest-user', // TEMPORARY: Use guest user ID
+        seller_id: session.user.id, // Use real authenticated user ID
         image_urls: imageUrls,
         tags: formData.tags,
         location: formData.location || '',

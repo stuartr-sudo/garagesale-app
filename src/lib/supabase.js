@@ -9,9 +9,9 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    autoRefreshToken: false,  // DISABLED: No auto refresh
-    persistSession: false,    // DISABLED: No session persistence
-    detectSessionInUrl: false, // DISABLED: Don't process OAuth callbacks
+    autoRefreshToken: true,   // ENABLED: Auto refresh tokens
+    persistSession: true,       // ENABLED: Persist sessions
+    detectSessionInUrl: true,   // ENABLED: Process OAuth callbacks
     flowType: 'pkce',
     redirectTo: 'https://garage-sale-40afc1f5.vercel.app/marketplace'
   }

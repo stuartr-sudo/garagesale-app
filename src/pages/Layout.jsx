@@ -131,22 +131,41 @@ export default function Layout({ children, currentPageName }) {
     const fetchUser = async () => {
       setLoading(true);
       try {
-        // TEMPORARILY: Skip authentication entirely
-        setCurrentUser({
-          id: 'guest-user',
-          email: 'guest@example.com',
-          full_name: 'Guest User',
-          account_type: 'individual'
-        });
+        // Get current session
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting session:', error);
+          setCurrentUser(null);
+          return;
+        }
+
+        if (session?.user) {
+          // Get user profile from our users table
+          const { data: profile, error: profileError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+          if (profileError) {
+            console.error('Error fetching user profile:', profileError);
+            // Use basic user info from auth
+            setCurrentUser({
+              id: session.user.id,
+              email: session.user.email,
+              full_name: session.user.user_metadata?.full_name || session.user.email,
+              account_type: 'individual'
+            });
+          } else {
+            setCurrentUser(profile);
+          }
+        } else {
+          setCurrentUser(null);
+        }
       } catch (error) {
-        // TEMPORARILY DISABLED: Allow access without authentication
-        // Create a mock user for testing
-        setCurrentUser({
-          id: 'guest-user',
-          email: 'guest@example.com',
-          full_name: 'Guest User',
-          account_type: 'individual'
-        });
+        console.error('Error loading user:', error);
+        setCurrentUser(null);
       } finally {
         setLoading(false);
       }
