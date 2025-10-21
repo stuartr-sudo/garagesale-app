@@ -274,7 +274,7 @@ function LayoutContent({ currentUser, currentPageName, visibleNavItems, handleLo
   return (
     <div className="relative min-h-screen flex w-full bg-slate-950 text-gray-200 overflow-hidden">
       <NerdBackground count={75} />
-      {currentUser && <FloatingCameraButton />}
+      {currentUser && currentPageName !== 'Home' && <FloatingCameraButton />}
 
       {/* Only show sidebar if user is logged in */}
       {currentUser && (
@@ -412,8 +412,8 @@ function LayoutContent({ currentUser, currentPageName, visibleNavItems, handleLo
       )}
 
         <main className="flex-1 flex flex-col z-10 min-w-0">
-          {/* Fixed Floating Hamburger Menu - Only show if logged in */}
-          {currentUser && (
+          {/* Fixed Floating Hamburger Menu - Only show if logged in and NOT on Home page */}
+          {currentUser && currentPageName !== 'Home' && (
             <div 
               className={`fixed top-6 z-50 transition-all duration-300 ${
                 open ? 'left-[270px]' : 'left-6'
@@ -425,8 +425,8 @@ function LayoutContent({ currentUser, currentPageName, visibleNavItems, handleLo
             </div>
           )}
 
-          {/* Fixed Cart Icon - Only show if logged in */}
-          {currentUser && (
+          {/* Fixed Cart Icon - Only show if logged in and NOT on Home page */}
+          {currentUser && currentPageName !== 'Home' && (
             <div className="fixed top-6 right-6 z-50">
               <CartIcon />
             </div>
