@@ -91,8 +91,8 @@ export default function HomePage() {
   }, []);
 
   const handleAuthAction = (destinationPage) => {
-    // Navigate to sign-in page instead of using OAuth directly
-    navigate(createPageUrl('SignIn'));
+    // TEMPORARILY: Skip auth entirely and go directly to marketplace
+    navigate(createPageUrl('Marketplace'));
   };
 
   return (
