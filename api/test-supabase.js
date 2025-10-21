@@ -31,6 +31,8 @@ export default async function handler(req, res) {
       supabaseUrl: !!supabaseUrl,
       serviceKeyAvailable: !!supabaseServiceKey,
       serviceKeyPrefix: supabaseServiceKey?.substring(0, 20) + '...',
+      newServiceKeyAvailable: !!process.env.NEW_SUPABASE_SERVICE_KEY,
+      newServiceKeyPrefix: process.env.NEW_SUPABASE_SERVICE_KEY?.substring(0, 20) + '...',
       queryResult: { data, error },
       itemCount: data?.length || 0
     });
