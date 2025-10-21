@@ -13,14 +13,13 @@ import { createPageUrl } from '@/utils';
 export default function SignIn() {
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-
-  // Removed auto-redirect - let users actually sign in
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,7 +28,10 @@ export default function SignIn() {
     setLoading(true);
 
     try {
-      if (isSignUp) {
+      if (isForgotPassword) {
+        await User.resetPassword(email);
+        setMessage('Password reset email sent! Check your inbox.');
+      } else if (isSignUp) {
         await User.signUp(email, password, { full_name: fullName });
         setMessage('Check your email for the confirmation link!');
       } else {
@@ -58,10 +60,12 @@ export default function SignIn() {
         <Card className="bg-gray-900/80 backdrop-blur-sm border-gray-800 shadow-xl">
           <CardHeader>
             <CardTitle className="text-2xl text-white">
-              {isSignUp ? 'Create Account' : 'Welcome Back'}
+              {isForgotPassword ? 'Reset Password' : isSignUp ? 'Create Account' : 'Welcome Back'}
             </CardTitle>
             <CardDescription className="text-gray-400">
-              {isSignUp
+              {isForgotPassword
+                ? 'Enter your email to receive a password reset link'
+                : isSignUp
                 ? 'Sign up to start selling and buying'
                 : 'Sign in to your account'}
             </CardDescription>
@@ -79,7 +83,7 @@ export default function SignIn() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {isSignUp && (
+              {isSignUp && !isForgotPassword && (
                 <div className="space-y-2">
                   <Label htmlFor="fullName" className="text-gray-300">
                     Full Name
@@ -112,27 +116,45 @@ export default function SignIn() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-gray-300">
-                  <Lock className="w-4 h-4 inline mr-2" />
-                  Password
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="bg-gray-800 border-gray-700 text-white"
-                  placeholder="••••••••"
-                  minLength={6}
-                />
-                {isSignUp && (
-                  <p className="text-xs text-gray-400">
-                    Password must be at least 6 characters
-                  </p>
-                )}
-              </div>
+              {!isForgotPassword && (
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-gray-300">
+                    <Lock className="w-4 h-4 inline mr-2" />
+                    Password
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="bg-gray-800 border-gray-700 text-white"
+                    placeholder="••••••••"
+                    minLength={6}
+                  />
+                  {isSignUp && (
+                    <p className="text-xs text-gray-400">
+                      Password must be at least 6 characters
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {!isSignUp && !isForgotPassword && (
+                <div className="text-right">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsForgotPassword(true);
+                      setError('');
+                      setMessage('');
+                    }}
+                    className="text-sm text-pink-400 hover:text-pink-300"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+              )}
 
               <Button
                 type="submit"
@@ -144,6 +166,8 @@ export default function SignIn() {
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                     Processing...
                   </div>
+                ) : isForgotPassword ? (
+                  'Send Reset Link'
                 ) : isSignUp ? (
                   'Create Account'
                 ) : (
@@ -153,20 +177,34 @@ export default function SignIn() {
             </form>
 
 
-            <div className="text-center text-sm">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsSignUp(!isSignUp);
-                  setError('');
-                  setMessage('');
-                }}
-                className="text-pink-400 hover:text-pink-300"
-              >
-                {isSignUp
-                  ? 'Already have an account? Sign in'
-                  : "Don't have an account? Sign up"}
-              </button>
+            <div className="text-center text-sm space-y-2">
+              {isForgotPassword ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsForgotPassword(false);
+                    setError('');
+                    setMessage('');
+                  }}
+                  className="text-pink-400 hover:text-pink-300"
+                >
+                  Back to sign in
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSignUp(!isSignUp);
+                    setError('');
+                    setMessage('');
+                  }}
+                  className="text-pink-400 hover:text-pink-300"
+                >
+                  {isSignUp
+                    ? 'Already have an account? Sign in'
+                    : "Don't have an account? Sign up"}
+                </button>
+              )}
             </div>
 
             <div className="text-center">

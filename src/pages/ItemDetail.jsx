@@ -32,11 +32,11 @@ export default function ItemDetail() {
   const [isOwner, setIsOwner] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isInCart, setIsInCart] = useState(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    // Scroll to top when page loads
-    window.scrollTo(0, 0);
+    // Load item data on mount
     loadItem();
     trackItemView();
   }, [id]);
@@ -332,10 +332,34 @@ export default function ItemDetail() {
                   </div>
                 </div>
 
-                {/* Description - Compact */}
-                <p className="text-gray-300 leading-relaxed text-sm line-clamp-3">
-                  {item.description}
-                </p>
+                {/* Description - Expandable */}
+                <div>
+                  <p className={`text-gray-300 leading-relaxed text-sm ${isDescriptionExpanded ? '' : 'line-clamp-3'}`}>
+                    {item.description}
+                  </p>
+                  {item.description && item.description.length > 150 && (
+                    <button
+                      onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                      className="text-pink-400 hover:text-pink-300 text-sm font-medium mt-2 flex items-center gap-1"
+                    >
+                      {isDescriptionExpanded ? (
+                        <>
+                          <span>Show Less</span>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                          </svg>
+                        </>
+                      ) : (
+                        <>
+                          <span>Expand Description</span>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
 
               </CardContent>
             </Card>

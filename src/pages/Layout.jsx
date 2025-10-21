@@ -215,6 +215,15 @@ export default function Layout({ children, currentPageName }) {
     );
   }
 
+  // Redirect non-logged-in users to Home page
+  const isPublicPage = publicPages.includes(currentPageName);
+  
+  useEffect(() => {
+    if (!loading && !currentUser && !isPublicPage) {
+      navigate(createPageUrl("Home"));
+    }
+  }, [currentUser, loading, isPublicPage, navigate]);
+
   // Show sidebar even when not authenticated, but with limited navigation
   const visibleNavItems = navigationItems.filter(item => 
     !item.adminOnly || (currentUser?.role === 'admin')
@@ -241,13 +250,15 @@ function LayoutContent({ currentUser, currentPageName, visibleNavItems, handleLo
   return (
     <div className="relative min-h-screen flex w-full bg-slate-950 text-gray-200 overflow-hidden">
       <NerdBackground count={75} />
-      <FloatingCameraButton />
+      {currentUser && <FloatingCameraButton />}
 
-      <Sidebar 
-        className="border-r-0 bg-black/80 backdrop-blur-lg shadow-2xl border-r border-gray-800 z-10" 
-        collapsible="offcanvas"
-        variant="sidebar"
-      >
+      {/* Only show sidebar if user is logged in */}
+      {currentUser && (
+        <Sidebar 
+          className="border-r-0 bg-black/80 backdrop-blur-lg shadow-2xl border-r border-gray-800 z-10" 
+          collapsible="offcanvas"
+          variant="sidebar"
+        >
           <SidebarHeader className="border-b border-gray-800 shrink-0">
             <SidebarMenu>
               <SidebarMenuItem>
@@ -374,23 +385,28 @@ function LayoutContent({ currentUser, currentPageName, visibleNavItems, handleLo
             </SidebarGroup>
           </SidebarContent>
         </Sidebar>
+      )}
 
         <main className="flex-1 flex flex-col z-10 min-w-0">
-          {/* Fixed Floating Hamburger Menu - Aligned with Cart */}
-          <div 
-            className={`fixed top-6 z-50 transition-all duration-300 ${
-              open ? 'left-[270px]' : 'left-6'
-            }`}
-          >
-            <SidebarTrigger className="w-16 h-16 flex items-center justify-center bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-2xl transition-all duration-300 shadow-2xl hover:shadow-cyan-500/50 hover:scale-110">
-              <span className="text-white text-4xl font-light" style={{ fontFamily: 'Hugeicons' }}>&#987985;</span>
-            </SidebarTrigger>
-          </div>
+          {/* Fixed Floating Hamburger Menu - Only show if logged in */}
+          {currentUser && (
+            <div 
+              className={`fixed top-6 z-50 transition-all duration-300 ${
+                open ? 'left-[270px]' : 'left-6'
+              }`}
+            >
+              <SidebarTrigger className="w-16 h-16 flex items-center justify-center bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-2xl transition-all duration-300 shadow-2xl hover:shadow-cyan-500/50 hover:scale-110">
+                <span className="text-white text-4xl font-light" style={{ fontFamily: 'Hugeicons' }}>&#987985;</span>
+              </SidebarTrigger>
+            </div>
+          )}
 
-          {/* Fixed Cart Icon - Top Right (Aligned with Hamburger) */}
-          <div className="fixed top-6 right-6 z-50">
-            <CartIcon />
-          </div>
+          {/* Fixed Cart Icon - Only show if logged in */}
+          {currentUser && (
+            <div className="fixed top-6 right-6 z-50">
+              <CartIcon />
+            </div>
+          )}
 
           <div className="flex-1">
             {children}

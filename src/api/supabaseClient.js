@@ -163,6 +163,15 @@ export class UserEntity {
     if (error) throw error;
   }
 
+  async resetPassword(email) {
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`
+    });
+    
+    if (error) throw error;
+    return data;
+  }
+
   async loginWithRedirect(redirectUrl) {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
