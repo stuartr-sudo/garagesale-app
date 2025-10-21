@@ -54,6 +54,7 @@ export default function AddItem() {
   });
   const [newTag, setNewTag] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
 
   useEffect(() => {
@@ -96,6 +97,9 @@ export default function AddItem() {
   };
 
   const handleImageUpload = async (files) => {
+    if (isUploading) return; // Prevent multiple uploads
+    
+    setIsUploading(true);
     try {
       const uploadPromises = Array.from(files).map(async (file) => {
         // Create a unique filename
@@ -129,6 +133,8 @@ export default function AddItem() {
     } catch (error) {
       console.error("Error uploading images:", error);
       alert("Error uploading images. Please try again.");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -206,11 +212,12 @@ export default function AddItem() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                <ImageUpload
-                  images={itemData.image_urls}
-                  onUpload={handleImageUpload}
-                  onRemove={handleRemoveImage}
-                />
+            <ImageUpload
+              images={itemData.image_urls}
+              onUpload={handleImageUpload}
+              onRemove={handleRemoveImage}
+              isUploading={isUploading}
+            />
               </CardContent>
             </Card>
 

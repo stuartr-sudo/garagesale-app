@@ -49,6 +49,7 @@ export default function QuickListing({ onClose, onSuccess }) {
     location: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [newTag, setNewTag] = useState('');
 
   const handleCameraCapture = (data) => {
@@ -114,7 +115,10 @@ export default function QuickListing({ onClose, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting || isUploading) return; // Prevent double submission
+    
     setIsSubmitting(true);
+    setIsUploading(true);
 
     try {
       // Convert captured image to base64 if needed
@@ -193,6 +197,7 @@ export default function QuickListing({ onClose, onSuccess }) {
       });
     } finally {
       setIsSubmitting(false);
+      setIsUploading(false);
     }
   };
 
@@ -270,12 +275,23 @@ export default function QuickListing({ onClose, onSuccess }) {
               <div className="space-y-3">
                 <Button
                   onClick={() => setShowCamera(true)}
-                  className="w-full h-48 border-2 border-dashed border-gray-600 hover:border-pink-500 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors"
+                  disabled={isUploading}
+                  className="w-full h-48 border-2 border-dashed border-gray-600 hover:border-pink-500 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <div className="text-center">
-                    <Camera className="w-12 h-12 mx-auto mb-2" />
-                    <div className="text-lg font-semibold">Take Photo</div>
-                    <div className="text-sm">AI will analyze and suggest details</div>
+                    {isUploading ? (
+                      <>
+                        <Upload className="w-12 h-12 mx-auto mb-2 animate-spin" />
+                        <div className="text-lg font-semibold">Uploading...</div>
+                        <div className="text-sm">Please wait</div>
+                      </>
+                    ) : (
+                      <>
+                        <Camera className="w-12 h-12 mx-auto mb-2" />
+                        <div className="text-lg font-semibold">Take Photo</div>
+                        <div className="text-sm">AI will analyze and suggest details</div>
+                      </>
+                    )}
                   </div>
                 </Button>
                 
@@ -283,12 +299,23 @@ export default function QuickListing({ onClose, onSuccess }) {
                 
                 <Button
                   onClick={() => setShowVoiceInput(true)}
-                  className="w-full h-48 border-2 border-dashed border-gray-600 hover:border-purple-500 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors"
+                  disabled={isUploading}
+                  className="w-full h-48 border-2 border-dashed border-gray-600 hover:border-purple-500 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <div className="text-center">
-                    <Mic className="w-12 h-12 mx-auto mb-2" />
-                    <div className="text-lg font-semibold">Voice Input</div>
-                    <div className="text-sm">Speak your item details</div>
+                    {isUploading ? (
+                      <>
+                        <Upload className="w-12 h-12 mx-auto mb-2 animate-spin" />
+                        <div className="text-lg font-semibold">Uploading...</div>
+                        <div className="text-sm">Please wait</div>
+                      </>
+                    ) : (
+                      <>
+                        <Mic className="w-12 h-12 mx-auto mb-2" />
+                        <div className="text-lg font-semibold">Voice Input</div>
+                        <div className="text-sm">Speak your item details</div>
+                      </>
+                    )}
                   </div>
                 </Button>
               </div>
@@ -446,13 +473,13 @@ export default function QuickListing({ onClose, onSuccess }) {
               </Button>
               <Button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isUploading}
                 className="flex-1 bg-gradient-to-r from-pink-600 to-fuchsia-600 hover:from-pink-700 hover:to-fuchsia-700 text-white"
               >
-                {isSubmitting ? (
+                {isSubmitting || isUploading ? (
                   <>
                     <Upload className="w-4 h-4 mr-2 animate-spin" />
-                    Creating...
+                    {isUploading ? 'Uploading...' : 'Creating...'}
                   </>
                 ) : (
                   <>

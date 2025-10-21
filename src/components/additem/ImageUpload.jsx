@@ -1,8 +1,8 @@
 import React, { useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Upload, Camera, X, Plus } from "lucide-react";
+import { Upload, Camera, X, Plus, Loader2 } from "lucide-react";
 
-export default function ImageUpload({ images, onUpload, onRemove }) {
+export default function ImageUpload({ images, onUpload, onRemove, isUploading = false }) {
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
 
@@ -63,10 +63,20 @@ export default function ImageUpload({ images, onUpload, onRemove }) {
           type="button"
           variant="outline"
           onClick={() => fileInputRef.current?.click()}
+          disabled={isUploading}
           className="flex-1 h-12 rounded-xl"
         >
-          <Upload className="w-4 h-4 mr-2" />
-          Upload Photos
+          {isUploading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Uploading...
+            </>
+          ) : (
+            <>
+              <Upload className="w-4 h-4 mr-2" />
+              Upload Photos
+            </>
+          )}
         </Button>
 
         <input
@@ -81,10 +91,20 @@ export default function ImageUpload({ images, onUpload, onRemove }) {
           type="button"
           variant="outline"
           onClick={() => cameraInputRef.current?.click()}
+          disabled={isUploading}
           className="flex-1 h-12 rounded-xl"
         >
-          <Camera className="w-4 h-4 mr-2" />
-          Take Photo
+          {isUploading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Uploading...
+            </>
+          ) : (
+            <>
+              <Camera className="w-4 h-4 mr-2" />
+              Take Photo
+            </>
+          )}
         </Button>
       </div>
 
