@@ -102,27 +102,14 @@ export default function AddItem() {
     setIsUploading(true);
     try {
       const uploadPromises = Array.from(files).map(async (file) => {
-        // Create a unique filename
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `item-images/${fileName}`;
-
-        // Upload to Supabase Storage
-        const { data, error } = await supabase.storage
-          .from('items')
-          .upload(filePath, file);
-
-        if (error) {
-          console.error('Upload error:', error);
-          throw error;
-        }
-
-        // Get public URL
-        const { data: { publicUrl } } = supabase.storage
-          .from('items')
-          .getPublicUrl(filePath);
-
-        return publicUrl;
+        // For now, create blob URLs for immediate display
+        // In production, you'd upload to Supabase Storage
+        const blobUrl = URL.createObjectURL(file);
+        
+        // Simulate upload delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        return blobUrl;
       });
       
       const uploadedUrls = await Promise.all(uploadPromises);

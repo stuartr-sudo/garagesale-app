@@ -124,37 +124,9 @@ export default function QuickListing({ onClose, onSuccess }) {
       // Convert captured image to base64 if needed
       let imageUrls = [];
       if (capturedImage) {
-        try {
-          // Convert blob URL to file and upload to Supabase
-          const response = await fetch(capturedImage);
-          const blob = await response.blob();
-          const file = new File([blob], 'captured-image.jpg', { type: 'image/jpeg' });
-          
-          // Upload to Supabase Storage
-          const fileExt = 'jpg';
-          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-          const filePath = `item-images/${fileName}`;
-
-          const { data, error } = await supabase.storage
-            .from('items')
-            .upload(filePath, file);
-
-          if (error) {
-            console.error('Upload error:', error);
-            throw error;
-          }
-
-          // Get public URL
-          const { data: { publicUrl } } = supabase.storage
-            .from('items')
-            .getPublicUrl(filePath);
-
-          imageUrls = [publicUrl];
-        } catch (error) {
-          console.error('Error uploading captured image:', error);
-          // Fallback to blob URL
-          imageUrls = [capturedImage];
-        }
+        // For now, use the blob URL directly
+        // In production, you'd upload to Supabase Storage
+        imageUrls = [capturedImage];
       }
 
       const listingData = {
