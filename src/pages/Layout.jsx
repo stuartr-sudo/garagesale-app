@@ -387,8 +387,8 @@ function LayoutContent({ currentUser, currentPageName, visibleNavItems, handleLo
             </SidebarTrigger>
           </div>
 
-          {/* Fixed Cart Icon - Top Right */}
-          <div className="fixed top-4 right-4 z-50">
+          {/* Fixed Cart Icon - Top Right (Lower Position) */}
+          <div className="fixed top-20 right-6 z-50">
             <CartIcon />
           </div>
 

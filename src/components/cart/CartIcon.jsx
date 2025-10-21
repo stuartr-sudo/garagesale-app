@@ -53,13 +53,12 @@ export default function CartIcon() {
   return (
     <Button
       variant="ghost"
-      size="icon"
       onClick={() => navigate(createPageUrl('Cart'))}
-      className="relative text-gray-300 hover:text-white hover:bg-gray-800"
+      className="relative w-16 h-16 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 shadow-2xl hover:shadow-pink-500/50 hover:scale-110 transition-all duration-300 flex items-center justify-center"
     >
-      <ShoppingCart className="w-6 h-6" />
+      <ShoppingCart className="w-8 h-8 text-white" />
       {cartCount > 0 && (
-        <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs font-bold border-2 border-gray-900">
+        <Badge className="absolute -top-2 -right-2 h-7 w-7 flex items-center justify-center p-0 bg-red-500 text-white text-sm font-bold border-2 border-white shadow-lg">
           {cartCount > 99 ? '99+' : cartCount}
         </Badge>
       )}
