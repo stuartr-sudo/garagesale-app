@@ -191,12 +191,10 @@ export default function Layout({ children, currentPageName }) {
     );
   }
 
-  // TEMPORARILY DISABLED: Allow all pages without authentication
-  if (!currentUser) {
-    return <div className="w-full">{children}</div>;
-  }
-
-  const visibleNavItems = navigationItems.filter(item => !item.adminOnly || currentUser?.role === 'admin');
+  // Show sidebar even when not authenticated, but with limited navigation
+  const visibleNavItems = navigationItems.filter(item => 
+    !item.adminOnly || (currentUser?.role === 'admin')
+  );
 
   return (
     <SidebarProvider>
@@ -303,12 +301,23 @@ export default function Layout({ children, currentPageName }) {
 
             <SidebarGroup>
                 <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton onClick={handleLogout} className="group hover:bg-red-500/10 hover:text-red-400 transition-all duration-300 rounded-lg p-2.5 justify-start text-gray-400 text-sm">
-                           <LogOut className="w-4 h-4 mr-2.5 shrink-0" />
-                           <span className="font-medium truncate">Log Out</span>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
+                    {currentUser ? (
+                        <SidebarMenuItem>
+                            <SidebarMenuButton onClick={handleLogout} className="group hover:bg-red-500/10 hover:text-red-400 transition-all duration-300 rounded-lg p-2.5 justify-start text-gray-400 text-sm">
+                               <LogOut className="w-4 h-4 mr-2.5 shrink-0" />
+                               <span className="font-medium truncate">Log Out</span>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    ) : (
+                        <SidebarMenuItem>
+                            <SidebarMenuButton asChild className="group hover:bg-green-500/10 hover:text-green-400 transition-all duration-300 rounded-lg p-2.5 justify-start text-gray-400 text-sm">
+                                <Link to={createPageUrl("SignIn")} className="flex items-center gap-2.5 min-w-0">
+                                    <UserIcon className="w-4 h-4 shrink-0" />
+                                    <span className="font-medium truncate">Log In</span>
+                                </Link>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    )}
                 </SidebarMenu>
             </SidebarGroup>
           </SidebarContent>
