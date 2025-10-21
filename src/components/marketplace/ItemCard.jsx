@@ -10,7 +10,7 @@ import { supabase } from '@/lib/supabase';
 import { User as UserEntity } from '@/api/entities';
 import { useToast } from '@/hooks/use-toast';
 
-export default function ItemCard({ item, seller }) {
+export default function ItemCard({ item, seller, isSold = false }) {
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isInCart, setIsInCart] = useState(false);
   const { toast } = useToast();
@@ -85,7 +85,10 @@ export default function ItemCard({ item, seller }) {
           }}
         />
         <div className="absolute top-3 right-3 flex flex-col gap-2">
-          {item.price === 0 && (
+          {isSold && (
+            <Badge className="bg-green-500 text-white font-bold">Sold</Badge>
+          )}
+          {!isSold && item.price === 0 && (
             <Badge className="bg-lime-500 text-black font-bold">Free</Badge>
           )}
           {item.condition && (
@@ -130,27 +133,33 @@ export default function ItemCard({ item, seller }) {
           </div>
         </div>
 
-        <Button
-          onClick={handleAddToCart}
-          disabled={isAddingToCart || isInCart}
-          className={`w-full mt-4 ${
-            isInCart
-              ? 'bg-green-600 hover:bg-green-600'
-              : 'bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700'
-          }`}
-        >
-          {isInCart ? (
-            <>
-              <Check className="w-4 h-4 mr-2" />
-              Added to Cart
-            </>
-          ) : (
-            <>
-              <ShoppingCart className="w-4 h-4 mr-2" />
-              Add to Cart
-            </>
-          )}
-        </Button>
+        {!isSold ? (
+          <Button
+            onClick={handleAddToCart}
+            disabled={isAddingToCart || isInCart}
+            className={`w-full mt-4 ${
+              isInCart
+                ? 'bg-green-600 hover:bg-green-600'
+                : 'bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700'
+            }`}
+          >
+            {isInCart ? (
+              <>
+                <Check className="w-4 h-4 mr-2" />
+                Added to Cart
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="w-4 h-4 mr-2" />
+                Add to Cart
+              </>
+            )}
+          </Button>
+        ) : (
+          <div className="w-full mt-4 py-2 px-4 bg-gray-800/50 rounded-lg border border-gray-700 text-center text-gray-400 text-sm font-medium">
+            This item has been sold
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -146,6 +146,7 @@ const DEMO_ITEMS = [
 export default function Marketplace() {
   const [items, setItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
+  const [recentlySoldItems, setRecentlySoldItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedAd, setSelectedAd] = useState(null);
@@ -163,6 +164,7 @@ export default function Marketplace() {
 
   useEffect(() => {
     loadItems();
+    loadRecentlySold();
   }, []);
 
   useEffect(() => {
@@ -223,6 +225,75 @@ export default function Marketplace() {
     setLoading(false);
   };
 
+  const loadRecentlySold = async () => {
+    try {
+      // Get recently sold items from completed orders
+      const { data: orders, error } = await supabase
+        .from('orders')
+        .select(`
+          id,
+          created_at,
+          item:items (
+            id,
+            title,
+            image_urls,
+            category,
+            price,
+            description,
+            condition,
+            created_date,
+            seller_id
+          )
+        `)
+        .in('status', ['completed', 'payment_confirmed', 'shipped', 'collection_arranged'])
+        .order('created_at', { ascending: false })
+        .limit(4);
+
+      if (error) {
+        console.error('Error fetching sold items:', error);
+        return;
+      }
+
+      // Extract items and load seller information
+      const soldItems = (orders || [])
+        .map(order => order.item)
+        .filter(item => item && item.id);
+      
+      setRecentlySoldItems(soldItems);
+
+      // Load seller information for sold items
+      const soldSellerIds = [...new Set(soldItems.map((item) => item.seller_id))];
+      const sellersData = { ...sellers };
+
+      for (const sellerId of soldSellerIds) {
+        if (!sellersData[sellerId]) {
+          try {
+            if (sellerId && !sellerId.startsWith('demo_seller_')) {
+              const seller = await User.get(sellerId);
+              sellersData[sellerId] = seller;
+            } else {
+              sellersData[sellerId] = {
+                id: sellerId,
+                full_name: `Demo Seller ${sellerId.split('_')[2] || '1'}`,
+                email: `${sellerId}@demo.com`
+              };
+            }
+          } catch (error) {
+            console.warn(`Could not load seller ${sellerId}:`, error);
+            sellersData[sellerId] = {
+              id: sellerId,
+              full_name: 'Anonymous Seller',
+              email: 'anonymous@marketplace.com'
+            };
+          }
+        }
+      }
+      setSellers(sellersData);
+    } catch (error) {
+      console.error('Error loading recently sold items:', error);
+    }
+  };
+
   useEffect(() => {
     // Check for payment success/failure in URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -236,6 +307,7 @@ export default function Marketplace() {
       window.history.replaceState({}, document.title, window.location.pathname);
       // Reload items to reflect the sold item
       loadItems();
+      loadRecentlySold();
     } else if (paymentStatus === 'cancelled') {
       // Show cancelled message
       alert('Payment was cancelled. You can try again anytime.');
@@ -385,13 +457,24 @@ export default function Marketplace() {
             />
           </div>
 
-          {/* Recently Sold Section - Above Main Grid */}
-          <SmartRecommendations 
-            algorithm="sold"
-            title="🔥 Recently Sold"
-            limit={4}
-            showViewAll={false}
-          />
+          {/* Recently Sold Section */}
+          {recentlySoldItems.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-6">
+                Recently Sold
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {recentlySoldItems.map((item) => (
+                  <ItemCard
+                    key={item.id}
+                    item={item}
+                    seller={sellers[item.seller_id]}
+                    isSold={true}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Main Items Grid - 4 columns */}
           <div>
@@ -449,33 +532,34 @@ export default function Marketplace() {
             </div>
           </div>
         </div>
+
+        {/* Modals */}
+        {selectedItem && (
+          <PurchaseModal
+            item={selectedItem}
+            seller={sellers[selectedItem.seller_id]}
+            onClose={() => setSelectedItem(null)}
+            onSuccess={() => {
+              setSelectedItem(null);
+              loadItems();
+              loadRecentlySold();
+            }}
+          />
+        )}
+
+        {selectedAd && (
+          <AdModal
+            ad={selectedAd}
+            onClose={() => setSelectedAd(null)}
+          />
+        )}
+
+        {/* Onboarding Tour */}
+        {showOnboarding && (
+          <OnboardingTour
+            onComplete={() => setShowOnboarding(false)}
+          />
+        )}
       </div>
-
-      {selectedItem && (
-        <PurchaseModal
-          item={selectedItem}
-          seller={sellers[selectedItem.seller_id]}
-          onClose={() => setSelectedItem(null)}
-          onSuccess={() => {
-            setSelectedItem(null);
-            loadItems();
-          }}
-        />
-      )}
-
-      {selectedAd && (
-        <AdModal
-          ad={selectedAd}
-          onClose={() => setSelectedAd(null)}
-        />
-      )}
-
-      {/* Onboarding Tour */}
-      {showOnboarding && (
-        <OnboardingTour
-          onComplete={() => setShowOnboarding(false)}
-        />
-      )}
-    </div>);
-
+  );
 }
