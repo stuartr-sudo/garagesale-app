@@ -346,24 +346,24 @@ export default function Layout({ children, currentPageName }) {
         </Sidebar>
 
         <main className="flex-1 flex flex-col z-10 min-w-0">
+          {/* Fixed Floating Hamburger Menu - Always Visible */}
+          <div className="fixed top-4 left-4 z-50">
+            <SidebarTrigger className="w-14 h-14 flex items-center justify-center bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-2xl transition-all duration-300 shadow-2xl hover:shadow-cyan-500/50 hover:scale-110">
+              <span className="text-white text-4xl font-light" style={{ fontFamily: 'Hugeicons' }}>&#987985;</span>
+            </SidebarTrigger>
+          </div>
+
           {/* Mobile Header */}
           <header className="bg-black/80 backdrop-blur-lg border-b border-gray-800 px-6 py-4 md:hidden shadow-sm sticky top-0 z-10">
-            <div className="flex items-center justify-between">
-                <SidebarTrigger className="w-12 h-12 flex items-center justify-center hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 bg-gray-800/50 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105">
-                  <span className="text-white text-3xl font-light" style={{ fontFamily: 'Hugeicons' }}>&#987985;</span>
-                </SidebarTrigger>
+            <div className="flex items-center justify-center">
                 <span className="text-xl font-bold text-white">
                     {currentPageName}
                 </span>
-                <div className="w-12"></div>
             </div>
           </header>
 
-          {/* Desktop Header with Sidebar Toggle */}
-          <header className="hidden md:flex bg-black/80 backdrop-blur-lg border-b border-gray-800 px-6 py-3 shadow-sm sticky top-0 z-10 items-center gap-4">
-            <SidebarTrigger className="w-12 h-12 flex items-center justify-center hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 bg-gray-800/50 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105">
-              <span className="text-white text-3xl font-light" style={{ fontFamily: 'Hugeicons' }}>&#987985;</span>
-            </SidebarTrigger>
+          {/* Desktop Header */}
+          <header className="hidden md:flex bg-black/80 backdrop-blur-lg border-b border-gray-800 px-6 py-3 shadow-sm sticky top-0 z-10 items-center justify-center gap-4">
             <span className="text-xl font-bold text-white">{currentPageName}</span>
           </header>
 
