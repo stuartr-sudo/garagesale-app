@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { User } from '@/api/entities';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Badge } from "@/components/ui/badge";
 import { Store, ArrowRight, Camera, DollarSign, Users, Sparkles, ShoppingCart, Search, MapPin, Shield, Zap, Clock, Star, CheckCircle, Phone, MessageSquare } from 'lucide-react';
@@ -71,6 +71,7 @@ const TestimonialCard = ({ name, role, content, rating = 5 }) => (
 );
 
 export default function HomePage() {
+  const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -89,13 +90,9 @@ export default function HomePage() {
     fetchUser();
   }, []);
 
-  const handleAuthAction = async (destinationPage) => {
-    try {
-      const redirectUrl = `${window.location.origin}${createPageUrl(destinationPage)}`;
-      await User.loginWithRedirect(redirectUrl);
-    } catch (error) {
-      console.error("Authentication action failed", error);
-    }
+  const handleAuthAction = (destinationPage) => {
+    // Navigate to sign-in page instead of using OAuth directly
+    navigate(createPageUrl('SignIn'));
   };
 
   return (

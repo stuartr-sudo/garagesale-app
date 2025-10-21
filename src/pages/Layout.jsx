@@ -118,7 +118,7 @@ const navigationItems = [
   }
 ];
 
-const publicPages = ["Home", "Contact", "Privacy", "Terms", "Announcements", "Donations", "AccountTypeSelection", "BusinessSignup"];
+const publicPages = ["Home", "Contact", "Privacy", "Terms", "Announcements", "Donations", "AccountTypeSelection", "BusinessSignup", "SignIn"];
 
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();

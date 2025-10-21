@@ -50,6 +50,8 @@ import AccountTypeSelection from "./AccountTypeSelection";
 
 import TradeOffers from "./TradeOffers";
 
+import SignIn from "./SignIn";
+
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
 const PAGES = {
@@ -103,6 +105,8 @@ const PAGES = {
     AccountTypeSelection: AccountTypeSelection,
     
     TradeOffers: TradeOffers,
+    
+    SignIn: SignIn,
     
 }
 
@@ -180,6 +184,8 @@ function PagesContent() {
                 <Route path="/AccountTypeSelection" element={<AccountTypeSelection />} />
                 
                 <Route path="/TradeOffers" element={<TradeOffers />} />
+                
+                <Route path="/SignIn" element={<SignIn />} />
                 
             </Routes>
         </Layout>
