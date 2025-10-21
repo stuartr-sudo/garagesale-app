@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { User } from '@/api/entities';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Badge } from "@/components/ui/badge";
 import { Store, ArrowRight, Building, CheckCircle, Users, Shield, Sparkles, Globe } from 'lucide-react';
@@ -65,6 +65,7 @@ const PricingCard = ({ title, price, features, popular = false, ctaText, onActio
 );
 
 export default function BusinessSignup() {
+  const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -84,16 +85,13 @@ export default function BusinessSignup() {
   }, []);
 
   const handleLogin = async () => {
-    try {
-      const businessOnboardingUrl = `${window.location.origin}${createPageUrl('BusinessOnboarding')}`;
-      await User.loginWithRedirect(businessOnboardingUrl);
-    } catch (error) {
-      console.error("Login failed", error);
-    }
+    // TEMPORARILY: Skip OAuth and go directly to marketplace
+    navigate(createPageUrl('Marketplace'));
   };
 
   const handleStartBusinessOnboarding = () => {
-    window.location.href = createPageUrl('BusinessOnboarding');
+    // TEMPORARILY: Skip onboarding and go directly to marketplace
+    navigate(createPageUrl('Marketplace'));
   };
 
   if (loading) {

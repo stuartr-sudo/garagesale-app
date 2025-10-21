@@ -20,6 +20,14 @@ export default function SignIn() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
 
+  // TEMPORARILY: Auto-redirect to marketplace
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      navigate(createPageUrl('Marketplace'));
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [navigate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -42,12 +50,11 @@ export default function SignIn() {
   };
 
   const handleGoogleSignIn = async () => {
-    try {
-      const redirectUrl = `${window.location.origin}${createPageUrl('Marketplace')}`;
-      await User.loginWithRedirect(redirectUrl);
-    } catch (error) {
-      setError('Google sign-in is not configured yet. Please use email/password.');
-    }
+    // TEMPORARILY: Skip OAuth and show message
+    setError('Authentication is temporarily disabled. You can access all features without signing in.');
+    setTimeout(() => {
+      navigate(createPageUrl('Marketplace'));
+    }, 2000);
   };
 
   return (
