@@ -402,7 +402,6 @@ export default function ItemDetail() {
           onClose={() => setShowPurchaseModal(false)}
         />
       )}
-      </div>
     </div>
   );
 }

@@ -153,6 +153,7 @@ Respond naturally as a sales assistant would.`;
     }));
 
     // Get AI response
+    console.log('Calling OpenAI API...');
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -163,6 +164,7 @@ Respond naturally as a sales assistant would.`;
       temperature: 0.7,
       max_tokens: 200
     });
+    console.log('OpenAI API response received');
 
     const aiResponse = completion.choices[0].message.content;
 
@@ -208,9 +210,17 @@ Respond naturally as a sales assistant would.`;
 
   } catch (error) {
     console.error('Agent chat error:', error);
+    console.error('Error stack:', error.stack);
+    console.error('Environment check:', {
+      supabaseUrl: !!supabaseUrl,
+      supabaseServiceKey: !!supabaseServiceKey,
+      openaiApiKey: !!openaiApiKey
+    });
     return res.status(500).json({ 
       error: 'Internal server error',
-      details: error.message 
+      details: error.message,
+      type: error.name,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 }
