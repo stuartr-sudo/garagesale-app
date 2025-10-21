@@ -78,8 +78,31 @@ export default function AddItem() {
   };
 
   const handleImageUpload = async (files) => {
+    // Check if user is loaded
+    if (!currentUser) {
+      toast({
+        title: "Please wait",
+        description: "Loading user data...",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsUploading(true);
     try {
+      // Check authentication
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to upload images.",
+          variant: "destructive"
+        });
+        setIsUploading(false);
+        return;
+      }
+
       const uploadedUrls = [];
       
       for (const file of files) {
@@ -89,9 +112,15 @@ export default function AddItem() {
 
         const { data, error } = await supabase.storage
           .from('item-images')
-          .upload(filePath, file, { upsert: true });
+          .upload(filePath, file, { 
+            upsert: true,
+            contentType: file.type
+          });
 
-        if (error) throw error;
+        if (error) {
+          console.error("Upload error for file:", file.name, error);
+          throw error;
+        }
 
         const { data: { publicUrl } } = supabase.storage
           .from('item-images')
@@ -113,7 +142,7 @@ export default function AddItem() {
       console.error("Upload error:", error);
       toast({
         title: "Upload Failed",
-        description: "Failed to upload images. Please try again.",
+        description: error.message || "Failed to upload images. Please try again.",
         variant: "destructive"
       });
     } finally {

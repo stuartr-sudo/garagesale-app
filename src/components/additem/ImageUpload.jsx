@@ -61,10 +61,9 @@ export default function ImageUpload({ images, onUpload, onRemove, isUploading = 
         />
         <Button
           type="button"
-          variant="outline"
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
-          className="flex-1 h-12 rounded-xl"
+          className="flex-1 h-12 rounded-xl bg-white hover:bg-gray-100 text-gray-900 border-2 border-gray-300 font-semibold"
         >
           {isUploading ? (
             <>
@@ -89,10 +88,9 @@ export default function ImageUpload({ images, onUpload, onRemove, isUploading = 
         />
         <Button
           type="button"
-          variant="outline"
           onClick={() => cameraInputRef.current?.click()}
           disabled={isUploading}
-          className="flex-1 h-12 rounded-xl"
+          className="flex-1 h-12 rounded-xl bg-white hover:bg-gray-100 text-gray-900 border-2 border-gray-300 font-semibold"
         >
           {isUploading ? (
             <>
