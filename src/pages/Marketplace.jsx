@@ -457,25 +457,6 @@ export default function Marketplace() {
             />
           </div>
 
-          {/* Recently Sold Section */}
-          {recentlySoldItems.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-white mb-6">
-                Recently Sold
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {recentlySoldItems.map((item) => (
-                  <ItemCard
-                    key={item.id}
-                    item={item}
-                    seller={sellers[item.seller_id]}
-                    isSold={true}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Main Items Grid - 4 columns */}
           <div>
             {filteredItems.length > 0 ?
@@ -531,6 +512,25 @@ export default function Marketplace() {
           }
             </div>
           </div>
+
+          {/* Recently Sold Section */}
+          {recentlySoldItems.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-6">
+                Recently Sold
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {recentlySoldItems.map((item) => (
+                  <ItemCard
+                    key={item.id}
+                    item={item}
+                    seller={sellers[item.seller_id]}
+                    isSold={true}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Modals */}
