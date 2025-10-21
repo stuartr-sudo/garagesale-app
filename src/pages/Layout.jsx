@@ -1,0 +1,323 @@
+
+
+import React, { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { createPageUrl } from "@/utils";
+import {
+  Store,
+  Package,
+  Plus,
+  User as UserIcon,
+  Users,
+  Settings,
+  LogOut,
+  Home,
+  BarChart3,
+  LayoutTemplate,
+  Megaphone,
+  Heart,
+  Mail,
+  Lock,
+  FileText,
+  Briefcase,
+  ShoppingCart,
+  Building,
+  RefreshCw, // For Trade Offers
+  DollarSign // For Connect page
+} from "lucide-react";
+import { User } from "@/api/entities";
+import { Button } from "@/components/ui/button";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarHeader,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import NerdBackground from "@/components/ui/NerdBackground"; // Import the new component
+
+const navigationItems = [
+  {
+    title: "Marketplace",
+    url: createPageUrl("Marketplace"),
+    icon: Store,
+  },
+  {
+    title: "Storefront",
+    url: createPageUrl("Store"),
+    icon: Building,
+  },
+  {
+    title: "My Items",
+    url: createPageUrl("MyItems"),
+    icon: Package,
+  },
+  {
+    title: "My Purchases",
+    url: createPageUrl("MyPurchases"),
+    icon: ShoppingCart,
+  },
+  {
+    title: "Add Item",
+    url: createPageUrl("AddItem"),
+    icon: Plus,
+  },
+  {
+    title: "Seller Hub",
+    url: createPageUrl("Connect"),
+    icon: DollarSign,
+  },
+  {
+    title: "Trade Offers",
+    url: createPageUrl("TradeOffers"),
+    icon: RefreshCw,
+  },
+  {
+    title: "Requests",
+    url: createPageUrl("Requests"),
+    icon: Briefcase,
+  },
+  {
+    title: "Announcements",
+    url: createPageUrl("Announcements"),
+    icon: Megaphone,
+  },
+  {
+    title: "Donations",
+    url: createPageUrl("Donations"),
+    icon: Heart,
+  },
+  {
+    title: "Users",
+    url: createPageUrl("Users"),
+    icon: Users,
+    adminOnly: true,
+  },
+  {
+    title: "Advertisements",
+    url: createPageUrl("Advertisements"),
+    icon: BarChart3,
+    adminOnly: true,
+  },
+  {
+    title: "Homepage Editor",
+    url: createPageUrl("HomepageEditor"),
+    icon: LayoutTemplate,
+    adminOnly: true,
+  },
+  {
+    title: "Settings",
+    url: createPageUrl("Settings"),
+    icon: Settings,
+  }
+];
+
+const publicPages = ["Home", "Contact", "Privacy", "Terms", "Announcements", "Donations", "AccountTypeSelection", "BusinessSignup"];
+
+export default function Layout({ children, currentPageName }) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      setLoading(true);
+      try {
+        const user = await User.me();
+        setCurrentUser(user);
+
+        // Handle onboarding redirects
+        if (user && (!user.country || !user.postcode)) {
+          if (user.account_type === 'business' && currentPageName !== 'BusinessOnboarding') {
+            navigate(createPageUrl('BusinessOnboarding'));
+          } else if (user.account_type === 'individual' && currentPageName !== 'Onboarding') {
+            navigate(createPageUrl('Onboarding'));
+          }
+        }
+
+      } catch (error) {
+        setCurrentUser(null);
+        // If user is not authenticated and page is not public, redirect to Home
+        if (!publicPages.includes(currentPageName)) {
+           navigate(createPageUrl("Home"));
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUser();
+  }, [location.pathname, currentPageName, navigate]);
+
+  const handleLogout = async () => {
+    await User.logout();
+    setCurrentUser(null);
+    navigate(createPageUrl("Home"));
+  };
+
+  if (loading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-gray-950">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-pink-500"></div>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    // If user is not logged in, render the page only if it's public.
+    if (publicPages.includes(currentPageName)) {
+      return <div className="w-full">{children}</div>;
+    }
+    // Otherwise, the useEffect hook will handle redirection. Show nothing while redirecting.
+    return null;
+  }
+
+  const visibleNavItems = navigationItems.filter(item => !item.adminOnly || currentUser?.role === 'admin');
+
+  return (
+    <SidebarProvider>
+      <div className="relative min-h-screen flex w-full bg-gray-950 text-gray-200 overflow-hidden">
+        <NerdBackground count={75} />
+
+        <Sidebar className="border-r-0 bg-black/80 backdrop-blur-lg shadow-2xl border-r border-gray-800 z-10">
+          <SidebarHeader className="border-b border-gray-800 p-4 shrink-0">
+            <Link to={createPageUrl("Marketplace")} className="flex items-center gap-2 min-w-0">
+              <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-fuchsia-600 rounded-xl flex items-center justify-center shadow-lg shrink-0">
+                <Store className="w-5 h-5 text-white" />
+              </div>
+              <div className="min-w-0 overflow-hidden">
+                <h2 className="font-bold text-lg text-white truncate">GarageSale</h2>
+                <p className="text-xs text-gray-400 truncate">Local Marketplace</p>
+              </div>
+            </Link>
+          </SidebarHeader>
+
+          <SidebarContent className="p-3 flex flex-col justify-between h-[calc(100%-85px)]">
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu className="space-y-1">
+                  {visibleNavItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        className={`group hover:bg-gray-800 transition-all duration-300 rounded-lg p-2.5 justify-start text-sm ${
+                          location.pathname === item.url
+                            ? 'bg-pink-500/10 text-pink-400'
+                            : 'text-gray-400 hover:text-white'
+                        }`}
+                        data-tour={
+                          item.title === 'My Items' ? 'sidebar-my-items' :
+                          item.title === 'Add Item' ? 'sidebar-add-item' :
+                          item.title === 'Trade Offers' ? 'sidebar-trade-offers' :
+                          item.title === 'Requests' ? 'sidebar-requests' :
+                          undefined
+                        }
+                      >
+                        <Link to={item.url} className="flex items-center gap-2.5 min-w-0">
+                          <item.icon className="w-4 h-4 shrink-0" />
+                          <span className="font-medium truncate">{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu className="space-y-1">
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      className={`group hover:bg-gray-800 transition-all duration-300 rounded-lg p-2.5 justify-start text-sm ${
+                        location.pathname === createPageUrl("Contact")
+                          ? 'bg-pink-500/10 text-pink-400'
+                          : 'text-gray-400 hover:text-white'
+                      }`}
+                    >
+                      <Link to={createPageUrl("Contact")} className="flex items-center gap-2.5 min-w-0">
+                        <Mail className="w-4 h-4 shrink-0" />
+                        <span className="font-medium truncate">Contact Us</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      className={`group hover:bg-gray-800 transition-all duration-300 rounded-lg p-2.5 justify-start text-sm ${
+                        location.pathname === createPageUrl("Privacy")
+                          ? 'bg-pink-500/10 text-pink-400'
+                          : 'text-gray-400 hover:text-white'
+                      }`}
+                    >
+                      <Link to={createPageUrl("Privacy")} className="flex items-center gap-2.5 min-w-0">
+                        <Lock className="w-4 h-4 shrink-0" />
+                        <span className="font-medium truncate">Privacy Policy</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      className={`group hover:bg-gray-800 transition-all duration-300 rounded-lg p-2.5 justify-start text-sm ${
+                        location.pathname === createPageUrl("Terms")
+                          ? 'bg-pink-500/10 text-pink-400'
+                          : 'text-gray-400 hover:text-white'
+                      }`}
+                    >
+                      <Link to={createPageUrl("Terms")} className="flex items-center gap-2.5 min-w-0">
+                        <FileText className="w-4 h-4 shrink-0" />
+                        <span className="font-medium truncate">Terms of Service</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup>
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton onClick={handleLogout} className="group hover:bg-red-500/10 hover:text-red-400 transition-all duration-300 rounded-lg p-2.5 justify-start text-gray-400 text-sm">
+                           <LogOut className="w-4 h-4 mr-2.5 shrink-0" />
+                           <span className="font-medium truncate">Log Out</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </SidebarGroup>
+          </SidebarContent>
+        </Sidebar>
+
+        <main className="flex-1 flex flex-col z-10 min-w-0">
+          <header className="bg-black/80 backdrop-blur-lg border-b border-gray-800 px-6 py-4 md:hidden shadow-sm sticky top-0 z-10">
+            <div className="flex items-center justify-between">
+                <SidebarTrigger className="hover:bg-gray-800 p-2 rounded-xl transition-colors duration-200" />
+                <span className="text-xl font-bold text-white">
+                    {currentPageName}
+                </span>
+                <div className="w-8"></div>
+            </div>
+          </header>
+
+          <div className="flex-1 overflow-auto">
+            {currentUser && (!currentUser.country || !currentUser.postcode) && currentPageName !== 'Onboarding' && currentPageName !== 'BusinessOnboarding' && (
+                <div className="bg-yellow-900/50 border-b border-yellow-800 p-3 text-center text-sm text-yellow-300">
+                    Please complete your profile to get the best experience.
+                    <Link to={createPageUrl(currentUser.account_type === 'business' ? 'BusinessOnboarding' : 'Onboarding')} className="font-bold underline ml-2">Complete Setup</Link>
+                </div>
+            )}
+            {children}
+          </div>
+        </main>
+      </div>
+    </SidebarProvider>
+  );
+}
+
