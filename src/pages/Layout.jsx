@@ -349,17 +349,21 @@ export default function Layout({ children, currentPageName }) {
           {/* Mobile Header */}
           <header className="bg-black/80 backdrop-blur-lg border-b border-gray-800 px-6 py-4 md:hidden shadow-sm sticky top-0 z-10">
             <div className="flex items-center justify-between">
-                <SidebarTrigger className="hover:bg-gray-800 p-2 rounded-xl transition-colors duration-200" />
+                <SidebarTrigger className="w-12 h-12 flex items-center justify-center hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 bg-gray-800/50 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105">
+                  <span className="text-white text-3xl font-light" style={{ fontFamily: 'Hugeicons' }}>&#987985;</span>
+                </SidebarTrigger>
                 <span className="text-xl font-bold text-white">
                     {currentPageName}
                 </span>
-                <div className="w-8"></div>
+                <div className="w-12"></div>
             </div>
           </header>
 
           {/* Desktop Header with Sidebar Toggle */}
           <header className="hidden md:flex bg-black/80 backdrop-blur-lg border-b border-gray-800 px-6 py-3 shadow-sm sticky top-0 z-10 items-center gap-4">
-            <SidebarTrigger className="hover:bg-gray-800 p-2 rounded-xl transition-colors duration-200" />
+            <SidebarTrigger className="w-12 h-12 flex items-center justify-center hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 bg-gray-800/50 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105">
+              <span className="text-white text-3xl font-light" style={{ fontFamily: 'Hugeicons' }}>&#987985;</span>
+            </SidebarTrigger>
             <span className="text-xl font-bold text-white">{currentPageName}</span>
           </header>
 
