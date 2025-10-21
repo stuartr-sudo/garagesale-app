@@ -100,19 +100,34 @@ export default function MoreFromSeller({ sellerId, currentItemId }) {
 
   if (isLoading) {
     return (
-      <div className="text-center py-8">
-        <div className="text-gray-400">Loading more items...</div>
+      <div className="mt-8 p-8 bg-gray-900/50 rounded-2xl border-2 border-cyan-500/20">
+        <h2 className="text-2xl font-bold text-white mb-4">More from this Seller</h2>
+        <div className="text-center py-8">
+          <div className="text-gray-400">Loading more items...</div>
+        </div>
       </div>
     );
   }
 
   if (items.length === 0) {
-    return null;
+    return (
+      <div className="mt-8 p-8 bg-gray-900/50 rounded-2xl border-2 border-cyan-500/20">
+        <h2 className="text-2xl font-bold text-white mb-4">More from this Seller</h2>
+        <div className="text-center py-8">
+          <div className="text-gray-400">This seller doesn't have any other items listed at the moment.</div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="mt-8">
-      <h2 className="text-2xl font-bold text-white mb-4">More from this Seller</h2>
+    <div className="mt-8 p-6 bg-gray-900/50 rounded-2xl border-2 border-cyan-500/20">
+      <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+        <span>More from this Seller</span>
+        <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
+          {items.length} {items.length === 1 ? 'item' : 'items'}
+        </Badge>
+      </h2>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {items.map(item => {
           const primaryImage = item.image_urls?.[0] || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop";

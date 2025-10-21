@@ -491,10 +491,8 @@ export default function ItemDetail() {
       </div>
 
       {/* More from this Seller */}
-      {seller && !isOwner && (
-        <div className="mt-8">
-          <MoreFromSeller sellerId={seller.id} currentItemId={item.id} />
-        </div>
+      {seller && (
+        <MoreFromSeller sellerId={seller.id} currentItemId={item.id} />
       )}
       
       {/* Purchase Modal */}
