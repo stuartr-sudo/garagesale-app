@@ -158,11 +158,21 @@ export default function AddItem() {
   };
 
   const generateWithAI = async (field) => {
+    // Check if we have an image to analyze
+    if (!itemData.image_urls || itemData.image_urls.length === 0) {
+      toast({
+        title: "No Image",
+        description: "Please upload at least one image first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const mainImageUrl = itemData.image_urls[0];
+
     if (field === 'title') {
       setIsGeneratingTitle(true);
       try {
-        const prompt = `Generate a short, catchy title (max 60 characters) for a marketplace listing based on this description: "${itemData.description}". Just return the title, nothing else.`;
-        
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
@@ -170,28 +180,52 @@ export default function AddItem() {
             'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
           },
           body: JSON.stringify({
-            model: 'gpt-4',
-            messages: [{ role: 'user', content: prompt }],
+            model: 'gpt-4o',
+            messages: [
+              {
+                role: 'user',
+                content: [
+                  {
+                    type: 'text',
+                    text: 'Analyze this image and generate a short, catchy marketplace listing title (max 60 characters). Just return the title, nothing else.'
+                  },
+                  {
+                    type: 'image_url',
+                    image_url: {
+                      url: mainImageUrl,
+                      detail: 'low'
+                    }
+                  }
+                ]
+              }
+            ],
             max_tokens: 100
           })
         });
 
         const data = await response.json();
+        
+        if (data.error) {
+          throw new Error(data.error.message || 'Failed to analyze image');
+        }
+        
         const generatedTitle = data.choices[0].message.content.trim().replace(/^["']|["']$/g, '');
         
         setItemData(prev => ({ ...prev, title: generatedTitle }));
-        toast({ title: "Success!", description: "Title generated with AI." });
+        toast({ title: "Success!", description: "Title generated from image with AI." });
       } catch (error) {
         console.error("Error generating title:", error);
-        toast({ title: "Error", description: "Failed to generate title.", variant: "destructive" });
+        toast({ 
+          title: "Error", 
+          description: error.message || "Failed to generate title.", 
+          variant: "destructive" 
+        });
       } finally {
         setIsGeneratingTitle(false);
       }
     } else if (field === 'description') {
       setIsGeneratingDescription(true);
       try {
-        const prompt = `Generate a detailed, compelling product description (max 200 words) for: "${itemData.title}". Include key features and benefits. Just return the description, nothing else.`;
-        
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
@@ -199,20 +233,46 @@ export default function AddItem() {
             'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
           },
           body: JSON.stringify({
-            model: 'gpt-4',
-            messages: [{ role: 'user', content: prompt }],
-            max_tokens: 300
+            model: 'gpt-4o',
+            messages: [
+              {
+                role: 'user',
+                content: [
+                  {
+                    type: 'text',
+                    text: 'Analyze this image and generate a detailed, compelling marketplace product description (max 200 words). Include key features, condition, and benefits. Make it engaging for potential buyers. Just return the description, nothing else.'
+                  },
+                  {
+                    type: 'image_url',
+                    image_url: {
+                      url: mainImageUrl,
+                      detail: 'high'
+                    }
+                  }
+                ]
+              }
+            ],
+            max_tokens: 400
           })
         });
 
         const data = await response.json();
+        
+        if (data.error) {
+          throw new Error(data.error.message || 'Failed to analyze image');
+        }
+        
         const generatedDescription = data.choices[0].message.content.trim();
         
         setItemData(prev => ({ ...prev, description: generatedDescription }));
-        toast({ title: "Success!", description: "Description generated with AI." });
+        toast({ title: "Success!", description: "Description generated from image with AI." });
       } catch (error) {
         console.error("Error generating description:", error);
-        toast({ title: "Error", description: "Failed to generate description.", variant: "destructive" });
+        toast({ 
+          title: "Error", 
+          description: error.message || "Failed to generate description.", 
+          variant: "destructive" 
+        });
       } finally {
         setIsGeneratingDescription(false);
       }
@@ -388,7 +448,7 @@ export default function AddItem() {
                   <Button
                     type="button"
                   onClick={() => generateWithAI('title')}
-                  disabled={!itemData.description || isGeneratingTitle}
+                  disabled={isGeneratingTitle}
                     variant="outline"
                   size="sm"
                   className="bg-purple-600 hover:bg-purple-700 text-white border-purple-500"
@@ -416,7 +476,7 @@ export default function AddItem() {
                 <Button
                   type="button"
                   onClick={() => generateWithAI('description')}
-                  disabled={!itemData.title || isGeneratingDescription}
+                  disabled={isGeneratingDescription}
                   variant="outline"
                   size="sm"
                   className="bg-purple-600 hover:bg-purple-700 text-white border-purple-500"
