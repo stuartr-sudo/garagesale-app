@@ -30,6 +30,7 @@ export default async function handler(req, res) {
       success: true,
       supabaseUrl: !!supabaseUrl,
       serviceKeyAvailable: !!supabaseServiceKey,
+      serviceKeyPrefix: supabaseServiceKey?.substring(0, 20) + '...',
       queryResult: { data, error },
       itemCount: data?.length || 0
     });
