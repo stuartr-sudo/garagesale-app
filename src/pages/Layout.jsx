@@ -216,13 +216,14 @@ export default function Layout({ children, currentPageName }) {
   }
 
   // Redirect non-logged-in users to Home page
-  const isPublicPage = publicPages.includes(currentPageName);
-  
   useEffect(() => {
-    if (!loading && !currentUser && !isPublicPage) {
-      navigate(createPageUrl("Home"));
+    const isPublicPage = publicPages.includes(currentPageName);
+    const homePath = createPageUrl("Home");
+    
+    if (!loading && !currentUser && !isPublicPage && location.pathname !== homePath) {
+      navigate(homePath);
     }
-  }, [currentUser, loading, isPublicPage, navigate]);
+  }, [currentUser, loading, currentPageName, navigate, location.pathname]);
 
   // Show sidebar even when not authenticated, but with limited navigation
   const visibleNavItems = navigationItems.filter(item => 
