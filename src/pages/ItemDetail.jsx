@@ -5,13 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, ShoppingCart, MapPin, Tag, Calendar, Star, Share2, Bot, Settings } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, MapPin, Tag, Calendar, Star, Share2, Bot, Settings, Check, Plus } from 'lucide-react';
 import { Item } from '@/api/entities';
+import { User as UserEntity } from '@/api/entities';
 import { supabase } from '@/lib/supabase';
 import AgentChat from '@/components/agent/AgentChat';
 import { createPageUrl } from '@/utils';
 import PurchaseModal from '@/components/marketplace/PurchaseModal';
+import MoreFromSeller from '@/components/marketplace/MoreFromSeller';
 import { formatDistanceToNow } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ItemDetail() {
   const { id } = useParams();
@@ -26,6 +29,9 @@ export default function ItemDetail() {
   const [showAgentSettings, setShowAgentSettings] = useState(false);
   const [minimumPrice, setMinimumPrice] = useState('');
   const [isOwner, setIsOwner] = useState(false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isInCart, setIsInCart] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     loadItem();
@@ -132,6 +138,59 @@ export default function ItemDetail() {
     } catch (error) {
       console.error('Error saving agent settings:', error);
       alert('Error saving settings. Please try again.');
+    }
+  };
+
+  const handleAddToCart = async () => {
+    setIsAddingToCart(true);
+    try {
+      const user = await UserEntity.me();
+      
+      // Check if already in cart
+      const { data: existing } = await supabase
+        .from('cart_items')
+        .select('id, quantity')
+        .eq('buyer_id', user.id)
+        .eq('item_id', item.id)
+        .single();
+
+      if (existing) {
+        // Update quantity
+        const { error } = await supabase
+          .from('cart_items')
+          .update({ quantity: existing.quantity + 1 })
+          .eq('id', existing.id);
+
+        if (error) throw error;
+      } else {
+        // Add new
+        const { error } = await supabase
+          .from('cart_items')
+          .insert({
+            buyer_id: user.id,
+            item_id: item.id,
+            quantity: 1
+          });
+
+        if (error) throw error;
+      }
+
+      setIsInCart(true);
+      toast({
+        title: "Added to Cart!",
+        description: `${item.title} has been added to your cart`
+      });
+
+      setTimeout(() => setIsInCart(false), 2000);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add item to cart",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAddingToCart(false);
     }
   };
 
@@ -363,17 +422,41 @@ export default function ItemDetail() {
             </Card>
           )}
 
-          {/* Action Button - Below AI Agent */}
-          <Button
-            onClick={() => setShowPurchaseModal(true)}
-            className="w-full h-12 md:h-14 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold text-base md:text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
-            style={{
-              animation: 'subtle-pulse 3s ease-in-out infinite'
-            }}
-          >
-            <ShoppingCart className="w-5 h-5 mr-2" />
-            {item.price === 0 ? 'Claim This Item' : 'Buy Now'}
-          </Button>
+          {/* Action Buttons - Below AI Agent */}
+          <div className="space-y-3">
+            <Button
+              onClick={handleAddToCart}
+              disabled={isAddingToCart || isInCart}
+              className={`w-full h-12 md:h-14 text-white font-bold text-base md:text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] ${
+                isInCart
+                  ? 'bg-green-600 hover:bg-green-600'
+                  : 'bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700'
+              }`}
+            >
+              {isInCart ? (
+                <>
+                  <Check className="w-5 h-5 mr-2" />
+                  Added to Cart
+                </>
+              ) : (
+                <>
+                  <Plus className="w-5 h-5 mr-2" />
+                  Add to Cart
+                </>
+              )}
+            </Button>
+
+            <Button
+              onClick={() => setShowPurchaseModal(true)}
+              className="w-full h-12 md:h-14 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold text-base md:text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+              style={{
+                animation: 'subtle-pulse 3s ease-in-out infinite'
+              }}
+            >
+              <ShoppingCart className="w-5 h-5 mr-2" />
+              {item.price === 0 ? 'Claim This Item' : 'Buy Now'}
+            </Button>
+          </div>
           <style jsx>{`
             @keyframes subtle-pulse {
               0%, 100% {
@@ -406,6 +489,13 @@ export default function ItemDetail() {
           )}
         </div>
       </div>
+
+      {/* More from this Seller */}
+      {seller && !isOwner && (
+        <div className="mt-8">
+          <MoreFromSeller sellerId={seller.id} currentItemId={item.id} />
+        </div>
+      )}
       
       {/* Purchase Modal */}
       {showPurchaseModal && (

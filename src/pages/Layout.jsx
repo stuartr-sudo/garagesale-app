@@ -45,6 +45,7 @@ import {
 } from "@/components/ui/sidebar";
 import NerdBackground from "@/components/ui/NerdBackground"; // Import the new component
 import FloatingCameraButton from "@/components/camera/FloatingCameraButton";
+import CartIcon from "@/components/cart/CartIcon";
 
 const navigationItems = [
   {
@@ -384,6 +385,11 @@ function LayoutContent({ currentUser, currentPageName, visibleNavItems, handleLo
             <SidebarTrigger className="w-14 h-14 flex items-center justify-center bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-2xl transition-all duration-300 shadow-2xl hover:shadow-cyan-500/50 hover:scale-110">
               <span className="text-white text-4xl font-light" style={{ fontFamily: 'Hugeicons' }}>&#987985;</span>
             </SidebarTrigger>
+          </div>
+
+          {/* Fixed Cart Icon - Top Right */}
+          <div className="fixed top-4 right-4 z-50">
+            <CartIcon />
           </div>
 
           <div className="flex-1 overflow-auto">
