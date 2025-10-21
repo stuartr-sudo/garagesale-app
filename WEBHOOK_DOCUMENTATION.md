@@ -24,6 +24,7 @@ https://garage-sale-40afc1f5.vercel.app/api/create-listing
   "title": "string (required)",
   "description": "string (required)",
   "price": "number (required)",
+  "minimum_price": "number (optional)",
   "category": "string (optional, default: 'other')",
   "condition": "string (optional, default: 'good')",
   "seller_id": "string (optional, default: null)",
@@ -40,6 +41,7 @@ https://garage-sale-40afc1f5.vercel.app/api/create-listing
 | `title` | string | **Yes** | Item title (max 255 characters) |
 | `description` | string | **Yes** | Item description |
 | `price` | number | **Yes** | Item price (use 0 for free items) |
+| `minimum_price` | number | No | **NEW:** Minimum price AI agent will accept. Enables AI negotiation if provided |
 | `category` | string | No | One of: `electronics`, `clothing`, `furniture`, `books`, `toys`, `sports`, `home_garden`, `automotive`, `collectibles`, `other` |
 | `condition` | string | No | One of: `new`, `like_new`, `good`, `fair`, `poor` |
 | `seller_id` | string | No | Supabase user UUID. If not provided, item will be a system listing |
@@ -83,7 +85,7 @@ The `images` array can contain:
 
 ## Example Requests
 
-### Example 1: Basic Listing with Image URLs
+### Example 1: Basic Listing with Image URLs (WITH AI AGENT)
 
 ```bash
 curl -X POST https://garage-sale-40afc1f5.vercel.app/api/create-listing \
@@ -92,6 +94,7 @@ curl -X POST https://garage-sale-40afc1f5.vercel.app/api/create-listing \
     "title": "Vintage Leather Chair",
     "description": "Beautiful vintage leather chair in excellent condition. Perfect for home office or reading nook.",
     "price": 150,
+    "minimum_price": 120,
     "category": "furniture",
     "condition": "like_new",
     "images": [
@@ -102,6 +105,12 @@ curl -X POST https://garage-sale-40afc1f5.vercel.app/api/create-listing \
     "location": "San Francisco, CA"
   }'
 ```
+
+**Note:** Including `minimum_price` enables the AI agent, which will:
+- Answer buyer questions 24/7
+- Negotiate prices automatically
+- Accept offers ≥ $120 immediately
+- Notify seller when offers are accepted
 
 ### Example 2: Free Item
 
