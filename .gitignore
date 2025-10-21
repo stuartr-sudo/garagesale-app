@@ -34,3 +34,4 @@ CREDENTIALS.md
 
 # Vercel
 .vercel
+.env*.local

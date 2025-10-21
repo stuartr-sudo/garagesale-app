@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { Item } from "@/api/entities";
 import { User } from "@/api/entities";
-import { UploadFile, ExtractDataFromUploadedFile } from "@/api/integrations";
+import { ExtractDataFromUploadedFile } from "@/api/integrations";
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -97,8 +98,27 @@ export default function AddItem() {
   const handleImageUpload = async (files) => {
     try {
       const uploadPromises = Array.from(files).map(async (file) => {
-        const { file_url } = await UploadFile({ file });
-        return file_url;
+        // Create a unique filename
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `item-images/${fileName}`;
+
+        // Upload to Supabase Storage
+        const { data, error } = await supabase.storage
+          .from('items')
+          .upload(filePath, file);
+
+        if (error) {
+          console.error('Upload error:', error);
+          throw error;
+        }
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('items')
+          .getPublicUrl(filePath);
+
+        return publicUrl;
       });
       
       const uploadedUrls = await Promise.all(uploadPromises);
