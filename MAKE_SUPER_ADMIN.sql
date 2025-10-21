@@ -1,25 +1,34 @@
 -- Make yourself Super Admin
 -- Run this in your Supabase SQL Editor: https://supabase.com/dashboard/project/biwuxtvgvkkltrdpuptl/sql
 
--- Option 1: If you know your email address
--- Replace 'your-email@example.com' with your actual email
+-- NOTE: This has already been done for stuartr@doubleclick.work!
+-- The role column has been added to the profiles table.
+
+-- Option 1: Make a specific user super admin by email
+-- Replace 'their-email@example.com' with the user's actual email
 UPDATE profiles 
 SET role = 'super_admin'
-WHERE email = 'your-email@example.com';
+WHERE email = 'their-email@example.com';
 
--- Option 2: If you know your user ID
--- Replace 'your-user-id-here' with your actual user ID
+-- Option 2: Make a specific user super admin by user ID
+-- Replace 'user-id-here' with the actual user ID
 -- UPDATE profiles 
 -- SET role = 'super_admin'
--- WHERE id = 'your-user-id-here';
+-- WHERE id = 'user-id-here';
 
--- Option 3: Make ALL users super admin (for testing only!)
--- Uncomment if you want to make everyone super admin
+-- Option 3: Make a user admin (not super_admin)
 -- UPDATE profiles 
--- SET role = 'super_admin';
+-- SET role = 'admin'
+-- WHERE email = 'their-email@example.com';
 
--- Verify the change
+-- Option 4: Remove admin access (set back to regular user)
+-- UPDATE profiles 
+-- SET role = 'user'
+-- WHERE email = 'their-email@example.com';
+
+-- Verify the changes
 SELECT id, email, full_name, role, account_type 
 FROM profiles 
-WHERE role = 'super_admin';
+WHERE role IN ('admin', 'super_admin')
+ORDER BY role, email;
 
