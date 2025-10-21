@@ -24,7 +24,8 @@ import {
   ShoppingCart,
   Building,
   RefreshCw, // For Trade Offers
-  DollarSign // For Connect page
+  DollarSign, // For Connect page
+  Tag // For Special Offers
 } from "lucide-react";
 import { User } from "@/api/entities";
 import { Button } from "@/components/ui/button";
@@ -70,6 +71,16 @@ const navigationItems = [
     title: "My Orders",
     url: createPageUrl("MyOrders"),
     icon: ShoppingCart,
+  },
+  {
+    title: "Shopping Cart",
+    url: createPageUrl("Cart"),
+    icon: ShoppingCart,
+  },
+  {
+    title: "Special Offers",
+    url: createPageUrl("SpecialOffers"),
+    icon: Tag,
   },
   {
     title: "Add Item",

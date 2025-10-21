@@ -56,6 +56,10 @@ import ItemDetail from "./ItemDetail";
 
 import MyOrders from "./MyOrders";
 
+import Cart from "./Cart";
+
+import SpecialOffers from "./SpecialOffers";
+
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
 const PAGES = {
@@ -115,6 +119,10 @@ const PAGES = {
     ItemDetail: ItemDetail,
     
     MyOrders: MyOrders,
+    
+    Cart: Cart,
+    
+    SpecialOffers: SpecialOffers,
     
 }
 
@@ -198,6 +206,10 @@ function PagesContent() {
                 <Route path="/ItemDetail/:id" element={<ItemDetail />} />
                 
                 <Route path="/MyOrders" element={<MyOrders />} />
+                
+                <Route path="/Cart" element={<Cart />} />
+                
+                <Route path="/SpecialOffers" element={<SpecialOffers />} />
             </Routes>
         </Layout>
     );

@@ -1,13 +1,76 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tag, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Tag, Star, ShoppingCart, Check } from "lucide-react";
 import { formatDistanceToNow } from 'date-fns';
+import { supabase } from '@/lib/supabase';
+import { User as UserEntity } from '@/api/entities';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ItemCard({ item, seller }) {
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isInCart, setIsInCart] = useState(false);
+  const { toast } = useToast();
   const primaryImage = item.image_urls?.[0] || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop";
+
+  const handleAddToCart = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    setIsAddingToCart(true);
+    try {
+      const user = await UserEntity.me();
+      
+      // Check if already in cart
+      const { data: existing } = await supabase
+        .from('cart_items')
+        .select('id, quantity')
+        .eq('buyer_id', user.id)
+        .eq('item_id', item.id)
+        .single();
+
+      if (existing) {
+        // Update quantity
+        const { error } = await supabase
+          .from('cart_items')
+          .update({ quantity: existing.quantity + 1 })
+          .eq('id', existing.id);
+
+        if (error) throw error;
+      } else {
+        // Add new
+        const { error } = await supabase
+          .from('cart_items')
+          .insert({
+            buyer_id: user.id,
+            item_id: item.id,
+            quantity: 1
+          });
+
+        if (error) throw error;
+      }
+
+      setIsInCart(true);
+      toast({
+        title: "Added to Cart!",
+        description: `${item.title} has been added to your cart`
+      });
+
+      setTimeout(() => setIsInCart(false), 2000);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add item to cart",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
 
   return (
     <Card className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-2xl shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 border-2 border-cyan-500/30 hover:border-cyan-400/60 overflow-hidden group hover:scale-[1.02] flex flex-col h-full ring-1 ring-cyan-400/20 hover:ring-cyan-400/40">
@@ -66,6 +129,28 @@ export default function ItemCard({ item, seller }) {
             </div>
           </div>
         </div>
+
+        <Button
+          onClick={handleAddToCart}
+          disabled={isAddingToCart || isInCart}
+          className={`w-full mt-4 ${
+            isInCart
+              ? 'bg-green-600 hover:bg-green-600'
+              : 'bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700'
+          }`}
+        >
+          {isInCart ? (
+            <>
+              <Check className="w-4 h-4 mr-2" />
+              Added to Cart
+            </>
+          ) : (
+            <>
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              Add to Cart
+            </>
+          )}
+        </Button>
       </CardContent>
     </Card>
   );
