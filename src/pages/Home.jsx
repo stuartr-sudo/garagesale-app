@@ -91,8 +91,7 @@ export default function HomePage() {
   }, []);
 
   const handleAuthAction = (destinationPage) => {
-    // TEMPORARILY: Skip auth entirely and go directly to marketplace
-    navigate(createPageUrl('Marketplace'));
+    navigate(createPageUrl(destinationPage));
   };
 
   return (
@@ -107,20 +106,39 @@ export default function HomePage() {
             <h1 className="font-bold text-xl md:text-2xl text-white">GarageSale</h1>
           </Link>
           <div className="flex items-center gap-2 md:gap-4">
-            <Button
-              variant="ghost"
-              onClick={() => handleAuthAction('Marketplace')}
-              className="text-gray-400 hover:bg-gray-800 hover:text-white"
-            >
-              Log In
-            </Button>
-            <Button
-              onClick={() => handleAuthAction('AccountTypeSelection')}
-              className="bg-gradient-to-r from-pink-500 to-fuchsia-600 hover:from-pink-600 hover:to-fuchsia-700 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl"
-            >
-              Get Started Free
-              <ArrowRight className="w-4 h-4 ml-2 hidden md:inline" />
-            </Button>
+            {loading ? (
+              <div className="animate-pulse flex gap-2">
+                <div className="h-10 w-20 bg-gray-700 rounded"></div>
+                <div className="h-10 w-32 bg-gray-700 rounded"></div>
+              </div>
+            ) : currentUser ? (
+              // User is logged in - show Dashboard button
+              <Button
+                onClick={() => handleAuthAction('Marketplace')}
+                className="bg-gradient-to-r from-pink-500 to-fuchsia-600 hover:from-pink-600 hover:to-fuchsia-700 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl"
+              >
+                Go to Dashboard
+                <ArrowRight className="w-4 h-4 ml-2 hidden md:inline" />
+              </Button>
+            ) : (
+              // User is not logged in - show Login and Get Started buttons
+              <>
+                <Button
+                  variant="ghost"
+                  onClick={() => handleAuthAction('SignIn')}
+                  className="text-gray-400 hover:bg-gray-800 hover:text-white"
+                >
+                  Log In
+                </Button>
+                <Button
+                  onClick={() => handleAuthAction('SignIn')}
+                  className="bg-gradient-to-r from-pink-500 to-fuchsia-600 hover:from-pink-600 hover:to-fuchsia-700 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl"
+                >
+                  Get Started Free
+                  <ArrowRight className="w-4 h-4 ml-2 hidden md:inline" />
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </header>

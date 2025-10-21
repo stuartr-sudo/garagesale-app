@@ -148,7 +148,7 @@ function PagesContent() {
         <Layout currentPageName={currentPage}>
             <Routes>            
                 
-                    <Route path="/" element={<Marketplace />} />
+                    <Route path="/" element={<Home />} />
                 
                 
                 <Route path="/Marketplace" element={<Marketplace />} />
