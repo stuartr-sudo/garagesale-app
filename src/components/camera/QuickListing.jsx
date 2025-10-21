@@ -6,9 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Camera, Sparkles, Upload, X, Check } from 'lucide-react';
+import { Camera, Sparkles, Upload, X, Check, Mic } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import MobileCameraCapture from './MobileCameraCapture';
+import VoiceInput from './VoiceInput';
 import { supabase } from '@/lib/supabase';
 
 const categories = [
@@ -34,6 +35,7 @@ const conditions = [
 
 export default function QuickListing({ onClose, onSuccess }) {
   const [showCamera, setShowCamera] = useState(false);
+  const [showVoiceInput, setShowVoiceInput] = useState(false);
   const [capturedImage, setCapturedImage] = useState(null);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [formData, setFormData] = useState({
@@ -68,6 +70,28 @@ export default function QuickListing({ onClose, onSuccess }) {
     toast({
       title: "Photo Captured!",
       description: "AI has analyzed your photo and filled in the details.",
+    });
+  };
+
+  const handleVoiceTranscript = (voiceData) => {
+    setShowVoiceInput(false);
+    
+    // Merge voice data with existing form data
+    setFormData(prev => ({
+      ...prev,
+      title: voiceData.title || prev.title,
+      description: voiceData.description || prev.description,
+      price: voiceData.price?.toString() || prev.price,
+      minimum_price: voiceData.minimum_price?.toString() || prev.minimum_price,
+      category: voiceData.category || prev.category,
+      condition: voiceData.condition || prev.condition,
+      tags: voiceData.tags || prev.tags,
+      location: voiceData.location || prev.location
+    }));
+
+    toast({
+      title: "Voice Processing Complete!",
+      description: "AI has extracted your listing details from your speech.",
     });
   };
 
@@ -153,6 +177,15 @@ export default function QuickListing({ onClose, onSuccess }) {
     );
   }
 
+  if (showVoiceInput) {
+    return (
+      <VoiceInput
+        onTranscript={handleVoiceTranscript}
+        onClose={() => setShowVoiceInput(false)}
+      />
+    );
+  }
+
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-2xl bg-gray-900 border-gray-800 max-h-[90vh] overflow-y-auto">
@@ -206,16 +239,31 @@ export default function QuickListing({ onClose, onSuccess }) {
                 </Button>
               </div>
             ) : (
-              <Button
-                onClick={() => setShowCamera(true)}
-                className="w-full h-48 border-2 border-dashed border-gray-600 hover:border-pink-500 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors"
-              >
-                <div className="text-center">
-                  <Camera className="w-12 h-12 mx-auto mb-2" />
-                  <div className="text-lg font-semibold">Take Photo</div>
-                  <div className="text-sm">AI will analyze and suggest details</div>
-                </div>
-              </Button>
+              <div className="space-y-3">
+                <Button
+                  onClick={() => setShowCamera(true)}
+                  className="w-full h-48 border-2 border-dashed border-gray-600 hover:border-pink-500 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors"
+                >
+                  <div className="text-center">
+                    <Camera className="w-12 h-12 mx-auto mb-2" />
+                    <div className="text-lg font-semibold">Take Photo</div>
+                    <div className="text-sm">AI will analyze and suggest details</div>
+                  </div>
+                </Button>
+                
+                <div className="text-center text-gray-400 text-sm">OR</div>
+                
+                <Button
+                  onClick={() => setShowVoiceInput(true)}
+                  className="w-full h-48 border-2 border-dashed border-gray-600 hover:border-purple-500 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors"
+                >
+                  <div className="text-center">
+                    <Mic className="w-12 h-12 mx-auto mb-2" />
+                    <div className="text-lg font-semibold">Voice Input</div>
+                    <div className="text-sm">Speak your item details</div>
+                  </div>
+                </Button>
+              </div>
             )}
           </div>
 
