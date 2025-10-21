@@ -376,23 +376,23 @@ function LayoutContent({ currentUser, currentPageName, visibleNavItems, handleLo
         </Sidebar>
 
         <main className="flex-1 flex flex-col z-10 min-w-0">
-          {/* Fixed Floating Hamburger Menu - Moves with Sidebar */}
+          {/* Fixed Floating Hamburger Menu - Aligned with Cart */}
           <div 
-            className={`fixed top-4 z-50 transition-all duration-300 ${
-              open ? 'left-[270px]' : 'left-4'
+            className={`fixed top-6 z-50 transition-all duration-300 ${
+              open ? 'left-[270px]' : 'left-6'
             }`}
           >
-            <SidebarTrigger className="w-14 h-14 flex items-center justify-center bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-2xl transition-all duration-300 shadow-2xl hover:shadow-cyan-500/50 hover:scale-110">
+            <SidebarTrigger className="w-16 h-16 flex items-center justify-center bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-2xl transition-all duration-300 shadow-2xl hover:shadow-cyan-500/50 hover:scale-110">
               <span className="text-white text-4xl font-light" style={{ fontFamily: 'Hugeicons' }}>&#987985;</span>
             </SidebarTrigger>
           </div>
 
-          {/* Fixed Cart Icon - Top Right (Lower Position) */}
-          <div className="fixed top-20 right-6 z-50">
+          {/* Fixed Cart Icon - Top Right (Aligned with Hamburger) */}
+          <div className="fixed top-6 right-6 z-50">
             <CartIcon />
           </div>
 
-          <div className="flex-1 overflow-auto">
+          <div className="flex-1">
             {children}
           </div>
         </main>
