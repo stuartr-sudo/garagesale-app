@@ -124,17 +124,25 @@ export default async function handler(req, res) {
 
     // Determine negotiation strategy
     let negotiationStrategy = '';
+    let counterOfferAmount = null;
     if (knowledge?.minimum_price && isOffer && offerAmount) {
       const askingPrice = parseFloat(item.price);
       const minimumPrice = parseFloat(knowledge.minimum_price);
       
       if (offerAmount >= askingPrice) {
         // Offer at or above asking - accept immediately
-        negotiationStrategy = `- ACCEPT this offer of $${offerAmount} immediately! It's at or above the asking price.`;
+        negotiationStrategy = `- ACCEPT this offer of $${offerAmount} immediately! It's at or above the asking price. Tell them you accept and provide payment details.`;
       } else if (offerAmount >= minimumPrice && offerAmount < askingPrice) {
-        // Offer above minimum but below asking - counter offer
-        const counterOffer = Math.round((offerAmount + askingPrice) / 2);
-        negotiationStrategy = `- This offer of $${offerAmount} is good but below asking. Counter with $${counterOffer} (middle ground between their offer and asking price). Be friendly and explain the item's value justifies a bit more.`;
+        // Offer above minimum but below asking - counter offer with randomness
+        // Instead of always meeting in the middle, use a random percentage between 55-75%
+        const randomPercentage = 0.55 + (Math.random() * 0.20); // Random between 55% and 75%
+        const gap = askingPrice - offerAmount;
+        counterOfferAmount = Math.round(offerAmount + (gap * randomPercentage));
+        
+        // Make sure counter offer is at least above their offer and below asking
+        counterOfferAmount = Math.max(offerAmount + 5, Math.min(counterOfferAmount, askingPrice - 5));
+        
+        negotiationStrategy = `- This offer of $${offerAmount} is good but below asking. Counter with $${counterOfferAmount}. Be friendly and explain why this price is fair given the item's condition and value.`;
       } else {
         // Offer below minimum - politely decline
         negotiationStrategy = `- This offer of $${offerAmount} is below minimum. Politely decline and suggest they consider the listed price of $${askingPrice}, emphasizing the item's quality and value.`;

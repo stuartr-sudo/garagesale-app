@@ -30,11 +30,14 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
     }]);
   }, [itemTitle]);
 
-  const sendMessage = async () => {
-    if (!input.trim() || loading) return;
+  const sendMessage = async (customMessage = null) => {
+    const messageToSend = customMessage || input.trim();
+    if (!messageToSend || loading) return;
 
-    const userMessage = input.trim();
-    setInput('');
+    const userMessage = messageToSend;
+    if (!customMessage) {
+      setInput('');
+    }
     setLoading(true);
 
     // Add user message to UI
@@ -63,12 +66,17 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
           setConversationId(data.conversation_id);
         }
 
+        // Extract counter-offer from AI response
+        const counterOfferMatch = data.response.match(/\$(\d+(?:\.\d{2})?)/);
+        const counterOfferAmount = counterOfferMatch ? parseFloat(counterOfferMatch[1]) : null;
+
         // Add AI response
         setMessages(prev => [...prev, {
           sender: 'ai',
           content: data.response,
           timestamp: new Date().toISOString(),
-          offer_accepted: data.offer_accepted
+          offer_accepted: data.offer_accepted,
+          counter_offer: counterOfferAmount
         }]);
 
         // Handle accepted offer
@@ -77,7 +85,7 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
           setTimeout(() => {
             setMessages(prev => [...prev, {
               sender: 'system',
-              content: `🎉 Congratulations! Your offer of $${data.offer_amount} has been accepted! The seller will contact you shortly to complete the purchase.`,
+              content: `🎉 Congratulations! Your offer has been accepted! The seller will contact you shortly to complete the purchase.`,
               timestamp: new Date().toISOString()
             }]);
           }, 1000);
@@ -123,28 +131,46 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
               className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${
-                  msg.sender === 'user'
-                    ? 'bg-gradient-to-r from-pink-600 to-fuchsia-600 text-white'
-                    : msg.sender === 'system'
-                    ? 'bg-green-900/30 border border-green-800 text-green-300'
-                    : 'bg-gray-800 text-gray-200 border border-gray-700'
+                className={`max-w-[80%] ${
+                  msg.sender === 'user' ? '' : 'w-full'
                 }`}
               >
-                {msg.sender === 'ai' && (
-                  <div className="flex items-center gap-2 mb-1 text-purple-400 text-xs">
-                    <Bot className="w-3 h-3" />
-                    <span>AI Assistant</span>
+                <div
+                  className={`rounded-2xl px-4 py-2.5 ${
+                    msg.sender === 'user'
+                      ? 'bg-gradient-to-r from-pink-600 to-fuchsia-600 text-white'
+                      : msg.sender === 'system'
+                      ? 'bg-green-900/30 border border-green-800 text-green-300'
+                      : 'bg-gray-800 text-gray-200 border border-gray-700'
+                  }`}
+                >
+                  {msg.sender === 'ai' && (
+                    <div className="flex items-center gap-2 mb-1 text-purple-400 text-xs">
+                      <Bot className="w-3 h-3" />
+                      <span>AI Assistant</span>
+                    </div>
+                  )}
+                  <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                    {msg.content}
                   </div>
-                )}
-                <div className="text-sm leading-relaxed whitespace-pre-wrap">
-                  {msg.content}
+                  {msg.offer_accepted && (
+                    <div className="flex items-center gap-1 mt-2 text-green-400 text-xs">
+                      <CheckCircle className="w-4 h-4" />
+                      <span>Offer Accepted!</span>
+                    </div>
+                  )}
                 </div>
-                {msg.offer_accepted && (
-                  <div className="flex items-center gap-1 mt-2 text-green-400 text-xs">
-                    <CheckCircle className="w-4 h-4" />
-                    <span>Offer Accepted!</span>
-                  </div>
+                
+                {/* Show Accept Deal button if there's a counter-offer */}
+                {msg.sender === 'ai' && msg.counter_offer && !offerAccepted && (
+                  <Button
+                    onClick={() => sendMessage(`I accept your offer of $${msg.counter_offer}`)}
+                    className="mt-2 w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold shadow-lg"
+                    disabled={loading}
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Accept Deal - ${msg.counter_offer}
+                  </Button>
                 )}
               </div>
             </div>

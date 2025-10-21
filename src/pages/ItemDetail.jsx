@@ -366,7 +366,7 @@ export default function ItemDetail() {
           {/* Action Button - Below AI Agent */}
           <Button
             onClick={() => setShowPurchaseModal(true)}
-            className="w-full h-12 md:h-14 bg-gradient-to-r from-blue-500 to-yellow-500 hover:from-blue-600 hover:to-yellow-600 text-white font-bold text-base md:text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+            className="w-full h-12 md:h-14 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold text-base md:text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
             style={{
               animation: 'subtle-pulse 3s ease-in-out infinite'
             }}
