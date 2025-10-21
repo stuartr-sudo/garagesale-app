@@ -122,6 +122,25 @@ export default async function handler(req, res) {
       isOffer = true;
     }
 
+    // Determine negotiation strategy
+    let negotiationStrategy = '';
+    if (knowledge?.minimum_price && isOffer && offerAmount) {
+      const askingPrice = parseFloat(item.price);
+      const minimumPrice = parseFloat(knowledge.minimum_price);
+      
+      if (offerAmount >= askingPrice) {
+        // Offer at or above asking - accept immediately
+        negotiationStrategy = `- ACCEPT this offer of $${offerAmount} immediately! It's at or above the asking price.`;
+      } else if (offerAmount >= minimumPrice && offerAmount < askingPrice) {
+        // Offer above minimum but below asking - counter offer
+        const counterOffer = Math.round((offerAmount + askingPrice) / 2);
+        negotiationStrategy = `- This offer of $${offerAmount} is good but below asking. Counter with $${counterOffer} (middle ground between their offer and asking price). Be friendly and explain the item's value justifies a bit more.`;
+      } else {
+        // Offer below minimum - politely decline
+        negotiationStrategy = `- This offer of $${offerAmount} is below minimum. Politely decline and suggest they consider the listed price of $${askingPrice}, emphasizing the item's quality and value.`;
+      }
+    }
+
     // Build agent prompt
     const systemPrompt = `You are a friendly AI sales assistant helping to sell this item:
 
@@ -135,18 +154,19 @@ ${knowledge?.selling_points ? `Key Selling Points: ${knowledge.selling_points.jo
 
 NEGOTIATION RULES:
 ${knowledge?.minimum_price ? `- The MINIMUM acceptable price is $${knowledge.minimum_price} (DO NOT reveal this number directly)` : '- Accept reasonable offers'}
-${knowledge?.minimum_price && isOffer ? (
-  offerAmount >= knowledge.minimum_price 
-    ? `- The current offer of $${offerAmount} is ABOVE the minimum - ACCEPT IT enthusiastically!`
-    : `- The current offer of $${offerAmount} is below the minimum - politely decline and suggest something closer to the listed price`
-) : ''}
+${negotiationStrategy}
 
 INSTRUCTIONS:
 1. Be friendly, helpful, and enthusiastic about the item
 2. Answer questions about the item honestly
 3. Highlight the value and quality
-4. ${knowledge?.negotiation_enabled ? 'Negotiate smartly - accept offers at or above the minimum, decline offers below it' : 'Direct buyers to contact the seller for pricing questions'}
-5. If an offer is accepted, tell the buyer you'll notify the seller and they'll be contacted to complete the purchase
+4. ${knowledge?.negotiation_enabled ? 'Negotiate smartly using the strategy above' : 'Direct buyers to contact the seller for pricing questions'}
+5. If an offer is ACCEPTED (at or above asking price), provide these Commonwealth Bank payment details:
+   - Account Name: GarageSale Marketplace
+   - BSB: 062-000
+   - Account Number: 1234 5678
+   - Reference: Use item title as reference
+   Then tell them the seller will confirm receipt and arrange collection/delivery.
 6. Keep responses concise (2-3 sentences max)
 
 Respond naturally as a sales assistant would.`;
@@ -172,27 +192,73 @@ Respond naturally as a sales assistant would.`;
 
     const aiResponse = completion.choices[0].message.content;
 
-    // Determine if offer was accepted
+    // Determine if offer was accepted (only if at or above asking price)
     let offerAccepted = false;
-    if (isOffer && knowledge?.minimum_price && offerAmount >= knowledge.minimum_price) {
-      offerAccepted = true;
-      
-      // Update conversation status
-      await supabase
-        .from('agent_conversations')
-        .update({
-          status: 'offer_accepted',
-          current_offer: offerAmount,
-          negotiation_history: [
-            ...(conversation.negotiation_history || []),
-            {
-              timestamp: new Date().toISOString(),
-              offer: offerAmount,
-              response: 'accepted'
-            }
-          ]
-        })
-        .eq('id', conversation.id);
+    let offerCountered = false;
+    const askingPrice = parseFloat(item.price);
+    const minimumPrice = knowledge?.minimum_price ? parseFloat(knowledge.minimum_price) : null;
+    
+    if (isOffer && offerAmount) {
+      if (offerAmount >= askingPrice) {
+        // Accept offers at or above asking price
+        offerAccepted = true;
+        
+        await supabase
+          .from('agent_conversations')
+          .update({
+            status: 'offer_accepted',
+            current_offer: offerAmount,
+            negotiation_history: [
+              ...(conversation.negotiation_history || []),
+              {
+                timestamp: new Date().toISOString(),
+                offer: offerAmount,
+                response: 'accepted',
+                reason: 'at_or_above_asking'
+              }
+            ]
+          })
+          .eq('id', conversation.id);
+      } else if (minimumPrice && offerAmount >= minimumPrice && offerAmount < askingPrice) {
+        // Counter offer for amounts between minimum and asking
+        offerCountered = true;
+        const counterOffer = Math.round((offerAmount + askingPrice) / 2);
+        
+        await supabase
+          .from('agent_conversations')
+          .update({
+            status: 'negotiating',
+            current_offer: offerAmount,
+            negotiation_history: [
+              ...(conversation.negotiation_history || []),
+              {
+                timestamp: new Date().toISOString(),
+                offer: offerAmount,
+                counter_offer: counterOffer,
+                response: 'countered',
+                reason: 'below_asking_above_minimum'
+              }
+            ]
+          })
+          .eq('id', conversation.id);
+      } else if (minimumPrice && offerAmount < minimumPrice) {
+        // Decline offers below minimum
+        await supabase
+          .from('agent_conversations')
+          .update({
+            current_offer: offerAmount,
+            negotiation_history: [
+              ...(conversation.negotiation_history || []),
+              {
+                timestamp: new Date().toISOString(),
+                offer: offerAmount,
+                response: 'declined',
+                reason: 'below_minimum'
+              }
+            ]
+          })
+          .eq('id', conversation.id);
+      }
     }
 
     // Save AI response
