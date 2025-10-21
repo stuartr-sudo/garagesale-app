@@ -393,12 +393,6 @@ function LayoutContent({ currentUser, currentPageName, visibleNavItems, handleLo
           </div>
 
           <div className="flex-1 overflow-auto">
-            {currentUser && (!currentUser.country || !currentUser.postcode) && currentPageName !== 'Onboarding' && currentPageName !== 'BusinessOnboarding' && (
-                <div className="bg-yellow-900/50 border-b border-yellow-800 p-3 text-center text-sm text-yellow-300">
-                    Please complete your profile to get the best experience.
-                    <Link to={createPageUrl(currentUser.account_type === 'business' ? 'BusinessOnboarding' : 'Onboarding')} className="font-bold underline ml-2">Complete Setup</Link>
-                </div>
-            )}
             {children}
           </div>
         </main>
