@@ -137,7 +137,7 @@ export default function ItemCard({ item, seller, isSold = false }) {
           <Button
             onClick={handleAddToCart}
             disabled={isAddingToCart || isInCart}
-            className={`w-full mt-4 ${
+            className={`w-full mt-4 h-10 ${
               isInCart
                 ? 'bg-green-600 hover:bg-green-600'
                 : 'bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700'
@@ -156,7 +156,7 @@ export default function ItemCard({ item, seller, isSold = false }) {
             )}
           </Button>
         ) : (
-          <div className="w-full mt-4 py-2 px-4 bg-gray-800/50 rounded-lg border border-gray-700 text-center text-gray-400 text-sm font-medium">
+          <div className="w-full mt-4 h-10 px-4 bg-gray-800/50 rounded-lg border border-gray-700 text-center text-gray-400 text-sm font-medium flex items-center justify-center">
             This item has been sold
           </div>
         )}
