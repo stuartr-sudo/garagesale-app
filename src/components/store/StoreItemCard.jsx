@@ -7,7 +7,7 @@ export default function StoreItemCard({ item, onPurchase, isRedirecting }) {
   const primaryImage = item.image_urls?.[0] || "https://images.unsplash.com/photo-1571380242429-92323c910359?w=500&h=500&fit=crop";
 
   return (
-    <Card className="bg-gray-900 rounded-2xl shadow-lg shadow-pink-950/20 hover:shadow-pink-500/20 transition-all duration-300 border border-gray-800 overflow-hidden group hover:scale-[1.02] flex flex-col h-full">
+    <Card className="card-gradient card-glow rounded-2xl overflow-hidden group hover:scale-[1.02] flex flex-col h-full transition-all duration-300">
       <div className="relative aspect-square overflow-hidden">
         <img
           src={primaryImage}

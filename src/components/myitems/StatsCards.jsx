@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export default function StatsCards({ icon: Icon, title, value, description, bgColor }) {
   return (
-    <Card className={`text-white overflow-hidden rounded-2xl shadow-lg border border-gray-800 ${bgColor}`}>
+    <Card className={`text-white overflow-hidden rounded-2xl card-glow ${bgColor}`}>
       <CardContent className="p-4">
         <div className="flex items-center gap-4">
           <div className="bg-black/20 p-3 rounded-xl">

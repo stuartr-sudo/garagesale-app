@@ -19,7 +19,7 @@ export default function AdModal({ ad, onClose }) {
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto bg-gray-950 border-gray-800">
+      <DialogContent className="modal-glow card-gradient max-w-2xl max-h-[90vh] overflow-auto bg-gray-950 border-gray-800">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl text-white">
             <span className="bg-gradient-to-r from-fuchsia-400 to-pink-400 bg-clip-text text-transparent">

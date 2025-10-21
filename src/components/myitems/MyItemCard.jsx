@@ -41,7 +41,7 @@ export default function MyItemCard({ item, onDelete, onStatusChange }) {
   return (
     <Card 
       onClick={handleCardClick}
-      className="bg-gray-900 shadow-lg shadow-fuchsia-950/20 hover:shadow-pink-500/20 transition-all duration-300 border border-gray-800 rounded-2xl overflow-hidden group hover:scale-[1.02] flex flex-col h-full cursor-pointer"
+      className="card-gradient card-glow rounded-2xl overflow-hidden group hover:scale-[1.02] flex flex-col h-full cursor-pointer transition-all duration-300"
     >
       <div className="relative aspect-square overflow-hidden">
         <img

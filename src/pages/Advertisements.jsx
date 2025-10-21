@@ -540,7 +540,7 @@ export default function Advertisements() {
           });
         }
       }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto bg-gray-900/95 border-gray-700 shadow-xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-2xl text-white">
               <BarChart3 className="w-6 h-6 text-pink-500" />

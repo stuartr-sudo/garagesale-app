@@ -49,7 +49,7 @@ export default function ContactRequestModal({ request, requester, onClose }) {
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto bg-gray-900/95 border-gray-700 shadow-xl text-gray-200">
+      <DialogContent className="modal-glow card-gradient max-w-2xl max-h-[90vh] overflow-auto bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10 text-gray-200">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl text-white">
             <User className="w-6 h-6 text-pink-500" />

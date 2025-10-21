@@ -30,7 +30,7 @@ export default function RequestCard({ request, requester, onContact }) {
   const primaryImage = request.image_urls?.[0];
   
   return (
-    <Card className="group bg-gray-900 shadow-lg shadow-pink-950/20 hover:shadow-pink-500/20 transition-all duration-500 border border-gray-800 rounded-2xl overflow-hidden hover:scale-[1.02] flex flex-col h-full">
+    <Card className="group card-gradient card-glow rounded-2xl overflow-hidden hover:scale-[1.02] flex flex-col h-full transition-all duration-500">
       {primaryImage && (
         <div className="relative aspect-video overflow-hidden">
           <img

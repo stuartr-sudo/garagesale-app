@@ -76,7 +76,7 @@ export default function PurchaseModal({ item, seller, onClose, onSuccess }) {
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto modal-glow card-gradient">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl">
             <ShoppingCart className="w-6 h-6 text-emerald-600" />

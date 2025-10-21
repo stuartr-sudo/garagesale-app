@@ -109,7 +109,7 @@ export default function TradeModal({ targetItem, targetSeller, onClose }) {
   if (loading) {
     return (
       <Dialog open={true} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto bg-gray-900/95 border-gray-700 shadow-xl">
+        <DialogContent className="modal-glow card-gradient max-w-4xl max-h-[90vh] overflow-auto bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div>
           </div>
@@ -120,7 +120,7 @@ export default function TradeModal({ targetItem, targetSeller, onClose }) {
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto bg-gray-900/95 border-gray-700 shadow-xl">
+      <DialogContent className="modal-glow card-gradient max-w-4xl max-h-[90vh] overflow-auto bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl text-white">
             <RefreshCw className="w-6 h-6 text-purple-400" />
