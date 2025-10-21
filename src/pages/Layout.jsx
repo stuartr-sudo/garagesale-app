@@ -67,8 +67,8 @@ const navigationItems = [
     icon: Package,
   },
   {
-    title: "My Purchases",
-    url: createPageUrl("MyPurchases"),
+    title: "My Orders",
+    url: createPageUrl("MyOrders"),
     icon: ShoppingCart,
   },
   {
