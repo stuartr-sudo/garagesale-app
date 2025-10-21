@@ -2,8 +2,8 @@
 CREATE TABLE IF NOT EXISTS public.orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   item_id UUID NOT NULL REFERENCES public.items(id) ON DELETE CASCADE,
-  buyer_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
-  seller_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  buyer_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  seller_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   
   -- Pricing
   total_amount DECIMAL(10, 2) NOT NULL,
