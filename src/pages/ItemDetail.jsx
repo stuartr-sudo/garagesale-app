@@ -244,9 +244,9 @@ export default function ItemDetail() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Images & Details */}
           <div className="lg:col-span-2 space-y-4">
-            {/* Main Image - Optimized for mobile */}
+            {/* Main Image - Compact height for above-the-fold */}
             <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10 overflow-hidden">
-              <div className="aspect-[4/3] md:aspect-[16/10] relative">
+              <div className="relative h-64 md:h-80 lg:h-96">
                 <img
                   src={primaryImage}
                   alt={item.title}
@@ -290,19 +290,19 @@ export default function ItemDetail() {
 
             {/* Compact Item Details - Above the fold on mobile */}
             <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
-              <CardContent className="p-4 space-y-4">
+              <CardContent className="p-3 md:p-4 space-y-3">
                 {/* Title and Price - Most Important Info */}
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">{item.title}</h1>
-                    <div className="flex items-center gap-3 text-gray-400 text-sm">
+                    <h1 className="text-xl md:text-2xl font-bold text-white mb-1">{item.title}</h1>
+                    <div className="flex items-center gap-2 text-gray-400 text-xs">
                       <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
+                        <Calendar className="w-3 h-3" />
                         {formatDistanceToNow(new Date(item.created_date), { addSuffix: true })}
                       </div>
                       {item.location && (
                         <div className="flex items-center gap-1">
-                          <MapPin className="w-4 h-4" />
+                          <MapPin className="w-3 h-3" />
                           {item.location}
                         </div>
                       )}
@@ -312,22 +312,22 @@ export default function ItemDetail() {
                     variant="ghost"
                     size="icon"
                     onClick={handleShare}
-                    className="text-gray-400 hover:text-white"
+                    className="text-gray-400 hover:text-white h-8 w-8"
                   >
-                    <Share2 className="w-5 h-5" />
+                    <Share2 className="w-4 h-4" />
                   </Button>
                 </div>
 
                 {/* Price and Condition - Prominent Display */}
                 <div className="flex items-center justify-between">
-                  <div className="text-3xl md:text-4xl font-bold text-cyan-400">
+                  <div className="text-2xl md:text-3xl font-bold text-cyan-400">
                     {item.price === 0 ? 'Free' : `$${item.price}`}
                   </div>
                   <div className="flex gap-2">
-                    <Badge variant="secondary" className="capitalize bg-blue-900/50 text-blue-300 border-blue-700">
+                    <Badge variant="secondary" className="capitalize bg-blue-900/50 text-blue-300 border-blue-700 text-xs">
                       {item.condition?.replace('_', ' ')}
                     </Badge>
-                    <Badge variant="outline" className="capitalize bg-purple-900/50 text-purple-300 border-purple-700">
+                    <Badge variant="outline" className="capitalize bg-purple-900/50 text-purple-300 border-purple-700 text-xs">
                       <Tag className="w-3 h-3 mr-1" />
                       {item.category?.replace('_', ' ')}
                     </Badge>
@@ -335,25 +335,10 @@ export default function ItemDetail() {
                 </div>
 
                 {/* Description - Compact */}
-                <p className="text-gray-300 leading-relaxed text-sm md:text-base line-clamp-3">
+                <p className="text-gray-300 leading-relaxed text-sm line-clamp-2">
                   {item.description}
                 </p>
 
-                {/* Tags - Compact */}
-                {item.tags && item.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {item.tags.slice(0, 3).map((tag, idx) => (
-                      <Badge key={idx} variant="outline" className="text-xs text-gray-400">
-                        {tag}
-                      </Badge>
-                    ))}
-                    {item.tags.length > 3 && (
-                      <Badge variant="outline" className="text-xs text-gray-400">
-                        +{item.tags.length - 3} more
-                      </Badge>
-                    )}
-                  </div>
-                )}
               </CardContent>
             </Card>
 
@@ -437,11 +422,11 @@ export default function ItemDetail() {
           )}
 
           {/* Action Buttons - Below AI Agent */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <Button
               onClick={handleAddToCart}
               disabled={isAddingToCart || isInCart}
-              className={`w-full h-12 md:h-14 text-white font-bold text-base md:text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] ${
+              className={`w-full h-10 md:h-12 text-white font-semibold text-sm md:text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] ${
                 isInCart
                   ? 'bg-green-600 hover:bg-green-600'
                   : 'bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700'
@@ -449,12 +434,12 @@ export default function ItemDetail() {
             >
               {isInCart ? (
                 <>
-                  <Check className="w-5 h-5 mr-2" />
-                  Added to Cart
+                  <Check className="w-4 h-4 mr-1" />
+                  Added
                 </>
               ) : (
                 <>
-                  <Plus className="w-5 h-5 mr-2" />
+                  <Plus className="w-4 h-4 mr-1" />
                   Add to Cart
                 </>
               )}
@@ -462,13 +447,13 @@ export default function ItemDetail() {
 
             <Button
               onClick={() => setShowPurchaseModal(true)}
-              className="w-full h-12 md:h-14 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold text-base md:text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+              className="w-full h-10 md:h-12 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold text-sm md:text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
               style={{
                 animation: 'subtle-pulse 3s ease-in-out infinite'
               }}
             >
-              <ShoppingCart className="w-5 h-5 mr-2" />
-              {item.price === 0 ? 'Claim This Item' : 'Buy Now'}
+              <ShoppingCart className="w-4 h-4 mr-1" />
+              {item.price === 0 ? 'Claim' : 'Buy Now'}
             </Button>
           </div>
           <style jsx>{`
@@ -482,18 +467,17 @@ export default function ItemDetail() {
             }
           `}</style>
 
-          {/* Seller Info - Below Buy Now */}
+          {/* Seller Info - Compact */}
           {seller && (
             <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
-              <CardContent className="p-4">
-                <h3 className="font-semibold text-white mb-3 text-sm">Seller Information</h3>
+              <CardContent className="p-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-white font-medium">{seller.full_name}</div>
+                    <div className="text-white font-medium text-sm">{seller.full_name}</div>
                     {seller.rating_count > 0 && (
-                      <div className="flex items-center gap-1 text-yellow-400 text-xs mt-1">
+                      <div className="flex items-center gap-1 text-yellow-400 text-xs mt-0.5">
                         <Star className="w-3 h-3 fill-yellow-400" />
-                        <span>{seller.average_rating?.toFixed(1)} ({seller.rating_count} reviews)</span>
+                        <span>{seller.average_rating?.toFixed(1)} ({seller.rating_count})</span>
                       </div>
                     )}
                   </div>
