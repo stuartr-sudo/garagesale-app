@@ -165,9 +165,9 @@ export default function Layout({ children, currentPageName }) {
         }
 
         if (session?.user) {
-          // Get user profile from our users table
+          // Get user profile from profiles table
           const { data: profile, error: profileError } = await supabase
-            .from('users')
+            .from('profiles')
             .select('*')
             .eq('id', session.user.id)
             .single();
@@ -179,7 +179,8 @@ export default function Layout({ children, currentPageName }) {
               id: session.user.id,
               email: session.user.email,
               full_name: session.user.user_metadata?.full_name || session.user.email,
-              account_type: 'individual'
+              account_type: 'individual',
+              role: 'user'
             });
           } else {
             setCurrentUser(profile);
