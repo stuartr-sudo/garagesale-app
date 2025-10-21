@@ -366,11 +366,24 @@ export default function ItemDetail() {
           {/* Action Button - Below AI Agent */}
           <Button
             onClick={() => setShowPurchaseModal(true)}
-            className="w-full h-12 md:h-14 bg-gradient-to-r from-blue-500 via-cyan-500 to-orange-500 hover:from-blue-600 hover:via-cyan-600 hover:to-orange-600 text-white font-bold text-base md:text-lg rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.5)] hover:shadow-[0_0_30px_rgba(59,130,246,0.8)] transition-all duration-300 animate-pulse hover:animate-none"
+            className="w-full h-12 md:h-14 bg-gradient-to-r from-blue-500 to-yellow-500 hover:from-blue-600 hover:to-yellow-600 text-white font-bold text-base md:text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+            style={{
+              animation: 'subtle-pulse 3s ease-in-out infinite'
+            }}
           >
             <ShoppingCart className="w-5 h-5 mr-2" />
             {item.price === 0 ? 'Claim This Item' : 'Buy Now'}
           </Button>
+          <style jsx>{`
+            @keyframes subtle-pulse {
+              0%, 100% {
+                opacity: 1;
+              }
+              50% {
+                opacity: 0.85;
+              }
+            }
+          `}</style>
 
           {/* Seller Info - Below Buy Now */}
           {seller && (
