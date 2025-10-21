@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { InvokeLLM } from "@/api/integrations";
+import { GenerateItemDescription, ExtractDataFromUploadedFile } from "@/api/integrations";
 import { Sparkles, MessageSquare, Loader2 } from "lucide-react";
 
 export default function AIAssistant({ images, onAssist }) {
@@ -17,38 +17,37 @@ export default function AIAssistant({ images, onAssist }) {
 
     setIsProcessing(true);
     try {
-      const analysisPrompt = images.length > 0 
-        ? `Analyze these images and any additional description provided to suggest a title, description, price range, category, condition, and relevant tags for a marketplace listing. Additional info: ${prompt || "No additional description provided"}`
-        : `Based on this description, suggest a title, description, price range, category, condition, and relevant tags for a marketplace listing: ${prompt}`;
+      let analysisData = {};
 
-      const schema = {
-        type: "object",
-        properties: {
-          title: { type: "string" },
-          description: { type: "string" },
-          suggested_price: { type: "number" },
-          price_range: { type: "string" },
-          category: { 
-            type: "string",
-            enum: ["electronics", "clothing", "furniture", "books", "toys", "sports", "home_garden", "automotive", "collectibles", "other"]
-          },
-          condition: {
-            type: "string", 
-            enum: ["new", "like_new", "good", "fair", "poor"]
-          },
-          tags: { 
-            type: "array", 
-            items: { type: "string" }
-          },
-          reasoning: { type: "string" }
-        }
+      // If images are provided, analyze the first one
+      if (images.length > 0) {
+        const imageAnalysis = await ExtractDataFromUploadedFile({ file_url: images[0] });
+        analysisData = {
+          title: imageAnalysis.title,
+          category: imageAnalysis.category,
+          condition: imageAnalysis.condition,
+          currentDescription: imageAnalysis.description
+        };
+      }
+
+      // If user provided additional description, use it
+      if (prompt.trim()) {
+        analysisData.currentDescription = prompt;
+      }
+
+      // Generate enhanced description with OpenAI
+      const enhanced = await GenerateItemDescription(analysisData);
+
+      const result = {
+        title: enhanced.title || analysisData.title || "Item",
+        description: enhanced.description,
+        category: analysisData.category || "other",
+        condition: analysisData.condition || "good",
+        tags: enhanced.tags || [],
+        suggested_price: 0,
+        price_range: "To be determined based on condition and market",
+        reasoning: "AI-generated listing based on image analysis and description"
       };
-
-      const result = await InvokeLLM({
-        prompt: analysisPrompt,
-        file_urls: images.length > 0 ? images : undefined,
-        response_json_schema: schema
-      });
 
       setLastResult(result);
       
@@ -71,14 +70,14 @@ export default function AIAssistant({ images, onAssist }) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-100">
+      <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded-xl p-4 border border-purple-800">
         <div className="flex items-start gap-3">
-          <div className="p-2 bg-purple-100 rounded-lg">
-            <Sparkles className="w-5 h-5 text-purple-600" />
+          <div className="p-2 bg-purple-600 rounded-lg">
+            <Sparkles className="w-5 h-5 text-white" />
           </div>
           <div className="flex-1">
-            <h4 className="font-semibold text-purple-900">AI-Powered Listing Assistant</h4>
-            <p className="text-sm text-purple-700 mt-1">
+            <h4 className="font-semibold text-white">AI-Powered Listing Assistant</h4>
+            <p className="text-sm text-gray-300 mt-1">
               Upload photos or describe your item, and I'll help generate a compelling listing with title, description, pricing suggestions, and tags.
             </p>
           </div>
@@ -114,12 +113,12 @@ export default function AIAssistant({ images, onAssist }) {
       </div>
 
       {lastResult && (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-          <h4 className="font-semibold text-green-900 mb-2 flex items-center gap-2">
+        <div className="bg-green-900/20 border border-green-800 rounded-xl p-4">
+          <h4 className="font-semibold text-green-300 mb-2 flex items-center gap-2">
             <MessageSquare className="w-4 h-4" />
             AI Analysis Complete
           </h4>
-          <div className="text-sm space-y-2 text-green-800">
+          <div className="text-sm space-y-2 text-gray-300">
             <p><strong>Suggested Price:</strong> ${lastResult.suggested_price} ({lastResult.price_range})</p>
             <p><strong>Category:</strong> {lastResult.category?.replace('_', ' ')}</p>
             <p><strong>Condition:</strong> {lastResult.condition?.replace('_', ' ')}</p>

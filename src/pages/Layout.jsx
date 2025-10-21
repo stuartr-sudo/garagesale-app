@@ -156,9 +156,13 @@ export default function Layout({ children, currentPageName }) {
   }, [location.pathname, currentPageName, navigate]);
 
   const handleLogout = async () => {
-    await User.logout();
-    setCurrentUser(null);
-    navigate(createPageUrl("Home"));
+    try {
+      await User.signOut();
+      setCurrentUser(null);
+      navigate(createPageUrl("Home"));
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   if (loading) {

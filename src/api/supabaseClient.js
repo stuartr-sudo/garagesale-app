@@ -1,0 +1,178 @@
+import { supabase } from '../lib/supabase';
+
+// Base entity class for common CRUD operations
+export class BaseEntity {
+  constructor(tableName) {
+    this.tableName = tableName;
+  }
+
+  async create(data) {
+    const { data: result, error } = await supabase
+      .from(this.tableName)
+      .insert(data)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return result;
+  }
+
+  async get(id) {
+    const { data, error } = await supabase
+      .from(this.tableName)
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  async filter(filters = {}, orderBy = null) {
+    let query = supabase.from(this.tableName).select('*');
+    
+    // Apply filters
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        query = query.eq(key, value);
+      }
+    });
+    
+    // Apply ordering
+    if (orderBy) {
+      const descending = orderBy.startsWith('-');
+      const column = descending ? orderBy.slice(1) : orderBy;
+      query = query.order(column, { ascending: !descending });
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) throw error;
+    return data || [];
+  }
+
+  async update(id, data) {
+    const { data: result, error } = await supabase
+      .from(this.tableName)
+      .update(data)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return result;
+  }
+
+  async delete(id) {
+    const { error } = await supabase
+      .from(this.tableName)
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+    return true;
+  }
+
+  async list(limit = 100, offset = 0) {
+    const { data, error } = await supabase
+      .from(this.tableName)
+      .select('*')
+      .range(offset, offset + limit - 1);
+    
+    if (error) throw error;
+    return data || [];
+  }
+}
+
+// User/Auth class
+export class UserEntity {
+  async me() {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error) throw error;
+    if (!user) throw new Error('Not authenticated');
+    
+    // Get full profile
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+    
+    if (profileError) throw profileError;
+    return profile;
+  }
+
+  async get(userId) {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  async signUp(email, password, metadata = {}) {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: metadata
+      }
+    });
+    
+    if (error) throw error;
+    return data;
+  }
+
+  async signIn(email, password) {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+    
+    if (error) throw error;
+    return data;
+  }
+
+  async signOut() {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+  }
+
+  async loginWithRedirect(redirectUrl) {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: redirectUrl
+      }
+    });
+    
+    if (error) throw error;
+    return data;
+  }
+
+  async updateProfile(updates) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', user.id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  async isAuthenticated() {
+    const { data: { session } } = await supabase.auth.getSession();
+    return !!session;
+  }
+}
+
+export default supabase;
+
