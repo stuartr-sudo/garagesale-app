@@ -284,46 +284,46 @@ export default function ItemDetail() {
               </CardContent>
             </Card>
 
-            {/* Seller Info - Compact */}
-            {seller && (
-              <Card className="bg-gray-900 border-gray-800">
-                <CardContent className="p-4">
-                  <h3 className="font-semibold text-white mb-3 text-sm">Seller Information</h3>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-white font-medium">{seller.full_name}</div>
-                      {seller.rating_count > 0 && (
-                        <div className="flex items-center gap-1 text-yellow-400 text-xs mt-1">
-                          <Star className="w-3 h-3 fill-yellow-400" />
-                          <span>{seller.average_rating?.toFixed(1)} ({seller.rating_count} reviews)</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Action Button - Prominent */}
-            <Button
-              onClick={() => setShowPurchaseModal(true)}
-              className="w-full h-12 md:h-14 bg-gradient-to-r from-pink-600 to-fuchsia-600 hover:from-pink-700 hover:to-fuchsia-700 text-white font-bold text-base md:text-lg rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300"
-            >
-              <ShoppingCart className="w-5 h-5 mr-2" />
-              {item.price === 0 ? 'Claim This Item' : 'Buy Now'}
-            </Button>
           </div>
 
-        {/* Right Column - AI Agent Chat */}
-        <div className="lg:col-span-1">
+        {/* Right Column - Buy Now, Seller Info, and AI Agent Chat */}
+        <div className="lg:col-span-1 space-y-4">
+          {/* Action Button - Prominent */}
+          <Button
+            onClick={() => setShowPurchaseModal(true)}
+            className="w-full h-12 md:h-14 bg-gradient-to-r from-pink-600 to-fuchsia-600 hover:from-pink-700 hover:to-fuchsia-700 text-white font-bold text-base md:text-lg rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300"
+          >
+            <ShoppingCart className="w-5 h-5 mr-2" />
+            {item.price === 0 ? 'Claim This Item' : 'Buy Now'}
+          </Button>
+
+          {/* Seller Info - Compact */}
+          {seller && (
+            <Card className="bg-gray-900 border-gray-800">
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-white mb-3 text-sm">Seller Information</h3>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-white font-medium">{seller.full_name}</div>
+                    {seller.rating_count > 0 && (
+                      <div className="flex items-center gap-1 text-yellow-400 text-xs mt-1">
+                        <Star className="w-3 h-3 fill-yellow-400" />
+                        <span>{seller.average_rating?.toFixed(1)} ({seller.rating_count} reviews)</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* AI Agent Chat - Below Buy Now and Seller Info */}
           {hasAgentEnabled ? (
-            <div className="sticky top-4">
-              <AgentChat
-                itemId={item.id}
-                itemTitle={item.title}
-                itemPrice={item.price}
-              />
-            </div>
+            <AgentChat
+              itemId={item.id}
+              itemTitle={item.title}
+              itemPrice={item.price}
+            />
           ) : isOwner ? (
             <Card className="bg-gray-900/50 border-gray-800">
               <CardHeader>
@@ -393,7 +393,7 @@ export default function ItemDetail() {
           )}
         </div>
       </div>
-
+      
       {/* Purchase Modal */}
       {showPurchaseModal && (
         <PurchaseModal
@@ -402,7 +402,7 @@ export default function ItemDetail() {
           onClose={() => setShowPurchaseModal(false)}
         />
       )}
-      </div>
+    </div>
     </div>
   );
 }

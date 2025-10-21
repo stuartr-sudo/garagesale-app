@@ -209,16 +209,22 @@ export default function Layout({ children, currentPageName }) {
         <FloatingCameraButton />
 
         <Sidebar className="border-r-0 bg-black/80 backdrop-blur-lg shadow-2xl border-r border-gray-800 z-10" collapsible="icon">
-          <SidebarHeader className="border-b border-gray-800 p-4 shrink-0">
-            <Link to={createPageUrl("Marketplace")} className="flex items-center gap-2 min-w-0">
-              <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-fuchsia-600 rounded-xl flex items-center justify-center shadow-lg shrink-0">
-                <Store className="w-5 h-5 text-white" />
-              </div>
-              <div className="min-w-0 overflow-hidden">
-                <h2 className="font-bold text-lg text-white truncate">GarageSale</h2>
-                <p className="text-xs text-gray-400 truncate">Local Marketplace</p>
-              </div>
-            </Link>
+          <SidebarHeader className="border-b border-gray-800 shrink-0">
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton size="lg" asChild>
+                  <Link to={createPageUrl("Marketplace")} className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-fuchsia-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <Store className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-bold text-base text-white">GarageSale</span>
+                      <span className="text-xs text-gray-400">Local Marketplace</span>
+                    </div>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
           </SidebarHeader>
 
           <SidebarContent className="p-3 flex flex-col justify-between h-[calc(100%-85px)]">
