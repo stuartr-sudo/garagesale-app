@@ -21,7 +21,7 @@ import { createPageUrl } from '@/utils';
 export default function SmartRecommendations({ 
   currentItemId, 
   currentItem,
-  algorithm = 'similar', // 'similar', 'trending', 'history', 'price', 'seller'
+  algorithm = 'similar', // 'similar', 'trending', 'history', 'price', 'seller', 'sold'
   limit = 6,
   title,
   showViewAll = false
@@ -54,6 +54,9 @@ export default function SmartRecommendations({
           break;
         case 'seller':
           items = await getSellerItems();
+          break;
+        case 'sold':
+          items = await getRecentlySoldItems();
           break;
         default:
           items = await getSimilarItems();
@@ -162,12 +165,46 @@ export default function SmartRecommendations({
     return data || [];
   };
 
+  const getRecentlySoldItems = async () => {
+    // Get recently sold items from completed orders
+    const { data: orders, error } = await supabase
+      .from('orders')
+      .select(`
+        id,
+        created_at,
+        item:items (
+          id,
+          title,
+          image_urls,
+          category,
+          price,
+          description,
+          condition,
+          location
+        )
+      `)
+      .in('status', ['completed', 'payment_confirmed', 'shipped', 'collection_arranged'])
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error('Error fetching sold items:', error);
+      return [];
+    }
+
+    // Extract and return just the items (not the full order objects)
+    return (orders || [])
+      .map(order => order.item)
+      .filter(item => item && item.id); // Filter out null items
+  };
+
   const getAlgorithmIcon = () => {
     switch (algorithm) {
       case 'trending': return TrendingUp;
       case 'history': return Eye;
       case 'price': return ShoppingCart;
       case 'seller': return Heart;
+      case 'sold': return ShoppingCart;
       default: return Sparkles;
     }
   };
@@ -180,6 +217,7 @@ export default function SmartRecommendations({
       case 'history': return 'You Might Also Like';
       case 'price': return 'Similar Price Range';
       case 'seller': return 'More from this Seller';
+      case 'sold': return 'Recently Sold';
       default: return 'Similar Items';
     }
   };
@@ -190,6 +228,7 @@ export default function SmartRecommendations({
       case 'history': return 'Based on what you\'ve been viewing';
       case 'price': return 'Items in your price range';
       case 'seller': return 'Other items from this seller';
+      case 'sold': return 'Real purchases from our community';
       default: return 'Items you might be interested in';
     }
   };
@@ -200,8 +239,8 @@ export default function SmartRecommendations({
         <div className="flex items-center gap-2 mb-4">
           <div className="h-6 w-48 bg-gray-800 rounded animate-pulse"></div>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {Array(6).fill(0).map((_, i) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {Array(4).fill(0).map((_, i) => (
             <div key={i} className="bg-gray-900 rounded-xl overflow-hidden animate-pulse">
               <div className="aspect-square bg-gray-800"></div>
               <div className="p-3 space-y-2">
@@ -249,7 +288,7 @@ export default function SmartRecommendations({
       </div>
 
       {/* Recommendations Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {recommendations.map(item => {
           const primaryImage = item.image_urls?.[0] || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop";
           
@@ -269,7 +308,12 @@ export default function SmartRecommendations({
                     e.target.src = "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop";
                   }}
                 />
-                {item.price === 0 && (
+                {algorithm === 'sold' && (
+                  <Badge className="absolute top-2 right-2 bg-green-500 text-white font-bold">
+                    Sold
+                  </Badge>
+                )}
+                {item.price === 0 && algorithm !== 'sold' && (
                   <Badge className="absolute top-2 right-2 bg-lime-500 text-black font-bold">
                     Free
                   </Badge>

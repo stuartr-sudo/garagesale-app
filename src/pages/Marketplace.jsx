@@ -385,12 +385,18 @@ export default function Marketplace() {
             />
           </div>
 
-          {/* Main Content Area with Sidebar */}
-          <div className="flex flex-col lg:flex-row gap-6">
-            {/* Items Grid - Takes most space */}
-            <div className="flex-1">
-              {filteredItems.length > 0 ?
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {/* Recently Sold Section - Above Main Grid */}
+          <SmartRecommendations 
+            algorithm="sold"
+            title="🔥 Recently Sold"
+            limit={4}
+            showViewAll={false}
+          />
+
+          {/* Main Items Grid - 4 columns */}
+          <div>
+            {filteredItems.length > 0 ?
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredItems.map((item, index) =>
             <React.Fragment key={item.id}>
                   <div data-tour={index === 0 ? "item-card" : undefined}>
@@ -440,13 +446,6 @@ export default function Marketplace() {
               </Button>
             </div>
           }
-            </div>
-
-            {/* Sidebar - Recently Sold */}
-            <div className="w-full lg:w-80 flex-shrink-0">
-              <div className="sticky top-6">
-                <RecentlySold limit={10} showLocation={true} />
-              </div>
             </div>
           </div>
         </div>
