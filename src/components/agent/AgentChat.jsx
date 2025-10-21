@@ -48,6 +48,7 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
     }]);
 
     try {
+      // Fetch the response
       const response = await fetch('/api/agent-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -61,6 +62,10 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
       const data = await response.json();
 
       if (data.success) {
+        // Add a thoughtful delay (2-3 seconds) before showing the response
+        const delayMs = 2000 + Math.random() * 1000; // Random 2-3 seconds
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+
         // Set conversation ID for future messages
         if (data.conversation_id) {
           setConversationId(data.conversation_id);
