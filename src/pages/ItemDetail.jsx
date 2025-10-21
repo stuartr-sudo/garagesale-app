@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, ShoppingCart, MapPin, Tag, Calendar, Star, Share2, Bot, Settings, Check, Plus } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, MapPin, Tag, Calendar, Star, Share2, Bot, Settings, Check, Plus, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Item } from '@/api/entities';
 import { User as UserEntity } from '@/api/entities';
 import { supabase } from '@/lib/supabase';
@@ -33,6 +33,7 @@ export default function ItemDetail() {
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isInCart, setIsInCart] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [isImageFullscreen, setIsImageFullscreen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -226,9 +227,9 @@ export default function ItemDetail() {
   const primaryImage = validImages[selectedImage] || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 to-gray-900 p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 to-gray-900 pt-2 px-4 pb-4 md:px-8 md:pb-8 md:pt-2">
       {/* Back Button */}
-      <div className="max-w-7xl mx-auto mb-6">
+      <div className="max-w-7xl mx-auto mb-2">
         <Button
           variant="ghost"
           onClick={() => navigate(createPageUrl('Marketplace'))}
@@ -246,15 +247,24 @@ export default function ItemDetail() {
           <div className="lg:col-span-2 space-y-4">
             {/* Image Carousel Card */}
             <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10 overflow-hidden">
-              <div className="relative h-56 md:h-64 lg:h-72">
+              <div 
+                className="relative h-56 md:h-64 lg:h-72 cursor-pointer group"
+                onClick={() => setIsImageFullscreen(true)}
+              >
                 <img
                   src={primaryImage}
                   alt={item.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
                   onError={(e) => {
                     e.target.src = "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800";
                   }}
                 />
+                {/* Tap to Expand Indicator */}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
+                  <div className="bg-black/50 text-white px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity text-sm">
+                    Tap to expand
+                  </div>
+                </div>
                 {item.price === 0 && (
                   <Badge className="absolute top-4 right-4 bg-lime-500 text-black font-bold text-lg px-4 py-2">
                     Free
@@ -566,6 +576,70 @@ export default function ItemDetail() {
           seller={seller}
           onClose={() => setShowPurchaseModal(false)}
         />
+      )}
+
+      {/* Fullscreen Image Modal */}
+      {isImageFullscreen && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
+          onClick={() => setIsImageFullscreen(false)}
+        >
+          {/* Close Button */}
+          <button
+            onClick={() => setIsImageFullscreen(false)}
+            className="absolute top-4 right-4 z-10 bg-gray-900/80 hover:bg-gray-800 text-white rounded-full p-3 transition-all"
+          >
+            <X className="w-6 h-6" />
+          </button>
+
+          {/* Previous Image Button */}
+          {validImages.length > 1 && selectedImage > 0 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedImage(selectedImage - 1);
+              }}
+              className="absolute left-4 z-10 bg-gray-900/80 hover:bg-gray-800 text-white rounded-full p-3 transition-all"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+          )}
+
+          {/* Next Image Button */}
+          {validImages.length > 1 && selectedImage < validImages.length - 1 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedImage(selectedImage + 1);
+              }}
+              className="absolute right-4 z-10 bg-gray-900/80 hover:bg-gray-800 text-white rounded-full p-3 transition-all"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          )}
+
+          {/* Fullscreen Image */}
+          <div 
+            className="relative max-w-7xl max-h-full w-full h-full flex items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={primaryImage}
+              alt={item.title}
+              className="max-w-full max-h-full object-contain rounded-lg"
+              onError={(e) => {
+                e.target.src = "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800";
+              }}
+            />
+          </div>
+
+          {/* Image Counter */}
+          {validImages.length > 1 && (
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-900/80 text-white px-4 py-2 rounded-full text-sm">
+              {selectedImage + 1} / {validImages.length}
+            </div>
+          )}
+        </div>
       )}
     </div>
     </div>
