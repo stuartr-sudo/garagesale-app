@@ -405,8 +405,7 @@ export default function Marketplace() {
                   <div data-tour={index === 0 ? "item-card" : undefined}>
                     <ItemCard
                       item={item}
-                      seller={sellers[item.seller_id]}
-                      onPurchase={() => handlePurchase(item)} />
+                      seller={sellers[item.seller_id]} />
                   </div>
 
                   

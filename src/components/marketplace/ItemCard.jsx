@@ -1,25 +1,13 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ShoppingCart, Tag, Star } from "lucide-react";
+import { Tag, Star } from "lucide-react";
 import { formatDistanceToNow } from 'date-fns';
-import TradeButton from '../trading/TradeButton';
-import ExplosionEffect from '../ui/ExplosionEffect';
-import { createPageUrl } from '@/utils';
 
-export default function ItemCard({ item, seller, onPurchase }) {
+export default function ItemCard({ item, seller }) {
   const primaryImage = item.image_urls?.[0] || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop";
-  const [isBuyExploding, setIsBuyExploding] = useState(false);
-
-  const handlePurchaseClick = () => {
-    if (isBuyExploding) return;
-    setIsBuyExploding(true);
-    setTimeout(onPurchase, 400); // Delay action to let fireworks show
-    setTimeout(() => setIsBuyExploding(false), 2000); // Longer reset for fireworks
-  };
 
   return (
     <Card className="bg-gray-900 rounded-2xl shadow-lg shadow-fuchsia-950/20 hover:shadow-fuchsia-500/20 transition-all duration-300 border border-gray-800 overflow-hidden group hover:scale-[1.02] flex flex-col h-full">
@@ -76,33 +64,6 @@ export default function ItemCard({ item, seller, onPurchase }) {
               <Tag className="w-3 h-3" />
               <span className="truncate">{item.category?.replace('_', ' ') || 'General'}</span>
             </div>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        {/* EDIT: prevent button row overflow on narrow cards */}
-        <div className="flex gap-2 mt-4 min-w-0">
-          {/* Buy button wrapper: allow explode overlay and prevent clipping */}
-          <div className="relative flex-1 overflow-visible min-w-0">
-            <Button
-              onClick={handlePurchaseClick}
-              className="w-full h-11 bg-pink-600 hover:bg-pink-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-pink-500/20 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-1.5 text-xs px-3"
-            >
-              <ShoppingCart className="w-3.5 h-3.5 flex-shrink-0" />
-              <span className="truncate">{item.price === 0 ? "Claim" : "Buy"}</span>
-            </Button>
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <ExplosionEffect isExploding={isBuyExploding} particleCount={80} intensity="epic" />
-            </div>
-          </div>
-          
-          {/* Make Offer (Trade) button wrapper: ensure it doesn't push outside card */}
-          <div data-tour="trade-button" className="flex-1 min-w-0">
-            <TradeButton 
-              targetItem={item} 
-              targetSeller={seller}
-              className="w-full h-11 rounded-xl font-semibold text-xs px-3"
-            />
           </div>
         </div>
       </CardContent>
