@@ -213,7 +213,7 @@ export default function QuickListing({ onClose, onSuccess }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl bg-gray-900 border-gray-800 max-h-[90vh] overflow-y-auto">
+      <Card className="w-full max-w-2xl bg-gray-900/95 border-gray-700 shadow-xl max-h-[90vh] overflow-y-auto">
         <CardHeader className="border-b border-gray-800">
           <div className="flex items-center justify-between">
             <CardTitle className="text-white flex items-center gap-2">

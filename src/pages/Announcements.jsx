@@ -90,7 +90,7 @@ export default function Announcements() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-200">
+    <div className="min-h-screen bg-slate-950 text-gray-200">
       <div className="p-6 md:p-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}

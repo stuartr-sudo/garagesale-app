@@ -116,7 +116,7 @@ export default function MyItems() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-200">
+    <div className="min-h-screen bg-slate-950 text-gray-200">
       <div className="p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}

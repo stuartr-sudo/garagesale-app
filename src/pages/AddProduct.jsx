@@ -45,9 +45,9 @@ export default function AddProductPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-8">
+    <div className="min-h-screen bg-slate-950 text-white p-8">
       <div className="max-w-xl mx-auto">
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-gray-900/95 border-gray-700 shadow-xl">
           <CardHeader>
             <CardTitle>Create a New Product</CardTitle>
           </CardHeader>

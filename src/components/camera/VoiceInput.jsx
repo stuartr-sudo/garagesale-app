@@ -139,7 +139,7 @@ export default function VoiceInput({ onTranscript, onClose }) {
 
   if (!isSupported) {
     return (
-      <Card className="bg-gray-900 border-gray-800">
+      <Card className="bg-gray-900/95 border-gray-700 shadow-xl">
         <CardContent className="p-6 text-center">
           <VolumeX className="w-12 h-12 text-gray-500 mx-auto mb-4" />
           <h3 className="text-white font-semibold mb-2">Voice Input Not Supported</h3>
@@ -155,7 +155,7 @@ export default function VoiceInput({ onTranscript, onClose }) {
   }
 
   return (
-    <Card className="bg-gray-900 border-gray-800">
+    <Card className="bg-gray-900/95 border-gray-700 shadow-xl">
       <CardContent className="p-6">
         <div className="text-center mb-6">
           <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">

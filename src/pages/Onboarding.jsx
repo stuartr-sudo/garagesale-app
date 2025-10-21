@@ -153,14 +153,14 @@ export default function Onboarding() {
 
   if (loading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-gray-950">
+      <div className="flex h-screen w-full items-center justify-center bg-slate-950">
         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-pink-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-200">
+    <div className="min-h-screen bg-slate-950 text-gray-200">
       {/* Header */}
       <div className="bg-gray-900/80 backdrop-blur-sm border-b border-gray-800 p-6">
         <div className="max-w-4xl mx-auto flex items-center justify-between">

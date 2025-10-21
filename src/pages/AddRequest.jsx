@@ -162,7 +162,7 @@ export default function AddRequest() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-200">
+    <div className="min-h-screen bg-slate-950 text-gray-200">
       <div className="p-6 md:p-8">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
@@ -183,7 +183,7 @@ export default function AddRequest() {
 
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Optional Images */}
-            <Card className="bg-gray-900 border-gray-800 shadow-xl rounded-2xl overflow-hidden">
+            <Card className="bg-gray-900/95 border-gray-700 shadow-xl shadow-xl rounded-2xl overflow-hidden">
               <CardHeader className="bg-gray-800/50 border-b border-gray-700">
                 <CardTitle className="flex items-center gap-2 text-white">
                   <Upload className="w-6 h-6 text-pink-500" />
@@ -203,7 +203,7 @@ export default function AddRequest() {
             </Card>
 
             {/* Request Details */}
-            <Card className="bg-gray-900 border-gray-800 shadow-xl rounded-2xl overflow-hidden">
+            <Card className="bg-gray-900/95 border-gray-700 shadow-xl shadow-xl rounded-2xl overflow-hidden">
               <CardHeader className="bg-gray-800/50 border-b border-gray-700">
                 <CardTitle className="flex items-center gap-2 text-white">
                   <Briefcase className="w-6 h-6 text-pink-500" />

@@ -172,7 +172,7 @@ export default function ItemDetail() {
           {/* Left Column - Images & Details */}
           <div className="lg:col-span-2 space-y-4">
             {/* Main Image - Optimized for mobile */}
-            <Card className="bg-gray-900 border-gray-800 overflow-hidden">
+            <Card className="bg-gray-900/95 border-gray-700 shadow-xl overflow-hidden">
               <div className="aspect-[4/3] md:aspect-[16/10] relative">
                 <img
                   src={primaryImage}
@@ -191,7 +191,7 @@ export default function ItemDetail() {
             
             {/* Thumbnail Gallery */}
             {validImages.length > 1 && (
-              <div className="p-4 bg-gray-950/50 border-t border-gray-800">
+              <div className="p-4 bg-slate-950/50 border-t border-gray-800">
                 <div className="flex gap-2 overflow-x-auto">
                   {validImages.map((img, idx) => (
                     <button
@@ -216,7 +216,7 @@ export default function ItemDetail() {
           </Card>
 
             {/* Compact Item Details - Above the fold on mobile */}
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="bg-gray-900/95 border-gray-700 shadow-xl">
               <CardContent className="p-4 space-y-4">
                 {/* Title and Price - Most Important Info */}
                 <div className="flex items-start justify-between">
@@ -387,7 +387,7 @@ export default function ItemDetail() {
 
           {/* Seller Info - Below Buy Now */}
           {seller && (
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="bg-gray-900/95 border-gray-700 shadow-xl">
               <CardContent className="p-4">
                 <h3 className="font-semibold text-white mb-3 text-sm">Seller Information</h3>
                 <div className="flex items-center justify-between">

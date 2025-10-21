@@ -185,7 +185,7 @@ export default function UsersPage() {
 
   if (selectedUser) {
     return (
-      <div className="min-h-screen bg-gray-950 text-gray-200">
+      <div className="min-h-screen bg-slate-950 text-gray-200">
         <div className="p-6 md:p-8">
           <div className="max-w-6xl mx-auto">
             <div className="flex items-center gap-4 mb-8">
@@ -321,7 +321,7 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-200">
+    <div className="min-h-screen bg-slate-950 text-gray-200">
       <div className="p-6 md:p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}

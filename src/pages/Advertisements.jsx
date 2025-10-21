@@ -224,7 +224,7 @@ export default function Advertisements() {
   // Business View
   if (currentUser?.account_type === 'business') {
     return (
-      <div className="min-h-screen bg-gray-950 text-gray-200">
+      <div className="min-h-screen bg-slate-950 text-gray-200">
         <div className="p-6 md:p-8">
           <div className="max-w-6xl mx-auto">
             <div className="mb-8">
@@ -289,7 +289,7 @@ export default function Advertisements() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-200">
+    <div className="min-h-screen bg-slate-950 text-gray-200">
       <div className="p-6 md:p-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
@@ -540,7 +540,7 @@ export default function Advertisements() {
           });
         }
       }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto bg-gray-900 border-gray-800">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto bg-gray-900/95 border-gray-700 shadow-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-2xl text-white">
               <BarChart3 className="w-6 h-6 text-pink-500" />

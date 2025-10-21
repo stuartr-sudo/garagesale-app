@@ -156,7 +156,7 @@ export default function CameraCapture({ onCapture, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl bg-gray-900 border-gray-800">
+      <Card className="w-full max-w-2xl bg-gray-900/95 border-gray-700 shadow-xl">
         <CardHeader className="border-b border-gray-800">
           <div className="flex items-center justify-between">
             <CardTitle className="text-white flex items-center gap-2">

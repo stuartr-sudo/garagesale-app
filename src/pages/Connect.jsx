@@ -123,7 +123,7 @@ export default function Connect() {
   
   if (loading) {
     return (
-      <div className="flex h-[calc(100vh-100px)] w-full items-center justify-center bg-gray-950">
+      <div className="flex h-[calc(100vh-100px)] w-full items-center justify-center bg-slate-950">
         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-pink-500"></div>
       </div>
     );
@@ -132,7 +132,7 @@ export default function Connect() {
   const hasCompleteBankDetails = user?.bank_account_name && user?.bank_bsb && user?.bank_account_number;
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-200">
+    <div className="min-h-screen bg-slate-950 text-gray-200">
       <div className="p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
           <div className="mb-8 text-center">

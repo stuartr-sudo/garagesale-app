@@ -197,7 +197,7 @@ export default function Layout({ children, currentPageName }) {
 
   if (loading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-gray-950">
+      <div className="flex h-screen w-full items-center justify-center bg-slate-950">
         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-pink-500"></div>
       </div>
     );
@@ -227,7 +227,7 @@ function LayoutContent({ currentUser, currentPageName, visibleNavItems, handleLo
   const { open } = useSidebar();
 
   return (
-    <div className="relative min-h-screen flex w-full bg-gray-950 text-gray-200 overflow-hidden">
+    <div className="relative min-h-screen flex w-full bg-slate-950 text-gray-200 overflow-hidden">
       <NerdBackground count={75} />
       <FloatingCameraButton />
 

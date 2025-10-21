@@ -58,7 +58,7 @@ export default function TradeResponseModal({ offer, onClose, onUpdate }) {
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-gray-900 border-gray-800">
+      <DialogContent className="max-w-2xl bg-gray-900/95 border-gray-700 shadow-xl">
         <DialogHeader>
           <DialogTitle className="text-2xl text-white">Respond to Trade Offer</DialogTitle>
         </DialogHeader>
