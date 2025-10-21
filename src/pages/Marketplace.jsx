@@ -488,6 +488,30 @@ export default function Marketplace() {
               }
                 </React.Fragment>
             )}
+
+              {/* Recently Sold Items - Added directly to the same grid */}
+              {recentlySoldItems.length > 0 && (
+                <>
+                  {/* Full-width separator */}
+                  <div className="md:col-span-2 lg:col-span-3 xl:col-span-4 mt-4 mb-2">
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent"></div>
+                      <h2 className="text-2xl font-bold text-white">Recently Sold</h2>
+                      <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent"></div>
+                    </div>
+                  </div>
+
+                  {/* Recently Sold Cards */}
+                  {recentlySoldItems.map((item) => (
+                    <ItemCard
+                      key={`sold-${item.id}`}
+                      item={item}
+                      seller={sellers[item.seller_id]}
+                      isSold={true}
+                    />
+                  ))}
+                </>
+              )}
             </div> :
 
           <div className="text-center py-16">
@@ -512,25 +536,6 @@ export default function Marketplace() {
           }
             </div>
           </div>
-
-          {/* Recently Sold Section */}
-          {recentlySoldItems.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-white mb-6">
-                Recently Sold
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {recentlySoldItems.map((item) => (
-                  <ItemCard
-                    key={item.id}
-                    item={item}
-                    seller={sellers[item.seller_id]}
-                    isSold={true}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Modals */}
