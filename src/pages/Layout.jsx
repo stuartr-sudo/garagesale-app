@@ -46,6 +46,8 @@ import {
 import NerdBackground from "@/components/ui/NerdBackground"; // Import the new component
 import FloatingCameraButton from "@/components/camera/FloatingCameraButton";
 import CartIcon from "@/components/cart/CartIcon";
+import SuspensionBanner from "@/components/SuspensionBanner";
+import { checkUserStatus, checkExpiredOrders } from "@/api/penalties";
 
 const navigationItems = [
   {
@@ -145,6 +147,7 @@ export default function Layout({ children, currentPageName }) {
   const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [userStatus, setUserStatus] = useState(null);
 
   // Force sidebar to start collapsed by setting cookie
   useEffect(() => {
@@ -161,6 +164,7 @@ export default function Layout({ children, currentPageName }) {
         if (error) {
           console.error('Error getting session:', error);
           setCurrentUser(null);
+          setUserStatus(null);
           return;
         }
 
@@ -184,13 +188,22 @@ export default function Layout({ children, currentPageName }) {
             });
           } else {
             setCurrentUser(profile);
+            
+            // Check user status (suspension/ban) and check for expired orders
+            const status = await checkUserStatus(session.user.id);
+            setUserStatus(status);
+            
+            // Check for expired orders in the background
+            checkExpiredOrders().catch(err => console.error('Error checking expired orders:', err));
           }
         } else {
           setCurrentUser(null);
+          setUserStatus(null);
         }
       } catch (error) {
         console.error('Error loading user:', error);
         setCurrentUser(null);
+        setUserStatus(null);
       } finally {
         setLoading(false);
       }
@@ -214,6 +227,11 @@ export default function Layout({ children, currentPageName }) {
         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-pink-500"></div>
       </div>
     );
+  }
+
+  // Show suspension/ban screen if user is suspended or banned
+  if (currentUser && userStatus && (userStatus.isSuspended || userStatus.isBanned)) {
+    return <SuspensionBanner userStatus={userStatus} onLogout={handleLogout} />;
   }
 
   // Redirect non-logged-in users to Home page (disabled for now to allow login)
