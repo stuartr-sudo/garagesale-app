@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, ShoppingCart, MapPin, Tag, Calendar, Star, Share2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ArrowLeft, ShoppingCart, MapPin, Tag, Calendar, Star, Share2, Bot, Settings } from 'lucide-react';
 import { Item } from '@/api/entities';
 import { supabase } from '@/lib/supabase';
 import AgentChat from '@/components/agent/AgentChat';
@@ -20,6 +22,10 @@ export default function ItemDetail() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [hasAgentEnabled, setHasAgentEnabled] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [showAgentSettings, setShowAgentSettings] = useState(false);
+  const [minimumPrice, setMinimumPrice] = useState('');
+  const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
     loadItem();
@@ -28,6 +34,12 @@ export default function ItemDetail() {
   const loadItem = async () => {
     setLoading(true);
     try {
+      // Get current user session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setCurrentUser(session.user);
+      }
+
       // Get item
       const { data: itemData, error: itemError } = await supabase
         .from('items')
@@ -43,6 +55,11 @@ export default function ItemDetail() {
 
       setItem(itemData);
 
+      // Check if current user is the owner
+      if (session?.user && itemData.seller_id === session.user.id) {
+        setIsOwner(true);
+      }
+
       // Get seller
       if (itemData.seller_id) {
         const { data: sellerData } = await supabase
@@ -54,14 +71,17 @@ export default function ItemDetail() {
         setSeller(sellerData);
       }
 
-      // Check if agent is enabled
+      // Check if agent is enabled - look for any item_knowledge record
       const { data: knowledge } = await supabase
         .from('item_knowledge')
-        .select('negotiation_enabled')
+        .select('*')
         .eq('item_id', id)
         .single();
 
-      setHasAgentEnabled(knowledge?.negotiation_enabled === true);
+      setHasAgentEnabled(!!knowledge);
+      if (knowledge?.minimum_price) {
+        setMinimumPrice(knowledge.minimum_price.toString());
+      }
 
     } catch (error) {
       console.error('Error loading item:', error);
@@ -80,6 +100,38 @@ export default function ItemDetail() {
     } else {
       navigator.clipboard.writeText(window.location.href);
       alert('Link copied to clipboard!');
+    }
+  };
+
+  const handleSaveAgentSettings = async () => {
+    try {
+      if (minimumPrice && parseFloat(minimumPrice) > 0) {
+        // Create or update item knowledge
+        const { error } = await supabase
+          .from('item_knowledge')
+          .upsert([{
+            item_id: item.id,
+            minimum_price: parseFloat(minimumPrice),
+            negotiation_notes: `Minimum acceptable price: $${minimumPrice}`,
+            negotiation_enabled: true,
+            created_at: new Date().toISOString()
+          }]);
+
+        if (error) {
+          console.error('Error saving agent settings:', error);
+          alert('Error saving settings. Please try again.');
+          return;
+        }
+
+        setHasAgentEnabled(true);
+        setShowAgentSettings(false);
+        alert('AI Agent settings saved successfully!');
+      } else {
+        alert('Please enter a valid minimum price.');
+      }
+    } catch (error) {
+      console.error('Error saving agent settings:', error);
+      alert('Error saving settings. Please try again.');
     }
   };
 
@@ -256,6 +308,66 @@ export default function ItemDetail() {
                 itemPrice={item.price}
               />
             </div>
+          ) : isOwner ? (
+            <Card className="bg-gray-900/50 border-gray-800">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <Bot className="w-5 h-5 text-pink-400" />
+                  AI Agent Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {showAgentSettings ? (
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="minimumPrice" className="text-gray-300">
+                        Minimum Price for AI Agent
+                      </Label>
+                      <Input
+                        id="minimumPrice"
+                        type="number"
+                        step="0.01"
+                        value={minimumPrice}
+                        onChange={(e) => setMinimumPrice(e.target.value)}
+                        placeholder="e.g., 100.00"
+                        className="bg-gray-800 border-gray-700 text-white"
+                      />
+                      <p className="text-xs text-gray-400 mt-1">
+                        The AI agent will automatically accept offers at or above this price
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={handleSaveAgentSettings}
+                        className="flex-1 bg-gradient-to-r from-pink-600 to-fuchsia-600 hover:from-pink-700 hover:to-fuchsia-700"
+                      >
+                        Save Settings
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowAgentSettings(false)}
+                        className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center space-y-4">
+                    <p className="text-gray-400">
+                      Enable AI Agent to automatically negotiate with buyers
+                    </p>
+                    <Button
+                      onClick={() => setShowAgentSettings(true)}
+                      className="w-full bg-gradient-to-r from-pink-600 to-fuchsia-600 hover:from-pink-700 hover:to-fuchsia-700"
+                    >
+                      <Settings className="w-4 h-4 mr-2" />
+                      Configure AI Agent
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           ) : (
             <Card className="bg-gray-900/50 border-gray-800 p-6 text-center">
               <p className="text-gray-400">

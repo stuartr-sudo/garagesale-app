@@ -213,6 +213,7 @@ export default function AddItem() {
             item_id: data[0].id,
             minimum_price: newItem.minimum_price,
             negotiation_notes: `Minimum acceptable price: $${newItem.minimum_price}`,
+            negotiation_enabled: true,
             created_at: new Date().toISOString()
           }]);
       }
