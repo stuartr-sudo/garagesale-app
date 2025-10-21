@@ -13,6 +13,8 @@ import PurchaseModal from "../components/marketplace/PurchaseModal";
 import AdBanner from "../components/marketplace/AdBanner";
 import AdModal from "../components/marketplace/AdModal"; // Added import
 import OnboardingTour from "../components/onboarding/OnboardingTour";
+import SearchFilters from "../components/marketplace/SearchFilters";
+import { supabase } from '@/lib/supabase';
 
 // Define a set of demo items to display if no real items are available
 const DEMO_ITEMS = [
@@ -143,14 +145,19 @@ export default function Marketplace() {
   const [items, setItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [priceRange, setPriceRange] = useState("all");
-  const [showFreeOnly, setShowFreeOnly] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedAd, setSelectedAd] = useState(null);
   const [sellers, setSellers] = useState({});
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [filters, setFilters] = useState({
+    searchTerm: '',
+    category: null,
+    condition: null,
+    minPrice: 0,
+    maxPrice: 10000,
+    sortBy: 'date_desc',
+    location: null
+  });
 
   useEffect(() => {
     loadItems();
@@ -206,6 +213,8 @@ export default function Marketplace() {
         }
       }
       setSellers(sellersData);
+      // Apply initial filters to items
+      applyFilters(itemsData, filters);
     } catch (error) {
       console.error("Error loading items:", error);
     }
@@ -233,37 +242,68 @@ export default function Marketplace() {
     }
   }, []);
 
-  useEffect(() => {
-    filterItems();
-  }, [items, searchQuery, selectedCategory, priceRange, showFreeOnly]);
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+    applyFilters(items, newFilters);
+  };
 
-  const filterItems = () => {
-    let filtered = items;
+  const applyFilters = (itemsList, filterOptions) => {
+    let filtered = [...itemsList];
 
-    if (searchQuery) {
+    // Search term filter
+    if (filterOptions.searchTerm) {
+      const searchLower = filterOptions.searchTerm.toLowerCase();
       filtered = filtered.filter((item) =>
-      item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.tags?.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+        item.title?.toLowerCase().includes(searchLower) ||
+        item.description?.toLowerCase().includes(searchLower) ||
+        item.tags?.some((tag) => tag.toLowerCase().includes(searchLower))
       );
     }
 
-    if (selectedCategory !== "all") {
-      filtered = filtered.filter((item) => item.category === selectedCategory);
+    // Category filter
+    if (filterOptions.category) {
+      filtered = filtered.filter((item) => item.category === filterOptions.category);
     }
 
-    if (showFreeOnly) {
-      filtered = filtered.filter((item) => item.price === 0);
-    } else if (priceRange !== "all") {
-      const [min, max] = priceRange.split("-").map(Number);
-      filtered = filtered.filter((item) => {
-        if (max) {
-          return item.price >= min && item.price <= max;
-        } else {
-          return item.price >= min;
-        }
-      });
+    // Condition filter
+    if (filterOptions.condition) {
+      filtered = filtered.filter((item) => item.condition === filterOptions.condition);
     }
+
+    // Price range filter
+    filtered = filtered.filter((item) => {
+      const price = parseFloat(item.price) || 0;
+      return price >= filterOptions.minPrice && price <= filterOptions.maxPrice;
+    });
+
+    // Location filter (basic substring match)
+    if (filterOptions.location) {
+      const locationLower = filterOptions.location.toLowerCase();
+      filtered = filtered.filter((item) =>
+        item.location?.toLowerCase().includes(locationLower) ||
+        item.postcode?.toLowerCase().includes(locationLower)
+      );
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      switch (filterOptions.sortBy) {
+        case 'date_desc':
+          return new Date(b.created_date) - new Date(a.created_date);
+        case 'date_asc':
+          return new Date(a.created_date) - new Date(b.created_date);
+        case 'price_asc':
+          return parseFloat(a.price) - parseFloat(b.price);
+        case 'price_desc':
+          return parseFloat(b.price) - parseFloat(a.price);
+        case 'popular':
+          return (b.view_count || 0) - (a.view_count || 0);
+        case 'views':
+          return (b.view_count || 0) - (a.view_count || 0);
+        default:
+          return 0;
+      }
+    });
 
     setFilteredItems(filtered);
   };
@@ -327,74 +367,12 @@ export default function Marketplace() {
           {/* Top Banner Ad */}
           <AdBanner placement="top_banner" onAdClick={handleAdClick} className="mb-8" />
 
-          {/* Search and Filters */}
-          <div className="bg-gray-900/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-800 p-6 mb-8" data-tour="filters">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
-              {/* Search Input */}
-              <div className="relative lg:col-span-5" data-tour="marketplace-search">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
-                <Input
-                  placeholder="Search items, descriptions, or tags..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 w-full h-12 bg-gray-800 border-gray-700 focus:border-pink-500 focus:ring-pink-500 rounded-xl text-lg text-white placeholder-gray-400" />
-
-              </div>
-              
-              {/* Category Filter */}
-              <div className="lg:col-span-3">
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger className="w-full h-12 bg-gray-800 border-gray-700 rounded-xl text-white">
-                    <SelectValue placeholder="Category" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-700">
-                    {categories.map((cat) =>
-                    <SelectItem key={cat.value} value={cat.value} className="text-white hover:bg-gray-700">{cat.label}</SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Price Filter */}
-              <div className="lg:col-span-2">
-                <Select value={priceRange} onValueChange={setPriceRange} disabled={showFreeOnly}>
-                  <SelectTrigger className="w-full h-12 bg-gray-800 border-gray-700 rounded-xl text-white">
-                    <SelectValue placeholder="Price" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-700">
-                    <SelectItem value="all" className="text-white hover:bg-gray-700">All Prices</SelectItem>
-                    <SelectItem value="0-25" className="text-white hover:bg-gray-700">Under $25</SelectItem>
-                    <SelectItem value="25-50" className="text-white hover:bg-gray-700">$25 - $50</SelectItem>
-                    <SelectItem value="50-100" className="text-white hover:bg-gray-700">$50 - $100</SelectItem>
-                    <SelectItem value="100-250" className="text-white hover:bg-gray-700">$100 - $250</SelectItem>
-                    <SelectItem value="250" className="text-white hover:bg-gray-700">$250+</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Free Items Button */}
-              <div className="lg:col-span-2">
-                <Button
-                  variant={showFreeOnly ? "default" : "outline"}
-                  onClick={() => {
-                    setShowFreeOnly(!showFreeOnly);
-                    if (!showFreeOnly) setPriceRange("all");
-                  }} className="bg-lime-600 text-slate-50 px-6 py-2 text-sm font-medium inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border hover:text-accent-foreground h-12 w-full rounded-xl hover:bg-lime-900/50 border-lime-500">
-                  {showFreeOnly ? '✓ ' : ''}Free Items
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Results Count */}
-          <div className="flex items-center justify-between mb-6">
-            <p className="text-gray-400 font-medium">
-              {filteredItems.length} {filteredItems.length === 1 ? 'item' : 'items'} available
-              {showFreeOnly && <span className="text-lime-400 ml-2">(free items only)</span>}
-            </p>
-            <Badge variant="outline" className="bg-cyan-900/50 text-cyan-400 border-cyan-800">
-              {items.length} total listings
-            </Badge>
+          {/* Search and Filters - New Component */}
+          <div className="mb-8" data-tour="filters">
+            <SearchFilters 
+              onFilterChange={handleFilterChange}
+              itemCount={filteredItems.length}
+            />
           </div>
 
           {/* Items Grid with Ads */}
