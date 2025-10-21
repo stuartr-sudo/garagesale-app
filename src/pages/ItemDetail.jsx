@@ -34,6 +34,8 @@ export default function ItemDetail() {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Scroll to top when page loads
+    window.scrollTo(0, 0);
     loadItem();
   }, [id]);
 
