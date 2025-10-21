@@ -113,6 +113,7 @@ export default async function handler(req, res) {
       title,
       description,
       price,
+      minimum_price,
       category = 'other',
       condition = 'good',
       seller_id,
@@ -190,6 +191,9 @@ export default async function handler(req, res) {
       updated_at: new Date().toISOString()
     };
 
+    // Store minimum price separately for AI agent negotiation (if provided)
+    const minimumPrice = minimum_price !== undefined ? parseFloat(minimum_price) : null;
+
     const { data: item, error: insertError } = await supabase
       .from('items')
       .insert(itemData)
@@ -207,11 +211,33 @@ export default async function handler(req, res) {
 
     console.log(`Successfully created listing with ID: ${item.id}`);
 
+    // Create agent knowledge entry if minimum price provided
+    if (minimumPrice !== null && item.id) {
+      const knowledgeData = {
+        item_id: item.id,
+        minimum_price: minimumPrice,
+        negotiation_enabled: true,
+        created_at: new Date().toISOString()
+      };
+
+      const { error: knowledgeError } = await supabase
+        .from('item_knowledge')
+        .insert(knowledgeData);
+
+      if (knowledgeError) {
+        console.error('Failed to create agent knowledge:', knowledgeError);
+        // Don't fail the whole request if knowledge creation fails
+      } else {
+        console.log(`Created agent knowledge with minimum price: $${minimumPrice}`);
+      }
+    }
+
     return res.status(201).json({
       success: true,
       message: 'Listing created successfully',
       item: item,
-      uploaded_images: uploadedImageUrls.length
+      uploaded_images: uploadedImageUrls.length,
+      agent_enabled: minimumPrice !== null
     });
 
   } catch (error) {

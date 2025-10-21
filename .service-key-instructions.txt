@@ -1,0 +1,19 @@
+================================================
+GET YOUR SUPABASE SERVICE KEY
+================================================
+
+1. Go to: https://supabase.com/dashboard/project/biwuxtvgvkkltrdpuptl/settings/api
+
+2. Scroll down to "Project API keys"
+
+3. Find the "service_role" key (NOT the "anon" key)
+
+4. Click "Reveal" and copy the key
+
+5. It will look something like:
+   eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6...
+
+IMPORTANT: This is a SECRET key - never expose it publicly!
+
+================================================
+

@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { ShoppingCart, Tag, Star } from "lucide-react";
 import { formatDistanceToNow } from 'date-fns';
 import TradeButton from '../trading/TradeButton';
 import ExplosionEffect from '../ui/ExplosionEffect';
+import { createPageUrl } from '@/utils';
 
 export default function ItemCard({ item, seller, onPurchase }) {
   const primaryImage = item.image_urls?.[0] || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop";
@@ -49,9 +51,11 @@ export default function ItemCard({ item, seller, onPurchase }) {
       
       <CardContent className="p-5 flex flex-col flex-grow">
         <div className="flex-grow">
-          <h3 className="font-bold text-lg text-white line-clamp-2 leading-tight">
-            {item.title}
-          </h3>
+          <Link to={`/ItemDetail/${item.id}`}>
+            <h3 className="font-bold text-lg text-white line-clamp-2 leading-tight hover:text-pink-400 transition-colors cursor-pointer">
+              {item.title}
+            </h3>
+          </Link>
           {seller && (
             <div className="flex items-center gap-2 text-sm text-gray-400 mt-1">
               <span>by {seller.full_name}</span>

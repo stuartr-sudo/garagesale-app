@@ -52,6 +52,8 @@ import TradeOffers from "./TradeOffers";
 
 import SignIn from "./SignIn";
 
+import ItemDetail from "./ItemDetail";
+
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
 const PAGES = {
@@ -107,6 +109,8 @@ const PAGES = {
     TradeOffers: TradeOffers,
     
     SignIn: SignIn,
+    
+    ItemDetail: ItemDetail,
     
 }
 
@@ -187,6 +191,7 @@ function PagesContent() {
                 
                 <Route path="/SignIn" element={<SignIn />} />
                 
+                <Route path="/ItemDetail/:id" element={<ItemDetail />} />
             </Routes>
         </Layout>
     );

@@ -1,0 +1,210 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Bot, Send, Loader2, CheckCircle, Sparkles } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+
+export default function AgentChat({ itemId, itemTitle, itemPrice }) {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [conversationId, setConversationId] = useState(null);
+  const [offerAccepted, setOfferAccepted] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  useEffect(() => {
+    // Add welcome message
+    setMessages([{
+      sender: 'ai',
+      content: `Hi! I'm the AI assistant for "${itemTitle}". I can answer any questions you have about this item, including pricing. Feel free to make an offer!`,
+      timestamp: new Date().toISOString()
+    }]);
+  }, [itemTitle]);
+
+  const sendMessage = async () => {
+    if (!input.trim() || loading) return;
+
+    const userMessage = input.trim();
+    setInput('');
+    setLoading(true);
+
+    // Add user message to UI
+    setMessages(prev => [...prev, {
+      sender: 'user',
+      content: userMessage,
+      timestamp: new Date().toISOString()
+    }]);
+
+    try {
+      const response = await fetch('/api/agent-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          item_id: itemId,
+          message: userMessage,
+          conversation_id: conversationId
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Set conversation ID for future messages
+        if (data.conversation_id) {
+          setConversationId(data.conversation_id);
+        }
+
+        // Add AI response
+        setMessages(prev => [...prev, {
+          sender: 'ai',
+          content: data.response,
+          timestamp: new Date().toISOString(),
+          offer_accepted: data.offer_accepted
+        }]);
+
+        // Handle accepted offer
+        if (data.offer_accepted) {
+          setOfferAccepted(true);
+          setTimeout(() => {
+            setMessages(prev => [...prev, {
+              sender: 'system',
+              content: `🎉 Congratulations! Your offer of $${data.offer_amount} has been accepted! The seller will contact you shortly to complete the purchase.`,
+              timestamp: new Date().toISOString()
+            }]);
+          }, 1000);
+        }
+      } else {
+        throw new Error(data.error || 'Failed to send message');
+      }
+    } catch (error) {
+      console.error('Chat error:', error);
+      setMessages(prev => [...prev, {
+        sender: 'system',
+        content: 'Sorry, there was an error. Please try again.',
+        timestamp: new Date().toISOString()
+      }]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
+  return (
+    <Card className="bg-gray-900/80 border-gray-800 shadow-xl">
+      <CardHeader className="border-b border-gray-800 bg-gradient-to-r from-purple-900/20 to-pink-900/20">
+        <CardTitle className="flex items-center gap-3">
+          <div className="p-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg">
+            <Bot className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <div className="text-white flex items-center gap-2">
+              AI Sales Assistant
+              <Sparkles className="w-4 h-4 text-yellow-400" />
+            </div>
+            <div className="text-xs text-gray-400 font-normal mt-0.5">
+              Ask questions or make an offer!
+            </div>
+          </div>
+        </CardTitle>
+      </CardHeader>
+      
+      <CardContent className="p-0">
+        {/* Messages */}
+        <div className="h-96 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
+          {messages.map((msg, idx) => (
+            <div
+              key={idx}
+              className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div
+                className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${
+                  msg.sender === 'user'
+                    ? 'bg-gradient-to-r from-pink-600 to-fuchsia-600 text-white'
+                    : msg.sender === 'system'
+                    ? 'bg-green-900/30 border border-green-800 text-green-300'
+                    : 'bg-gray-800 text-gray-200 border border-gray-700'
+                }`}
+              >
+                {msg.sender === 'ai' && (
+                  <div className="flex items-center gap-2 mb-1 text-purple-400 text-xs">
+                    <Bot className="w-3 h-3" />
+                    <span>AI Assistant</span>
+                  </div>
+                )}
+                <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                  {msg.content}
+                </div>
+                {msg.offer_accepted && (
+                  <div className="flex items-center gap-1 mt-2 text-green-400 text-xs">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Offer Accepted!</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+          {loading && (
+            <div className="flex justify-start">
+              <div className="bg-gray-800 border border-gray-700 rounded-2xl px-4 py-2.5">
+                <div className="flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
+                  <span className="text-gray-400 text-sm">Thinking...</span>
+                </div>
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input */}
+        <div className="border-t border-gray-800 p-4 bg-gray-950/50">
+          {offerAccepted ? (
+            <div className="text-center p-4 bg-green-900/20 border border-green-800 rounded-xl">
+              <CheckCircle className="w-8 h-8 text-green-400 mx-auto mb-2" />
+              <p className="text-green-300 font-semibold">Your offer has been accepted!</p>
+              <p className="text-gray-400 text-sm mt-1">The seller will contact you soon.</p>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask about the item or make an offer..."
+                disabled={loading}
+                className="flex-1 bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-purple-500 focus:ring-purple-500"
+              />
+              <Button
+                onClick={sendMessage}
+                disabled={loading || !input.trim()}
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6"
+              >
+                {loading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
+              </Button>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
