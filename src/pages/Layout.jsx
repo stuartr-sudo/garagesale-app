@@ -40,6 +40,7 @@ import {
   SidebarHeader,
   SidebarProvider,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import NerdBackground from "@/components/ui/NerdBackground"; // Import the new component
 import FloatingCameraButton from "@/components/camera/FloatingCameraButton";
@@ -209,15 +210,32 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <SidebarProvider defaultOpen={false}>
-      <div className="relative min-h-screen flex w-full bg-gray-950 text-gray-200 overflow-hidden">
-        <NerdBackground count={75} />
-        <FloatingCameraButton />
+      <LayoutContent 
+        currentUser={currentUser}
+        currentPageName={currentPageName}
+        visibleNavItems={visibleNavItems}
+        handleLogout={handleLogout}
+      >
+        {children}
+      </LayoutContent>
+    </SidebarProvider>
+  );
+}
 
-        <Sidebar 
-          className="border-r-0 bg-black/80 backdrop-blur-lg shadow-2xl border-r border-gray-800 z-10" 
-          collapsible="offcanvas"
-          variant="sidebar"
-        >
+// Internal component that has access to useSidebar
+function LayoutContent({ currentUser, currentPageName, visibleNavItems, handleLogout, children }) {
+  const { open } = useSidebar();
+
+  return (
+    <div className="relative min-h-screen flex w-full bg-gray-950 text-gray-200 overflow-hidden">
+      <NerdBackground count={75} />
+      <FloatingCameraButton />
+
+      <Sidebar 
+        className="border-r-0 bg-black/80 backdrop-blur-lg shadow-2xl border-r border-gray-800 z-10" 
+        collapsible="offcanvas"
+        variant="sidebar"
+      >
           <SidebarHeader className="border-b border-gray-800 shrink-0">
             <SidebarMenu>
               <SidebarMenuItem>
@@ -346,8 +364,12 @@ export default function Layout({ children, currentPageName }) {
         </Sidebar>
 
         <main className="flex-1 flex flex-col z-10 min-w-0">
-          {/* Fixed Floating Hamburger Menu - Always Visible */}
-          <div className="fixed top-4 left-4 z-50">
+          {/* Fixed Floating Hamburger Menu - Moves with Sidebar */}
+          <div 
+            className={`fixed top-4 z-50 transition-all duration-300 ${
+              open ? 'left-[270px]' : 'left-4'
+            }`}
+          >
             <SidebarTrigger className="w-14 h-14 flex items-center justify-center bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-2xl transition-all duration-300 shadow-2xl hover:shadow-cyan-500/50 hover:scale-110">
               <span className="text-white text-4xl font-light" style={{ fontFamily: 'Hugeicons' }}>&#987985;</span>
             </SidebarTrigger>
@@ -378,7 +400,5 @@ export default function Layout({ children, currentPageName }) {
           </div>
         </main>
       </div>
-    </SidebarProvider>
   );
 }
-
