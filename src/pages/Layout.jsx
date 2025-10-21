@@ -133,6 +133,11 @@ export default function Layout({ children, currentPageName }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Force sidebar to start collapsed by setting cookie
+  useEffect(() => {
+    document.cookie = 'sidebar_state=false; path=/; max-age=604800';
+  }, []);
+
   useEffect(() => {
     const fetchUser = async () => {
       setLoading(true);
@@ -208,16 +213,20 @@ export default function Layout({ children, currentPageName }) {
         <NerdBackground count={75} />
         <FloatingCameraButton />
 
-        <Sidebar className="border-r-0 bg-black/80 backdrop-blur-lg shadow-2xl border-r border-gray-800 z-10" collapsible="icon">
+        <Sidebar 
+          className="border-r-0 bg-black/80 backdrop-blur-lg shadow-2xl border-r border-gray-800 z-10" 
+          collapsible="icon"
+          variant="sidebar"
+        >
           <SidebarHeader className="border-b border-gray-800 shrink-0">
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton size="lg" asChild>
+                <SidebarMenuButton size="lg" asChild tooltip="GarageSale">
                   <Link to={createPageUrl("Marketplace")} className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-fuchsia-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-fuchsia-600 rounded-xl flex items-center justify-center shadow-lg shrink-0">
                       <Store className="w-5 h-5 text-white" />
                     </div>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col group-data-[collapsible=icon]:hidden">
                       <span className="font-bold text-base text-white">GarageSale</span>
                       <span className="text-xs text-gray-400">Local Marketplace</span>
                     </div>
@@ -235,6 +244,7 @@ export default function Layout({ children, currentPageName }) {
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
                         asChild
+                        tooltip={item.title}
                         className={`group hover:bg-gray-800 transition-all duration-300 rounded-lg p-2.5 justify-start text-sm ${
                           location.pathname === item.url
                             ? 'bg-pink-500/10 text-pink-400'
@@ -250,7 +260,7 @@ export default function Layout({ children, currentPageName }) {
                       >
                         <Link to={item.url} className="flex items-center gap-2.5 min-w-0">
                           <item.icon className="w-4 h-4 shrink-0" />
-                          <span className="font-medium truncate">{item.title}</span>
+                          <span className="font-medium truncate group-data-[collapsible=icon]:hidden">{item.title}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -273,7 +283,7 @@ export default function Layout({ children, currentPageName }) {
                     >
                       <Link to={createPageUrl("Contact")} className="flex items-center gap-2.5 min-w-0">
                         <Mail className="w-4 h-4 shrink-0" />
-                        <span className="font-medium truncate">Contact Us</span>
+                        <span className="font-medium truncate group-data-[collapsible=icon]:hidden">Contact Us</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -288,7 +298,7 @@ export default function Layout({ children, currentPageName }) {
                     >
                       <Link to={createPageUrl("Privacy")} className="flex items-center gap-2.5 min-w-0">
                         <Lock className="w-4 h-4 shrink-0" />
-                        <span className="font-medium truncate">Privacy Policy</span>
+                        <span className="font-medium truncate group-data-[collapsible=icon]:hidden">Privacy Policy</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -303,7 +313,7 @@ export default function Layout({ children, currentPageName }) {
                     >
                       <Link to={createPageUrl("Terms")} className="flex items-center gap-2.5 min-w-0">
                         <FileText className="w-4 h-4 shrink-0" />
-                        <span className="font-medium truncate">Terms of Service</span>
+                        <span className="font-medium truncate group-data-[collapsible=icon]:hidden">Terms of Service</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -315,17 +325,17 @@ export default function Layout({ children, currentPageName }) {
                 <SidebarMenu>
                     {currentUser ? (
                         <SidebarMenuItem>
-                            <SidebarMenuButton onClick={handleLogout} className="group hover:bg-red-500/10 hover:text-red-400 transition-all duration-300 rounded-lg p-2.5 justify-start text-gray-400 text-sm">
+                            <SidebarMenuButton tooltip="Log Out" onClick={handleLogout} className="group hover:bg-red-500/10 hover:text-red-400 transition-all duration-300 rounded-lg p-2.5 justify-start text-gray-400 text-sm">
                                <LogOut className="w-4 h-4 mr-2.5 shrink-0" />
-                               <span className="font-medium truncate">Log Out</span>
+                               <span className="font-medium truncate group-data-[collapsible=icon]:hidden">Log Out</span>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
                     ) : (
                         <SidebarMenuItem>
-                            <SidebarMenuButton asChild className="group hover:bg-green-500/10 hover:text-green-400 transition-all duration-300 rounded-lg p-2.5 justify-start text-gray-400 text-sm">
+                            <SidebarMenuButton asChild tooltip="Log In" className="group hover:bg-green-500/10 hover:text-green-400 transition-all duration-300 rounded-lg p-2.5 justify-start text-gray-400 text-sm">
                                 <Link to={createPageUrl("SignIn")} className="flex items-center gap-2.5 min-w-0">
                                     <UserIcon className="w-4 h-4 shrink-0" />
-                                    <span className="font-medium truncate">Log In</span>
+                                    <span className="font-medium truncate group-data-[collapsible=icon]:hidden">Log In</span>
                                 </Link>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
