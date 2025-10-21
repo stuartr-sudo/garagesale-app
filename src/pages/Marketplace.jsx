@@ -15,6 +15,7 @@ import AdModal from "../components/marketplace/AdModal"; // Added import
 import OnboardingTour from "../components/onboarding/OnboardingTour";
 import SearchFilters from "../components/marketplace/SearchFilters";
 import SmartRecommendations from "../components/recommendations/SmartRecommendations";
+import RecentlySold from "../components/marketplace/RecentlySold";
 import { supabase } from '@/lib/supabase';
 
 // Define a set of demo items to display if no real items are available
@@ -384,9 +385,12 @@ export default function Marketplace() {
             />
           </div>
 
-          {/* Items Grid with Ads */}
-          {filteredItems.length > 0 ?
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {/* Main Content Area with Sidebar */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Items Grid */}
+            <div className="lg:col-span-3">
+              {filteredItems.length > 0 ?
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredItems.map((item, index) =>
             <React.Fragment key={item.id}>
                   <div data-tour={index === 0 ? "item-card" : undefined}>
@@ -436,6 +440,15 @@ export default function Marketplace() {
               </Button>
             </div>
           }
+            </div>
+
+            {/* Sidebar - Recently Sold */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-6">
+                <RecentlySold limit={10} showLocation={true} />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
