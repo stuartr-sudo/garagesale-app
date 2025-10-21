@@ -41,6 +41,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import NerdBackground from "@/components/ui/NerdBackground"; // Import the new component
+import FloatingCameraButton from "@/components/camera/FloatingCameraButton";
 
 const navigationItems = [
   {
@@ -177,6 +178,7 @@ export default function Layout({ children, currentPageName }) {
     <SidebarProvider>
       <div className="relative min-h-screen flex w-full bg-gray-950 text-gray-200 overflow-hidden">
         <NerdBackground count={75} />
+        <FloatingCameraButton />
 
         <Sidebar className="border-r-0 bg-black/80 backdrop-blur-lg shadow-2xl border-r border-gray-800 z-10">
           <SidebarHeader className="border-b border-gray-800 p-4 shrink-0">
