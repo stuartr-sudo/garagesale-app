@@ -11,30 +11,29 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- Drop existing policies if they exist
-DROP POLICY IF EXISTS "Anyone can view item images" ON storage.objects;
-DROP POLICY IF EXISTS "Authenticated users can upload item images" ON storage.objects;
-DROP POLICY IF EXISTS "Users can update their own item images" ON storage.objects;
-DROP POLICY IF EXISTS "Users can delete their own item images" ON storage.objects;
+DROP POLICY IF EXISTS anyone_can_view_item_images ON storage.objects;
+DROP POLICY IF EXISTS authenticated_users_can_upload_item_images ON storage.objects;
+DROP POLICY IF EXISTS users_can_update_their_own_item_images ON storage.objects;
+DROP POLICY IF EXISTS users_can_delete_their_own_item_images ON storage.objects;
 
--- Set up RLS policies for item-images bucket
-CREATE POLICY "Anyone can view item images" ON storage.objects
+-- Set up RLS policies for item-images bucket (using underscores instead of spaces)
+CREATE POLICY anyone_can_view_item_images ON storage.objects
   FOR SELECT USING (bucket_id = 'item-images');
 
-CREATE POLICY "Authenticated users can upload item images" ON storage.objects
+CREATE POLICY authenticated_users_can_upload_item_images ON storage.objects
   FOR INSERT WITH CHECK (
     bucket_id = 'item-images' 
     AND auth.role() = 'authenticated'
   );
 
-CREATE POLICY "Users can update their own item images" ON storage.objects
+CREATE POLICY users_can_update_their_own_item_images ON storage.objects
   FOR UPDATE USING (
     bucket_id = 'item-images' 
     AND auth.uid()::text = (storage.foldername(name))[1]
   );
 
-CREATE POLICY "Users can delete their own item images" ON storage.objects
+CREATE POLICY users_can_delete_their_own_item_images ON storage.objects
   FOR DELETE USING (
     bucket_id = 'item-images' 
     AND auth.uid()::text = (storage.foldername(name))[1]
   );
-
