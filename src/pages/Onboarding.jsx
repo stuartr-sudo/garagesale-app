@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { User as UserIcon, MapPin, Globe, Store, ArrowRight, CheckCircle } from "lucide-react";
+import { User as UserIcon, MapPin, Globe, Store, ArrowRight, CheckCircle, Shield, FileText, AlertCircle } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const countries = [
   { code: "US", name: "United States", states: ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"] },
@@ -22,8 +23,7 @@ const countries = [
 
 const onboardingSteps = [
   { id: 1, title: "Personal Info", description: "Tell us about yourself" },
-  { id: 2, title: "Location", description: "Where are you located?" },
-  { id: 3, title: "Contact", description: "How can others reach you?" }
+  { id: 2, title: "Terms & Agreement", description: "Review and accept our policies" }
 ];
 
 export default function Onboarding() {
@@ -33,11 +33,14 @@ export default function Onboarding() {
   const [formData, setFormData] = useState({
     full_name: "",
     email: "",
-    country: "",
+    country: "AU", // Default to Australia
     state_region: "",
-    city: "",
-    postcode: "",
-    phone: ""
+    postcode: ""
+  });
+  const [termsAcceptance, setTermsAcceptance] = useState({
+    terms_of_service: false,
+    privacy_policy: false,
+    acceptable_use: false
   });
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -54,8 +57,8 @@ export default function Onboarding() {
       const user = await User.me();
       setCurrentUser(user);
       
-      // If user already has complete profile, redirect to marketplace
-      if (user.country && user.postcode && user.full_name) {
+      // If user already has complete profile and accepted terms, redirect to marketplace
+      if (user.country && user.postcode && user.full_name && user.terms_accepted) {
         navigate(createPageUrl('Marketplace'));
         return;
       }
@@ -63,17 +66,14 @@ export default function Onboarding() {
       setFormData({
         full_name: user.full_name || "",
         email: user.email || "",
-        country: user.country || "",
+        country: user.country || "AU", // Default to Australia
         state_region: user.state_region || "",
-        city: user.city || "",
-        postcode: user.postcode || "",
-        phone: user.phone || ""
+        postcode: user.postcode || ""
       });
 
-      if (user.country) {
-        const country = countries.find(c => c.code === user.country);
-        setSelectedCountry(country);
-      }
+      // Set Australia as default selected country
+      const defaultCountry = countries.find(c => c.code === (user.country || "AU"));
+      setSelectedCountry(defaultCountry);
     } catch (error) {
       console.error("Error loading user:", error);
     }
@@ -98,11 +98,20 @@ export default function Onboarding() {
   const validateStep = (step) => {
     switch (step) {
       case 1:
-        return formData.full_name.trim() !== "";
+        // Validate personal info: name, country, state, postcode
+        return (
+          formData.full_name.trim() !== "" &&
+          formData.country !== "" &&
+          formData.state_region !== "" &&
+          formData.postcode.trim() !== ""
+        );
       case 2:
-        return formData.country !== "" && formData.postcode.trim() !== "";
-      case 3:
-        return true; // Phone is optional
+        // Validate that all terms are accepted
+        return (
+          termsAcceptance.terms_of_service &&
+          termsAcceptance.privacy_policy &&
+          termsAcceptance.acceptable_use
+        );
       default:
         return false;
     }
@@ -111,11 +120,15 @@ export default function Onboarding() {
   const handleNextStep = () => {
     if (validateStep(currentStep)) {
       setCompletedSteps(prev => [...prev, currentStep]);
-      if (currentStep < 3) {
+      if (currentStep < 2) {
         setCurrentStep(currentStep + 1);
       }
     } else {
-      alert("Please fill in the required fields before continuing.");
+      if (currentStep === 1) {
+        alert("Please fill in all required fields: Name, Country, State, and Postcode.");
+      } else if (currentStep === 2) {
+        alert("Please accept all terms and policies to continue.");
+      }
     }
   };
 
@@ -126,8 +139,14 @@ export default function Onboarding() {
   };
 
   const handleComplete = async () => {
+    if (!validateStep(1)) {
+      alert("Please complete your personal information.");
+      setCurrentStep(1);
+      return;
+    }
+
     if (!validateStep(2)) {
-      alert("Please complete your location information.");
+      alert("Please accept all terms and policies to complete setup.");
       return;
     }
 
@@ -137,9 +156,9 @@ export default function Onboarding() {
         full_name: formData.full_name,
         country: formData.country,
         state_region: formData.state_region,
-        city: formData.city,
         postcode: formData.postcode,
-        phone: formData.phone
+        terms_accepted: true, // Mark that user has accepted terms
+        terms_accepted_date: new Date().toISOString()
       });
       
       // Redirect to marketplace after successful completion
@@ -174,7 +193,7 @@ export default function Onboarding() {
             </div>
           </div>
           <Badge variant="outline" className="bg-pink-900/50 text-pink-300 border-pink-700">
-            Step {currentStep} of 3
+            Step {currentStep} of 2
           </Badge>
         </div>
       </div>
@@ -219,22 +238,22 @@ export default function Onboarding() {
           <Card className="bg-gray-900/80 backdrop-blur-sm shadow-xl border border-gray-800 rounded-2xl overflow-hidden">
             <CardHeader className="bg-gradient-to-r from-pink-900/50 to-fuchsia-900/50 border-b border-gray-700">
               <CardTitle className="flex items-center gap-3 text-white text-2xl">
-                {currentStep === 1 && <><UserIcon className="w-7 h-7 text-pink-400" /> Personal Information</>}
-                {currentStep === 2 && <><MapPin className="w-7 h-7 text-pink-400" /> Location Details</>}
-                {currentStep === 3 && <><Globe className="w-7 h-7 text-pink-400" /> Contact Information</>}
+                {currentStep === 1 && <><UserIcon className="w-7 h-7 text-pink-400" /> Personal & Location Information</>}
+                {currentStep === 2 && <><Shield className="w-7 h-7 text-pink-400" /> Terms & Policies</>}
               </CardTitle>
             </CardHeader>
             
             <CardContent className="p-8">
-              {/* Step 1: Personal Info */}
+              {/* Step 1: Personal Info & Location */}
               {currentStep === 1 && (
                 <div className="space-y-6">
                   <div className="text-center mb-8">
                     <h3 className="text-xl font-semibold text-white mb-2">Let's get to know you!</h3>
-                    <p className="text-gray-400">This helps other community members connect with you</p>
+                    <p className="text-gray-400">Tell us about yourself and where you're located</p>
                   </div>
                   
                   <div className="space-y-6">
+                    {/* Personal Info Section */}
                     <div className="space-y-2">
                       <Label htmlFor="full_name" className="text-gray-300 font-medium">Full Name *</Label>
                       <Input
@@ -258,140 +277,189 @@ export default function Onboarding() {
                       />
                       <p className="text-xs text-gray-500">Your email is used for login and cannot be changed.</p>
                     </div>
+
+                    {/* Location Section */}
+                    <div className="pt-6 border-t border-gray-700">
+                      <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <MapPin className="w-5 h-5 text-pink-400" />
+                        Location Details
+                      </h4>
+                      <p className="text-sm text-gray-400 mb-6">This helps us connect you with local buyers and sellers. Your full address will only be required when you list an item for sale.</p>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label htmlFor="country" className="text-gray-300 font-medium">Country *</Label>
+                          <Select
+                            value={formData.country}
+                            onValueChange={handleCountryChange}
+                          >
+                            <SelectTrigger className="h-14 rounded-xl bg-gray-800 border-gray-700 text-white text-lg">
+                              <SelectValue placeholder="Select your country" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-gray-800 border-gray-700">
+                              <SelectItem value="AU" className="text-white hover:bg-gray-700 text-lg py-3">
+                                <div className="flex items-center gap-2">
+                                  <Globe className="w-4 h-4" />
+                                  Australia
+                                </div>
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <p className="text-xs text-gray-500">Currently only available in Australia</p>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="state_region" className="text-gray-300 font-medium">State/Territory *</Label>
+                          {selectedCountry && selectedCountry.states.length > 0 ? (
+                            <Select
+                              value={formData.state_region}
+                              onValueChange={(value) => setFormData(prev => ({ ...prev, state_region: value }))}
+                            >
+                              <SelectTrigger className="h-14 rounded-xl bg-gray-800 border-gray-700 text-white text-lg">
+                                <SelectValue placeholder="Select state/territory" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-gray-800 border-gray-700">
+                                {selectedCountry.states.map(state => (
+                                  <SelectItem key={state} value={state} className="text-white hover:bg-gray-700 text-lg py-3">
+                                    {state}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Input
+                              id="state_region"
+                              value={formData.state_region}
+                              onChange={handleInputChange}
+                              placeholder="Enter your state/territory"
+                              className="h-14 rounded-xl bg-gray-800 border-gray-700 text-white text-lg placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
+                              required
+                            />
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="mt-6">
+                        <div className="space-y-2">
+                          <Label htmlFor="postcode" className="text-gray-300 font-medium">Postcode *</Label>
+                          <Input
+                            id="postcode"
+                            value={formData.postcode}
+                            onChange={handleInputChange}
+                            placeholder="e.g., 2000"
+                            required
+                            className="h-14 rounded-xl bg-gray-800 border-gray-700 text-white text-lg placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
+                          />
+                          <p className="text-xs text-gray-500">Your postcode helps connect you with nearby users</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
 
-              {/* Step 2: Location */}
+              {/* Step 2: Terms & Agreement */}
               {currentStep === 2 && (
                 <div className="space-y-6">
                   <div className="text-center mb-8">
-                    <h3 className="text-xl font-semibold text-white mb-2">Where are you located?</h3>
-                    <p className="text-gray-400">This helps us connect you with local buyers and sellers</p>
+                    <h3 className="text-xl font-semibold text-white mb-2">Terms & Policies</h3>
+                    <p className="text-gray-400">Please review and accept our policies to continue</p>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="country" className="text-gray-300 font-medium">Country *</Label>
-                      <Select
-                        value={formData.country}
-                        onValueChange={handleCountryChange}
-                      >
-                        <SelectTrigger className="h-14 rounded-xl bg-gray-800 border-gray-700 text-white text-lg">
-                          <SelectValue placeholder="Select your country" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-gray-800 border-gray-700">
-                          {countries.map(country => (
-                            <SelectItem key={country.code} value={country.code} className="text-white hover:bg-gray-700 text-lg py-3">
-                              <div className="flex items-center gap-2">
-                                <Globe className="w-4 h-4" />
-                                {country.name}
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="state_region" className="text-gray-300 font-medium">
-                        {selectedCountry?.code === 'US' ? 'State' : 
-                         selectedCountry?.code === 'CA' ? 'Province' : 
-                         selectedCountry?.code === 'GB' ? 'Country' :
-                         selectedCountry?.code === 'AU' ? 'State/Territory' :
-                         'State/Region'}
-                      </Label>
-                      {selectedCountry && selectedCountry.states.length > 0 ? (
-                        <Select
-                          value={formData.state_region}
-                          onValueChange={(value) => setFormData(prev => ({ ...prev, state_region: value }))}
-                        >
-                          <SelectTrigger className="h-14 rounded-xl bg-gray-800 border-gray-700 text-white text-lg">
-                            <SelectValue placeholder={`Select ${selectedCountry.code === 'US' ? 'state' : 'region'}`} />
-                          </SelectTrigger>
-                          <SelectContent className="bg-gray-800 border-gray-700">
-                            {selectedCountry.states.map(state => (
-                              <SelectItem key={state} value={state} className="text-white hover:bg-gray-700 text-lg py-3">
-                                {state}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Input
-                          id="state_region"
-                          value={formData.state_region}
-                          onChange={handleInputChange}
-                          placeholder="Enter your state/region"
-                          className="h-14 rounded-xl bg-gray-800 border-gray-700 text-white text-lg placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
+                  <div className="space-y-8">
+                    {/* Terms of Service */}
+                    <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
+                      <div className="flex items-start gap-4">
+                        <Checkbox
+                          id="terms_of_service"
+                          checked={termsAcceptance.terms_of_service}
+                          onCheckedChange={(checked) => 
+                            setTermsAcceptance(prev => ({ ...prev, terms_of_service: checked }))
+                          }
+                          className="mt-1 data-[state=checked]:bg-pink-600 data-[state=checked]:border-pink-600"
                         />
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="city" className="text-gray-300 font-medium">City</Label>
-                      <Input
-                        id="city"
-                        value={formData.city}
-                        onChange={handleInputChange}
-                        placeholder="Enter your city"
-                        className="h-14 rounded-xl bg-gray-800 border-gray-700 text-white text-lg placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="postcode" className="text-gray-300 font-medium">
-                        {selectedCountry?.code === 'US' ? 'ZIP Code *' : 
-                         selectedCountry?.code === 'CA' ? 'Postal Code *' : 
-                         selectedCountry?.code === 'GB' ? 'Postcode *' :
-                         'Postal Code *'}
-                      </Label>
-                      <Input
-                        id="postcode"
-                        value={formData.postcode}
-                        onChange={handleInputChange}
-                        placeholder={
-                          selectedCountry?.code === 'US' ? 'e.g., 90210' :
-                          selectedCountry?.code === 'CA' ? 'e.g., K1A 0A6' :
-                          selectedCountry?.code === 'GB' ? 'e.g., SW1A 1AA' :
-                          'Enter postal code'
-                        }
-                        required
-                        className="h-14 rounded-xl bg-gray-800 border-gray-700 text-white text-lg placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Step 3: Contact */}
-              {currentStep === 3 && (
-                <div className="space-y-6">
-                  <div className="text-center mb-8">
-                    <h3 className="text-xl font-semibold text-white mb-2">How can others reach you?</h3>
-                    <p className="text-gray-400">This information helps buyers and sellers connect with you</p>
-                  </div>
-                  
-                  <div className="space-y-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="phone" className="text-gray-300 font-medium">Mobile Phone Number</Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        placeholder="e.g., (555) 123-4567"
-                        className="h-14 rounded-xl bg-gray-800 border-gray-700 text-white text-lg placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
-                      />
+                        <div className="flex-1">
+                          <Label htmlFor="terms_of_service" className="text-white font-semibold text-base cursor-pointer flex items-center gap-2">
+                            <FileText className="w-5 h-5 text-pink-400" />
+                            Terms of Service
+                          </Label>
+                          <p className="text-sm text-gray-400 mt-2">
+                            I agree to follow the GarageSale Terms of Service, which govern my use of the platform, including buying, selling, and trading items.
+                          </p>
+                          <a href={createPageUrl('Terms')} target="_blank" className="text-sm text-pink-400 hover:text-pink-300 underline mt-2 inline-block">
+                            Read Full Terms of Service →
+                          </a>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="bg-blue-900/20 border border-blue-700/50 rounded-xl p-6">
-                      <h4 className="font-semibold text-blue-300 mb-2">Privacy Note</h4>
-                      <p className="text-sm text-blue-200">
-                        Your contact information is only shared with other users when you're actively buying or selling items. 
-                        We never share your information with third parties.
-                      </p>
+                    {/* Privacy Policy */}
+                    <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
+                      <div className="flex items-start gap-4">
+                        <Checkbox
+                          id="privacy_policy"
+                          checked={termsAcceptance.privacy_policy}
+                          onCheckedChange={(checked) => 
+                            setTermsAcceptance(prev => ({ ...prev, privacy_policy: checked }))
+                          }
+                          className="mt-1 data-[state=checked]:bg-pink-600 data-[state=checked]:border-pink-600"
+                        />
+                        <div className="flex-1">
+                          <Label htmlFor="privacy_policy" className="text-white font-semibold text-base cursor-pointer flex items-center gap-2">
+                            <Shield className="w-5 h-5 text-pink-400" />
+                            Privacy Policy
+                          </Label>
+                          <p className="text-sm text-gray-400 mt-2">
+                            I understand how GarageSale collects, uses, and protects my personal information as described in the Privacy Policy.
+                          </p>
+                          <a href={createPageUrl('Privacy')} target="_blank" className="text-sm text-pink-400 hover:text-pink-300 underline mt-2 inline-block">
+                            Read Privacy Policy →
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Acceptable Use Policy */}
+                    <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
+                      <div className="flex items-start gap-4">
+                        <Checkbox
+                          id="acceptable_use"
+                          checked={termsAcceptance.acceptable_use}
+                          onCheckedChange={(checked) => 
+                            setTermsAcceptance(prev => ({ ...prev, acceptable_use: checked }))
+                          }
+                          className="mt-1 data-[state=checked]:bg-pink-600 data-[state=checked]:border-pink-600"
+                        />
+                        <div className="flex-1">
+                          <Label htmlFor="acceptable_use" className="text-white font-semibold text-base cursor-pointer flex items-center gap-2">
+                            <AlertCircle className="w-5 h-5 text-pink-400" />
+                            Acceptable Use Agreement
+                          </Label>
+                          <p className="text-sm text-gray-400 mt-2 mb-3">
+                            I agree to use GarageSale responsibly and will not:
+                          </p>
+                          <ul className="text-sm text-gray-400 space-y-1.5 ml-4 list-disc">
+                            <li>Post illegal, illicit, or prohibited items</li>
+                            <li>Spam or flood the platform with excessive listings</li>
+                            <li>Harass, abuse, or mislead other users</li>
+                            <li>Violate intellectual property rights</li>
+                            <li>Engage in fraudulent or deceptive practices</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Warning Notice */}
+                    <div className="bg-yellow-900/20 border border-yellow-700/50 rounded-xl p-6">
+                      <div className="flex items-start gap-3">
+                        <AlertCircle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="font-semibold text-yellow-300 mb-2">Important Notice</h4>
+                          <p className="text-sm text-yellow-200">
+                            By accepting these terms, you acknowledge that violation of any of these policies may result in suspension or permanent removal from the platform. GarageSale reserves the right to moderate content and take appropriate action against policy violations.
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -410,10 +478,10 @@ export default function Onboarding() {
                 </Button>
 
                 <div className="flex items-center gap-2 text-sm text-gray-400">
-                  <span>Step {currentStep} of 3</span>
+                  <span>Step {currentStep} of 2</span>
                 </div>
 
-                {currentStep < 3 ? (
+                {currentStep < 2 ? (
                   <Button
                     type="button"
                     onClick={handleNextStep}
@@ -437,7 +505,7 @@ export default function Onboarding() {
                       </>
                     ) : (
                       <>
-                        Complete Setup
+                        Accept & Complete Setup
                         <CheckCircle className="w-4 h-4 ml-2" />
                       </>
                     )}
