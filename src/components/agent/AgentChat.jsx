@@ -107,18 +107,9 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
   return (
     <Card className="bg-gray-900/80 border-gray-800 shadow-xl">
       <CardHeader className="border-b border-gray-800 bg-gradient-to-r from-purple-900/20 to-pink-900/20">
-        <CardTitle className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg">
-            <Bot className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <div className="text-white flex items-center gap-2">
-              AI Sales Assistant
-              <Sparkles className="w-4 h-4 text-yellow-400" />
-            </div>
-            <div className="text-xs text-gray-400 font-normal mt-0.5">
-              Ask questions or make an offer!
-            </div>
+        <CardTitle className="flex items-center justify-center">
+          <div className="p-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl shadow-lg">
+            <Bot className="w-6 h-6 text-white" />
           </div>
         </CardTitle>
       </CardHeader>

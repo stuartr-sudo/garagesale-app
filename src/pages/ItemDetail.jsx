@@ -148,7 +148,9 @@ export default function ItemDetail() {
   }
 
   const images = item.image_urls || [];
-  const primaryImage = images[selectedImage] || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800";
+  // Filter out invalid blob URLs and use fallback
+  const validImages = images.filter(img => img && !img.startsWith('blob:'));
+  const primaryImage = validImages[selectedImage] || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 to-gray-900 p-4 md:p-8">
@@ -164,29 +166,34 @@ export default function ItemDetail() {
         </Button>
       </div>
 
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column - Images & Details */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Main Image */}
-          <Card className="bg-gray-900 border-gray-800 overflow-hidden">
-            <div className="aspect-[4/3] relative">
-              <img
-                src={primaryImage}
-                alt={item.title}
-                className="w-full h-full object-cover"
-              />
-              {item.price === 0 && (
-                <Badge className="absolute top-4 right-4 bg-lime-500 text-black font-bold text-lg px-4 py-2">
-                  Free
-                </Badge>
-              )}
-            </div>
+      <div className="max-w-7xl mx-auto">
+        {/* Mobile-First Layout: Image, Price, and Key Info Above Fold */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Images & Details */}
+          <div className="lg:col-span-2 space-y-4">
+            {/* Main Image - Optimized for mobile */}
+            <Card className="bg-gray-900 border-gray-800 overflow-hidden">
+              <div className="aspect-[4/3] md:aspect-[16/10] relative">
+                <img
+                  src={primaryImage}
+                  alt={item.title}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.src = "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800";
+                  }}
+                />
+                {item.price === 0 && (
+                  <Badge className="absolute top-4 right-4 bg-lime-500 text-black font-bold text-lg px-4 py-2">
+                    Free
+                  </Badge>
+                )}
+              </div>
             
             {/* Thumbnail Gallery */}
-            {images.length > 1 && (
+            {validImages.length > 1 && (
               <div className="p-4 bg-gray-950/50 border-t border-gray-800">
                 <div className="flex gap-2 overflow-x-auto">
-                  {images.map((img, idx) => (
+                  {validImages.map((img, idx) => (
                     <button
                       key={idx}
                       onClick={() => setSelectedImage(idx)}
@@ -208,14 +215,14 @@ export default function ItemDetail() {
             )}
           </Card>
 
-          {/* Item Details */}
-          <Card className="bg-gray-900 border-gray-800">
-            <CardContent className="p-6 space-y-6">
-              <div>
-                <div className="flex items-start justify-between mb-4">
+            {/* Compact Item Details - Above the fold on mobile */}
+            <Card className="bg-gray-900 border-gray-800">
+              <CardContent className="p-4 space-y-4">
+                {/* Title and Price - Most Important Info */}
+                <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h1 className="text-3xl font-bold text-white mb-2">{item.title}</h1>
-                    <div className="flex items-center gap-4 text-gray-400 text-sm">
+                    <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">{item.title}</h1>
+                    <div className="flex items-center gap-3 text-gray-400 text-sm">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
                         {formatDistanceToNow(new Date(item.created_date), { addSuffix: true })}
@@ -238,70 +245,79 @@ export default function ItemDetail() {
                   </Button>
                 </div>
 
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="text-4xl font-bold text-cyan-400">
+                {/* Price and Condition - Prominent Display */}
+                <div className="flex items-center justify-between">
+                  <div className="text-3xl md:text-4xl font-bold text-cyan-400">
                     {item.price === 0 ? 'Free' : `$${item.price}`}
                   </div>
-                  <Badge variant="secondary" className="capitalize">
-                    {item.condition?.replace('_', ' ')}
-                  </Badge>
-                  <Badge variant="outline" className="capitalize">
-                    <Tag className="w-3 h-3 mr-1" />
-                    {item.category?.replace('_', ' ')}
-                  </Badge>
+                  <div className="flex gap-2">
+                    <Badge variant="secondary" className="capitalize">
+                      {item.condition?.replace('_', ' ')}
+                    </Badge>
+                    <Badge variant="outline" className="capitalize">
+                      <Tag className="w-3 h-3 mr-1" />
+                      {item.category?.replace('_', ' ')}
+                    </Badge>
+                  </div>
                 </div>
 
-                <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">
+                {/* Description - Compact */}
+                <p className="text-gray-300 leading-relaxed text-sm md:text-base line-clamp-3">
                   {item.description}
                 </p>
 
+                {/* Tags - Compact */}
                 {item.tags && item.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    {item.tags.map((tag, idx) => (
-                      <Badge key={idx} variant="outline" className="text-gray-400">
+                  <div className="flex flex-wrap gap-1">
+                    {item.tags.slice(0, 3).map((tag, idx) => (
+                      <Badge key={idx} variant="outline" className="text-xs text-gray-400">
                         {tag}
                       </Badge>
                     ))}
+                    {item.tags.length > 3 && (
+                      <Badge variant="outline" className="text-xs text-gray-400">
+                        +{item.tags.length - 3} more
+                      </Badge>
+                    )}
                   </div>
                 )}
-              </div>
+              </CardContent>
+            </Card>
 
-              {/* Seller Info */}
-              {seller && (
-                <div className="border-t border-gray-800 pt-6">
-                  <h3 className="font-semibold text-white mb-3">Seller Information</h3>
+            {/* Seller Info - Compact */}
+            {seller && (
+              <Card className="bg-gray-900 border-gray-800">
+                <CardContent className="p-4">
+                  <h3 className="font-semibold text-white mb-3 text-sm">Seller Information</h3>
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="text-white font-medium">{seller.full_name}</div>
                       {seller.rating_count > 0 && (
-                        <div className="flex items-center gap-1 text-yellow-400 text-sm mt-1">
-                          <Star className="w-4 h-4 fill-yellow-400" />
+                        <div className="flex items-center gap-1 text-yellow-400 text-xs mt-1">
+                          <Star className="w-3 h-3 fill-yellow-400" />
                           <span>{seller.average_rating?.toFixed(1)} ({seller.rating_count} reviews)</span>
                         </div>
                       )}
                     </div>
                   </div>
-                </div>
-              )}
+                </CardContent>
+              </Card>
+            )}
 
-              {/* Action Buttons */}
-              <div className="border-t border-gray-800 pt-6">
-                <Button
-                  onClick={() => setShowPurchaseModal(true)}
-                  className="w-full h-14 bg-gradient-to-r from-pink-600 to-fuchsia-600 hover:from-pink-700 hover:to-fuchsia-700 text-white font-bold text-lg rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300"
-                >
-                  <ShoppingCart className="w-5 h-5 mr-2" />
-                  {item.price === 0 ? 'Claim This Item' : 'Buy Now'}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            {/* Action Button - Prominent */}
+            <Button
+              onClick={() => setShowPurchaseModal(true)}
+              className="w-full h-12 md:h-14 bg-gradient-to-r from-pink-600 to-fuchsia-600 hover:from-pink-700 hover:to-fuchsia-700 text-white font-bold text-base md:text-lg rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300"
+            >
+              <ShoppingCart className="w-5 h-5 mr-2" />
+              {item.price === 0 ? 'Claim This Item' : 'Buy Now'}
+            </Button>
+          </div>
 
         {/* Right Column - AI Agent Chat */}
         <div className="lg:col-span-1">
           {hasAgentEnabled ? (
-            <div className="sticky top-8">
+            <div className="sticky top-4">
               <AgentChat
                 itemId={item.id}
                 itemTitle={item.title}
