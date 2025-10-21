@@ -55,8 +55,7 @@ export default function AddItem() {
     image_urls: []
   });
   
-  const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
-  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
+  const [isGeneratingContent, setIsGeneratingContent] = useState(false);
   const [isGeneratingTags, setIsGeneratingTags] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -170,8 +169,72 @@ export default function AddItem() {
 
     const mainImageUrl = itemData.image_urls[0];
 
-    if (field === 'title') {
-      setIsGeneratingTitle(true);
+    if (field === 'both') {
+      setIsGeneratingContent(true);
+      try {
+        // Generate both title and description in a single AI call
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o',
+            messages: [
+              {
+                role: 'user',
+                content: [
+                  {
+                    type: 'text',
+                    text: 'Analyze this image and generate:\n1. A short, catchy marketplace listing title (max 60 characters)\n2. A detailed, compelling product description (max 200 words) that includes key features, condition, and benefits.\n\nReturn in JSON format: {"title": "...", "description": "..."}'
+                  },
+                  {
+                    type: 'image_url',
+                    image_url: {
+                      url: mainImageUrl,
+                      detail: 'high'
+                    }
+                  }
+                ]
+              }
+            ],
+            max_tokens: 500,
+            response_format: { type: "json_object" }
+          })
+        });
+
+        const data = await response.json();
+        
+        if (data.error) {
+          throw new Error(data.error.message || 'Failed to analyze image');
+        }
+        
+        const result = JSON.parse(data.choices[0].message.content);
+        const generatedTitle = result.title.trim().replace(/^["']|["']$/g, '');
+        const generatedDescription = result.description.trim();
+        
+        setItemData(prev => ({ 
+          ...prev, 
+          title: generatedTitle,
+          description: generatedDescription 
+        }));
+        toast({ 
+          title: "Success!", 
+          description: "Title and description generated from image with AI." 
+        });
+      } catch (error) {
+        console.error("Error generating content:", error);
+        toast({ 
+          title: "Error", 
+          description: error.message || "Failed to generate content.", 
+          variant: "destructive" 
+        });
+      } finally {
+        setIsGeneratingContent(false);
+      }
+    } else if (field === 'title') {
+      setIsGeneratingContent(true);
       try {
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
@@ -221,10 +284,10 @@ export default function AddItem() {
           variant: "destructive" 
         });
       } finally {
-        setIsGeneratingTitle(false);
+        setIsGeneratingContent(false);
       }
     } else if (field === 'description') {
-      setIsGeneratingDescription(true);
+      setIsGeneratingContent(true);
       try {
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
@@ -274,7 +337,7 @@ export default function AddItem() {
           variant: "destructive" 
         });
       } finally {
-        setIsGeneratingDescription(false);
+        setIsGeneratingContent(false);
       }
     } else if (field === 'tags') {
       setIsGeneratingTags(true);
@@ -442,28 +505,35 @@ export default function AddItem() {
               <p className="text-gray-400">Tell buyers about your item</p>
             </div>
 
+            {/* Single AI Generation Button */}
+            <div className="flex justify-center mb-6">
+              <Button
+                type="button"
+                onClick={() => generateWithAI('both')}
+                disabled={isGeneratingContent}
+                variant="outline"
+                size="lg"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-purple-500"
+              >
+                {isGeneratingContent ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Generating with AI...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Generate Title & Description with AI
+                  </>
+                )}
+              </Button>
+            </div>
+
             <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                <Label htmlFor="title" className="text-gray-300">Title *</Label>
-                  <Button
-                    type="button"
-                  onClick={() => generateWithAI('title')}
-                  disabled={isGeneratingTitle}
-                    variant="outline"
-                  size="sm"
-                  className="bg-purple-600 hover:bg-purple-700 text-white border-purple-500"
-                >
-                  {isGeneratingTitle ? (
-                    <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                  ) : (
-                    <Sparkles className="w-3 h-3 mr-1" />
-                  )}
-                  Generate with AI
-                  </Button>
-                </div>
-                    <Input
-                      id="title"
-                      value={itemData.title}
+              <Label htmlFor="title" className="text-gray-300">Title *</Label>
+              <Input
+                id="title"
+                value={itemData.title}
                 onChange={(e) => setItemData(prev => ({ ...prev, title: e.target.value }))}
                 placeholder="e.g., iPhone 13 Pro 256GB - Like New"
                 className="bg-gray-800 border-gray-700 text-white"
@@ -471,24 +541,7 @@ export default function AddItem() {
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="description" className="text-gray-300">Description *</Label>
-                <Button
-                  type="button"
-                  onClick={() => generateWithAI('description')}
-                  disabled={isGeneratingDescription}
-                  variant="outline"
-                  size="sm"
-                  className="bg-purple-600 hover:bg-purple-700 text-white border-purple-500"
-                >
-                  {isGeneratingDescription ? (
-                    <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                  ) : (
-                    <Sparkles className="w-3 h-3 mr-1" />
-                  )}
-                  Generate with AI
-                </Button>
-              </div>
+              <Label htmlFor="description" className="text-gray-300">Description *</Label>
               <Textarea
                 id="description"
                 value={itemData.description}
@@ -496,8 +549,8 @@ export default function AddItem() {
                 placeholder="Describe your item in detail..."
                 rows={6}
                 className="bg-gray-800 border-gray-700 text-white"
-                    />
-                  </div>
+              />
+            </div>
           </div>
         );
 
