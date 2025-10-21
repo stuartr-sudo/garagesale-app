@@ -12,7 +12,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: false,  // DISABLED: No auto refresh
     persistSession: false,    // DISABLED: No session persistence
     detectSessionInUrl: false, // DISABLED: Don't process OAuth callbacks
-    flowType: 'pkce'
+    flowType: 'pkce',
+    redirectTo: 'https://garage-sale-40afc1f5.vercel.app/marketplace'
   }
 });
 
