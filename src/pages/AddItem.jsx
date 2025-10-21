@@ -63,8 +63,13 @@ export default function AddItem() {
 
   const loadCurrentUser = async () => {
     try {
-      const user = await User.me();
-      setCurrentUser(user);
+      // TEMPORARILY: Skip authentication entirely
+      setCurrentUser({
+        id: 'guest-user',
+        email: 'guest@example.com',
+        full_name: 'Guest User',
+        account_type: 'individual'
+      });
     } catch (error) {
       console.error("Error loading user:", error);
       // Handle unauthenticated user - redirect to login or show message

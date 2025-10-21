@@ -131,8 +131,13 @@ export default function Layout({ children, currentPageName }) {
     const fetchUser = async () => {
       setLoading(true);
       try {
-        const user = await User.me();
-        setCurrentUser(user);
+        // TEMPORARILY: Skip authentication entirely
+        setCurrentUser({
+          id: 'guest-user',
+          email: 'guest@example.com',
+          full_name: 'Guest User',
+          account_type: 'individual'
+        });
       } catch (error) {
         // TEMPORARILY DISABLED: Allow access without authentication
         // Create a mock user for testing
