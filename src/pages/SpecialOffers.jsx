@@ -297,9 +297,9 @@ export default function SpecialOffers() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-gray-900 border-gray-700 text-white">
-                      <SelectItem value="bogo" className="text-white hover:bg-gray-800 focus:bg-gray-800 cursor-pointer">Buy One Get One Free (BOGO)</SelectItem>
-                      <SelectItem value="percentage_off" className="text-white hover:bg-gray-800 focus:bg-gray-800 cursor-pointer">Percentage Off</SelectItem>
-                      <SelectItem value="bulk_discount" className="text-white hover:bg-gray-800 focus:bg-gray-800 cursor-pointer">Bulk Discount</SelectItem>
+                      <SelectItem value="bogo" className="text-white hover:bg-cyan-600 hover:text-white focus:bg-cyan-600 focus:text-white cursor-pointer">Buy One Get One Free (BOGO)</SelectItem>
+                      <SelectItem value="percentage_off" className="text-white hover:bg-cyan-600 hover:text-white focus:bg-cyan-600 focus:text-white cursor-pointer">Percentage Off</SelectItem>
+                      <SelectItem value="bulk_discount" className="text-white hover:bg-cyan-600 hover:text-white focus:bg-cyan-600 focus:text-white cursor-pointer">Bulk Discount</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
