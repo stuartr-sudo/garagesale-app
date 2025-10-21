@@ -10,6 +10,13 @@ const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 const openaiApiKey = process.env.VITE_OPENAI_API_KEY;
 
+// Debug environment variables
+console.log('Environment check:', {
+  supabaseUrl: !!supabaseUrl,
+  supabaseServiceKey: !!supabaseServiceKey,
+  openaiApiKey: !!openaiApiKey
+});
+
 const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   auth: { autoRefreshToken: false, persistSession: false }
 });
@@ -19,6 +26,18 @@ const openai = new OpenAI({ apiKey: openaiApiKey });
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // Check environment variables
+  if (!supabaseUrl || !supabaseServiceKey || !openaiApiKey) {
+    console.error('Missing environment variables:', {
+      supabaseUrl: !!supabaseUrl,
+      supabaseServiceKey: !!supabaseServiceKey,
+      openaiApiKey: !!openaiApiKey
+    });
+    return res.status(500).json({ 
+      error: 'Server configuration error - missing environment variables' 
+    });
   }
 
   try {
