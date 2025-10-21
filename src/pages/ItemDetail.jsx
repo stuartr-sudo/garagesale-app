@@ -227,9 +227,9 @@ export default function ItemDetail() {
   const primaryImage = validImages[selectedImage] || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 to-gray-900 pt-2 px-4 pb-4 md:px-8 md:pb-8 md:pt-2 overflow-x-hidden" style={{ scrollBehavior: 'auto' }}>
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 to-gray-900 px-4 pb-4 md:px-8 md:pb-8 overflow-x-hidden" style={{ scrollBehavior: 'auto' }}>
       {/* Back Button */}
-      <div className="max-w-7xl mx-auto mb-2">
+      <div className="max-w-7xl mx-auto py-2">
         <Button
           variant="ghost"
           onClick={() => navigate(createPageUrl('Marketplace'))}
@@ -240,7 +240,7 @@ export default function ItemDetail() {
         </Button>
       </div>
 
-      <div className="max-w-7xl mx-auto transform scale-90">
+      <div className="max-w-7xl mx-auto">
         {/* Desktop/Mobile Layout: New structured layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Left Column - Image, Title, Price, Description */}
@@ -248,7 +248,7 @@ export default function ItemDetail() {
             {/* Image Carousel Card */}
             <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10 overflow-hidden">
               <div 
-                className="relative h-56 md:h-64 lg:h-72 cursor-pointer"
+                className="relative h-80 md:h-96 lg:h-[500px] cursor-pointer"
                 onClick={() => setIsImageFullscreen(true)}
               >
                 <img
