@@ -26,7 +26,8 @@ import {
   Building,
   RefreshCw, // For Trade Offers
   DollarSign, // For Connect page
-  Tag // For Special Offers
+  Tag, // For Special Offers
+  Clock // For Payment Confirmations
 } from "lucide-react";
 import { User } from "@/api/entities";
 import { Button } from "@/components/ui/button";
