@@ -130,23 +130,48 @@ export default async function handler(req, res) {
     let offerAccepted = false;
     let isSecondNegotiation = false;
     
-    if (knowledge?.minimum_price && isOffer && offerAmount) {
+    console.log('🔍 NEGOTIATION DEBUG:', {
+      isOffer,
+      offerAmount,
+      itemPrice: item.price,
+      minimumPrice: knowledge?.minimum_price,
+      hasKnowledge: !!knowledge
+    });
+    
+    if (isOffer && offerAmount) {
       const askingPrice = parseFloat(item.price);
-      const minimumPrice = parseFloat(knowledge.minimum_price);
+      const minimumPrice = knowledge?.minimum_price ? parseFloat(knowledge.minimum_price) : askingPrice * 0.7; // Default to 70% if no minimum set
       const negotiationHistory = conversation.negotiation_history || [];
+      
+      console.log('💰 PRICE COMPARISON:', {
+        offerAmount,
+        askingPrice,
+        minimumPrice,
+        isAboveAsking: offerAmount >= askingPrice,
+        isBelowMinimum: offerAmount < minimumPrice,
+        isBetween: offerAmount >= minimumPrice && offerAmount < askingPrice
+      });
       
       // Check if this is a second negotiation (user already got a counter-offer)
       const previousCounter = negotiationHistory.find(h => h.counter_offer);
       isSecondNegotiation = !!previousCounter;
       
+      console.log('📊 NEGOTIATION STATE:', {
+        isSecondNegotiation,
+        previousCounter: previousCounter?.counter_offer,
+        negotiationHistoryLength: negotiationHistory.length
+      });
+      
       if (offerAmount >= askingPrice) {
         // CASE 1: Offer at or above asking - ACCEPT immediately
         offerAccepted = true;
         negotiationStrategy = `✅ ACCEPT this offer of $${offerAmount} immediately! Say: "Thank you for your offer! I can absolutely accept $${offerAmount} for this item. Click the button below to proceed with payment."`;
+        console.log('✅ CASE 1: Accepting offer at/above asking');
         
       } else if (offerAmount < minimumPrice) {
         // CASE 2: Offer below minimum - POLITELY DECLINE (no counter-offer)
         negotiationStrategy = `❌ This offer of $${offerAmount} is below minimum ($${minimumPrice}). Politely decline WITHOUT revealing the exact minimum. Say something like: "Thank you for your interest! However, I'm unable to accept $${offerAmount} for this item. Given its quality and condition, the listed price of $${askingPrice} truly reflects its value. Let me know if you'd like to reconsider!"`;
+        console.log('❌ CASE 2: Declining offer below minimum');
         
       } else if (isSecondNegotiation && previousCounter) {
         // CASE 3: SECOND negotiation - Calculate between previous counter and new offer (FINAL OFFER)
@@ -156,6 +181,7 @@ export default async function handler(req, res) {
           // User accepted or exceeded our counter - ACCEPT
           offerAccepted = true;
           negotiationStrategy = `✅ ACCEPT this offer of $${offerAmount}! They met/exceeded your previous counter of $${previousCounterAmount}. Say: "Thank you for your offer! I can absolutely accept $${offerAmount} for this item. Click the button below to proceed with payment."`;
+          console.log('✅ CASE 3A: Accepting offer that met previous counter');
         } else {
           // Calculate FINAL counter between previous counter and new offer
           const gap = previousCounterAmount - offerAmount;
@@ -165,6 +191,7 @@ export default async function handler(req, res) {
           counterOfferAmount = Math.max(minimumPrice, counterOfferAmount);
           
           negotiationStrategy = `🔄 FINAL COUNTER: This is the second negotiation. Your previous counter was $${previousCounterAmount}, they offered $${offerAmount}. Counter with $${counterOfferAmount} (split the difference) as your FINAL offer. Say: "I appreciate you working with me! To meet you halfway, I can offer $${counterOfferAmount} as my final price. This is truly the best I can do for such a quality item. What do you think?"`;
+          console.log('🔄 CASE 3B: Final counter-offer', { counterOfferAmount });
         }
         
       } else {
@@ -177,6 +204,7 @@ export default async function handler(req, res) {
         counterOfferAmount = Math.max(minimumPrice, Math.max(offerAmount + 10, counterOfferAmount));
         
         negotiationStrategy = `🔄 FIRST COUNTER: Offer of $${offerAmount} is between minimum ($${minimumPrice}) and asking ($${askingPrice}). Counter with $${counterOfferAmount} (65-75% of gap). Say: "Thank you for your offer! I appreciate your interest. Given the quality and condition of this item, I'd be willing to accept $${counterOfferAmount}. I think that's a fair price that reflects its true value. Would that work for you?"`;
+        console.log('🔄 CASE 4: First counter-offer', { gap, randomPercentage, counterOfferAmount });
       }
     }
 
