@@ -56,6 +56,21 @@ export default function EditItem() {
     image_urls: []
   });
 
+  // Safety function to ensure arrays are always arrays
+  const ensureArray = (value) => {
+    if (Array.isArray(value)) return value;
+    if (value === null || value === undefined) return [];
+    if (typeof value === 'string') return value.split(',').filter(Boolean);
+    return [];
+  };
+
+  // Safety function to ensure string values
+  const ensureString = (value) => {
+    if (typeof value === 'string') return value;
+    if (value === null || value === undefined) return '';
+    return String(value);
+  };
+
   useEffect(() => {
     loadUserAndItem();
   }, [id]);
@@ -111,17 +126,17 @@ export default function EditItem() {
         tags: item.tags
       });
       
-      // Populate form with existing data - with extensive validation
+      // Populate form with existing data - with BULLETPROOF validation
       const newItemData = {
-        title: String(item.title || ""),
-        description: String(item.description || ""),
-        price: item.price ? String(item.price) : "",
-        minimum_price: item.minimum_price ? String(item.minimum_price) : "",
-        condition: item.condition || "good",
-        category: item.category || "other",
-        postcode: item.postcode || user.postcode || "",
-        tags: Array.isArray(item.tags) ? item.tags : [],
-        image_urls: validImageUrls
+        title: ensureString(item.title),
+        description: ensureString(item.description),
+        price: ensureString(item.price),
+        minimum_price: ensureString(item.minimum_price),
+        condition: ensureString(item.condition) || "good",
+        category: ensureString(item.category) || "other",
+        postcode: ensureString(item.postcode) || ensureString(user.postcode),
+        tags: ensureArray(item.tags),
+        image_urls: ensureArray(validImageUrls)
       };
       
       console.log("Setting item data:", newItemData);
@@ -471,11 +486,13 @@ export default function EditItem() {
                 />
               )}
 
-              {itemData.image_urls && Array.isArray(itemData.image_urls) && itemData.image_urls.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-                  {itemData.image_urls
-                    .filter(url => url && typeof url === 'string')
-                    .map((url, index) => (
+              {(() => {
+                const safeImageUrls = ensureArray(itemData.image_urls);
+                return safeImageUrls.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                    {safeImageUrls
+                      .filter(url => url && typeof url === 'string')
+                      .map((url, index) => (
                     <div key={`${url}-${index}`} className="relative group">
                       <img 
                         src={url} 
@@ -499,8 +516,9 @@ export default function EditItem() {
                       )}
                     </div>
                   ))}
-                </div>
-              )}
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Submit Button */}
