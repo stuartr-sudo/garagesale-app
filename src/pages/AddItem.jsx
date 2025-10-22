@@ -62,6 +62,8 @@ export default function AddItem() {
   const [isUploading, setIsUploading] = useState(false);
   const [showVoiceInput, setShowVoiceInput] = useState(false);
   const [voiceTargetField, setVoiceTargetField] = useState('description');
+  const [voiceTranscription, setVoiceTranscription] = useState('');
+  const [hasVoiceInput, setHasVoiceInput] = useState(false);
 
   useEffect(() => {
     loadUser();
@@ -80,6 +82,10 @@ export default function AddItem() {
   };
 
   const handleVoiceTranscript = (transcript) => {
+    // Store the voice transcription for AI optimization
+    setVoiceTranscription(transcript);
+    setHasVoiceInput(true);
+    
     if (voiceTargetField === 'title') {
       setItemData(prev => ({ ...prev, title: transcript }));
     } else if (voiceTargetField === 'description') {
@@ -189,6 +195,15 @@ export default function AddItem() {
     if (field === 'both') {
       setIsGeneratingContent(true);
       try {
+        // Build the prompt based on whether we have voice input
+        let promptText = 'Analyze this image and generate:\n1. A short, catchy marketplace listing title (max 60 characters)\n2. A detailed, compelling product description (max 200 words) that includes key features, condition, and benefits.';
+        
+        if (hasVoiceInput && voiceTranscription) {
+          promptText += `\n\nIMPORTANT: The seller has provided additional context via voice input: "${voiceTranscription}"\n\nUse this voice context to enhance and personalize the title and description. The voice input contains the seller's own description of the item, so incorporate this information to make the listing more accurate and compelling.`;
+        }
+        
+        promptText += '\n\nReturn in JSON format: {"title": "...", "description": "..."}';
+
         // Generate both title and description in a single AI call
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
@@ -204,7 +219,7 @@ export default function AddItem() {
                 content: [
                   {
                     type: 'text',
-                    text: 'Analyze this image and generate:\n1. A short, catchy marketplace listing title (max 60 characters)\n2. A detailed, compelling product description (max 200 words) that includes key features, condition, and benefits.\n\nReturn in JSON format: {"title": "...", "description": "..."}'
+                    text: promptText
                   },
                   {
                     type: 'image_url',
@@ -238,7 +253,7 @@ export default function AddItem() {
         }));
         toast({ 
           title: "Success!", 
-          description: "Title and description generated from image with AI." 
+          description: hasVoiceInput ? "Title and description generated using both image and voice input!" : "Title and description generated from image with AI." 
         });
       } catch (error) {
         console.error("Error generating content:", error);
@@ -440,21 +455,24 @@ export default function AddItem() {
 
       if (itemError) throw itemError;
 
-      // Create item_knowledge entry if minimum_price is provided
-      if (itemData.minimum_price) {
-        const knowledgePayload = {
-          item_id: newItem.id,
-          minimum_price: parseFloat(itemData.minimum_price),
-          negotiation_enabled: true,
-          selling_points: [itemData.title, itemData.condition, itemData.category]
-        };
+      // Create item_knowledge entry with voice transcription data
+      const knowledgePayload = {
+        item_id: newItem.id,
+        minimum_price: itemData.minimum_price ? parseFloat(itemData.minimum_price) : null,
+        negotiation_enabled: !!itemData.minimum_price,
+        selling_points: [itemData.title, itemData.condition, itemData.category],
+        additional_info: {
+          voice_transcription: hasVoiceInput ? voiceTranscription : null,
+          has_voice_input: hasVoiceInput,
+          created_with_voice: hasVoiceInput
+        }
+      };
 
-        const { error: knowledgeError } = await supabase
-          .from('item_knowledge')
-          .insert([knowledgePayload]);
+      const { error: knowledgeError } = await supabase
+        .from('item_knowledge')
+        .insert([knowledgePayload]);
 
-        if (knowledgeError) console.error("Error creating item_knowledge:", knowledgeError);
-      }
+      if (knowledgeError) console.error("Error creating item_knowledge:", knowledgeError);
 
       toast({
         title: "Success!",
@@ -553,6 +571,53 @@ export default function AddItem() {
               </div>
             )}
 
+            {/* Voice-to-Text Capability Question */}
+            {!hasVoiceInput && (
+              <div className="mb-6 p-4 bg-gradient-to-r from-purple-900/20 to-pink-900/20 border border-purple-500/30 rounded-lg">
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold text-white mb-2">🎤 Voice-to-Text Available!</h3>
+                  <p className="text-gray-300 mb-4">
+                    Can you speak to describe your item? This will help AI generate better, more personalized content.
+                  </p>
+                  <div className="flex gap-3 justify-center">
+                    <Button
+                      type="button"
+                      onClick={() => openVoiceInput('description')}
+                      variant="outline"
+                      className="border-purple-500 text-purple-400 hover:bg-purple-500/10"
+                    >
+                      <Mic className="w-4 h-4 mr-2" />
+                      Yes, I can speak
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => setHasVoiceInput(false)}
+                      variant="ghost"
+                      className="text-gray-400 hover:text-white"
+                    >
+                      Skip voice input
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Voice Input Status */}
+            {hasVoiceInput && voiceTranscription && (
+              <div className="mb-6 p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle className="w-5 h-5 text-green-400" />
+                  <span className="text-green-400 font-medium">Voice input captured!</span>
+                </div>
+                <p className="text-gray-300 text-sm">
+                  Your voice description will be used to enhance the AI-generated content.
+                </p>
+                <div className="mt-2 p-2 bg-gray-800 rounded text-sm text-gray-300">
+                  "{voiceTranscription.substring(0, 100)}{voiceTranscription.length > 100 ? '...' : ''}"
+                </div>
+              </div>
+            )}
+
             {/* AI Generation Button */}
             <div className="flex justify-center mb-6">
               <Button
@@ -571,7 +636,7 @@ export default function AddItem() {
                 ) : (
                   <>
                     <Sparkles className="w-4 h-4 mr-2" />
-                    Generate Title & Description with AI
+                    {hasVoiceInput ? "Generate with AI + Voice Input" : "Generate Title & Description with AI"}
                   </>
                 )}
               </Button>

@@ -58,12 +58,17 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: 'Item not found', success: false });
     }
 
-    // Get agent knowledge (including minimum price)
+    // Get agent knowledge (including minimum price and voice data)
     const { data: knowledge } = await supabase
       .from('item_knowledge')
       .select('*')
       .eq('item_id', item_id)
       .single();
+
+    // Extract voice transcription data for enhanced responses
+    const voiceData = knowledge?.additional_info || {};
+    const hasVoiceInput = voiceData.has_voice_input || false;
+    const voiceTranscription = voiceData.voice_transcription || null;
 
     // Get or create conversation
     let conversation;
@@ -218,6 +223,12 @@ Category: ${item.category}
 Condition: ${item.condition}
 ${item.location ? `Location: ${item.location}` : ''}
 ${knowledge?.selling_points ? `Key Selling Points: ${knowledge.selling_points.join(', ')}` : ''}
+${hasVoiceInput && voiceTranscription ? `
+🎤 SELLER'S VOICE DESCRIPTION:
+"${voiceTranscription}"
+
+Use this personal description from the seller to provide more authentic, detailed answers about the item. This is the seller's own words about their item, so reference it when answering questions about features, condition, or history.
+` : ''}
 
 🚨 CRITICAL NEGOTIATION RULES:
 ${knowledge?.minimum_price ? `
