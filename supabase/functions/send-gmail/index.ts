@@ -69,9 +69,28 @@ serve(async (req) => {
     const refreshToken = Deno.env.get('GMAIL_REFRESH_TOKEN')
     const fromEmail = from || Deno.env.get('GMAIL_FROM_EMAIL') || 'noreply@garagesale.com'
 
+    console.log('Environment check:', {
+      hasClientId: !!clientId,
+      hasClientSecret: !!clientSecret,
+      hasRefreshToken: !!refreshToken,
+      fromEmail: fromEmail
+    })
+
     if (!clientId || !clientSecret || !refreshToken) {
+      console.error('Missing Gmail OAuth credentials:', {
+        clientId: clientId ? 'SET' : 'MISSING',
+        clientSecret: clientSecret ? 'SET' : 'MISSING',
+        refreshToken: refreshToken ? 'SET' : 'MISSING'
+      })
+      
       return new Response(JSON.stringify({ 
-        error: 'Gmail OAuth credentials not configured' 
+        error: 'Gmail OAuth credentials not configured',
+        details: {
+          clientId: clientId ? 'SET' : 'MISSING',
+          clientSecret: clientSecret ? 'SET' : 'MISSING',
+          refreshToken: refreshToken ? 'SET' : 'MISSING',
+          fromEmail: fromEmail
+        }
       }), {
         status: 500,
         headers: { 
