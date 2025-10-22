@@ -59,6 +59,26 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
       timestamp: new Date().toISOString()
     }]);
 
+    // Check if user is accepting an offer - handle this case specially
+    if (userMessage.toLowerCase().includes('i accept your offer') || 
+        userMessage.toLowerCase().includes('i accept the offer')) {
+      // Extract the amount from the message
+      const amountMatch = userMessage.match(/\$(\d+(?:,\d{3})*(?:\.\d{2})?)/);
+      const acceptedAmount = amountMatch ? parseFloat(amountMatch[1].replace(/,/g, '')) : null;
+      
+      if (acceptedAmount) {
+        // Add simple agent response without API call
+        setMessages(prev => [...prev, {
+          sender: 'ai',
+          content: "That's great. Please confirm you'd like to proceed?",
+          timestamp: new Date().toISOString(),
+          accepted_offer: acceptedAmount
+        }]);
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
       // Fetch the response
       const response = await fetch('/api/agent-chat', {
