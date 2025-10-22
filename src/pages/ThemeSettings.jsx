@@ -6,49 +6,49 @@ import { Input } from "@/components/ui/input";
 import { Palette, RotateCcw, Save, Eye } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 
-// Default theme presets
+// Default theme presets with hex colors
 const THEME_PRESETS = {
   'Navy to Purple': {
-    cardFrom: 'blue-900',
-    cardTo: 'purple-900',
-    buttonFrom: 'purple-500',
-    buttonTo: 'pink-600',
-    accentColor: 'cyan-400'
+    cardFrom: '#1e3a8a',  // blue-900
+    cardTo: '#581c87',    // purple-900
+    buttonFrom: '#a855f7', // purple-500
+    buttonTo: '#db2777',  // pink-600
+    accentColor: '#22d3ee' // cyan-400
   },
   'Dark Slate': {
-    cardFrom: 'slate-700',
-    cardTo: 'slate-600',
-    buttonFrom: 'purple-500',
-    buttonTo: 'pink-600',
-    accentColor: 'cyan-400'
+    cardFrom: '#334155',  // slate-700
+    cardTo: '#475569',    // slate-600
+    buttonFrom: '#a855f7', // purple-500
+    buttonTo: '#db2777',  // pink-600
+    accentColor: '#22d3ee' // cyan-400
   },
   'Ocean Blue': {
-    cardFrom: 'blue-800',
-    cardTo: 'cyan-900',
-    buttonFrom: 'blue-500',
-    buttonTo: 'cyan-600',
-    accentColor: 'blue-300'
+    cardFrom: '#1e40af',  // blue-800
+    cardTo: '#164e63',    // cyan-900
+    buttonFrom: '#3b82f6', // blue-500
+    buttonTo: '#0891b2',  // cyan-600
+    accentColor: '#93c5fd' // blue-300
   },
   'Sunset': {
-    cardFrom: 'orange-800',
-    cardTo: 'pink-900',
-    buttonFrom: 'orange-500',
-    buttonTo: 'pink-600',
-    accentColor: 'orange-300'
+    cardFrom: '#9a3412',  // orange-800
+    cardTo: '#831843',    // pink-900
+    buttonFrom: '#f97316', // orange-500
+    buttonTo: '#db2777',  // pink-600
+    accentColor: '#fdba74' // orange-300
   },
   'Forest': {
-    cardFrom: 'green-900',
-    cardTo: 'emerald-900',
-    buttonFrom: 'green-500',
-    buttonTo: 'emerald-600',
-    accentColor: 'green-300'
+    cardFrom: '#14532d',  // green-900
+    cardTo: '#064e3b',    // emerald-900
+    buttonFrom: '#22c55e', // green-500
+    buttonTo: '#10b981',  // emerald-600
+    accentColor: '#86efac' // green-300
   },
   'Royal': {
-    cardFrom: 'purple-900',
-    cardTo: 'indigo-900',
-    buttonFrom: 'purple-500',
-    buttonTo: 'indigo-600',
-    accentColor: 'purple-300'
+    cardFrom: '#581c87',  // purple-900
+    cardTo: '#312e81',    // indigo-900
+    buttonFrom: '#a855f7', // purple-500
+    buttonTo: '#6366f1',  // indigo-600
+    accentColor: '#c4b5fd' // purple-300
   }
 };
 
@@ -124,24 +124,36 @@ export default function ThemeSettings() {
                   <div>
                     <Label className="text-sm text-gray-400">From Color</Label>
                     <Input
+                      type="color"
                       value={theme.cardFrom}
                       onChange={(e) => updateThemeField('cardFrom', e.target.value)}
-                      placeholder="e.g., blue-900"
+                      className="h-10 w-full cursor-pointer"
+                    />
+                    <Input
+                      value={theme.cardFrom}
+                      onChange={(e) => updateThemeField('cardFrom', e.target.value)}
+                      placeholder="e.g., #1e3a8a"
                       className="bg-gray-800 border-gray-700 text-white mt-1"
                     />
                   </div>
                   <div>
                     <Label className="text-sm text-gray-400">To Color</Label>
                     <Input
+                      type="color"
                       value={theme.cardTo}
                       onChange={(e) => updateThemeField('cardTo', e.target.value)}
-                      placeholder="e.g., purple-900"
+                      className="h-10 w-full cursor-pointer"
+                    />
+                    <Input
+                      value={theme.cardTo}
+                      onChange={(e) => updateThemeField('cardTo', e.target.value)}
+                      placeholder="e.g., #581c87"
                       className="bg-gray-800 border-gray-700 text-white mt-1"
                     />
                   </div>
                 </div>
                 <p className="text-xs text-gray-500">
-                  Format: color-shade (e.g., blue-900, purple-800)
+                  Format: hex color (e.g., #1e3a8a, #581c87) or use color picker above
                 </p>
               </div>
 
@@ -152,18 +164,30 @@ export default function ThemeSettings() {
                   <div>
                     <Label className="text-sm text-gray-400">From Color</Label>
                     <Input
+                      type="color"
                       value={theme.buttonFrom}
                       onChange={(e) => updateThemeField('buttonFrom', e.target.value)}
-                      placeholder="e.g., purple-500"
+                      className="h-10 w-full cursor-pointer"
+                    />
+                    <Input
+                      value={theme.buttonFrom}
+                      onChange={(e) => updateThemeField('buttonFrom', e.target.value)}
+                      placeholder="e.g., #a855f7"
                       className="bg-gray-800 border-gray-700 text-white mt-1"
                     />
                   </div>
                   <div>
                     <Label className="text-sm text-gray-400">To Color</Label>
                     <Input
+                      type="color"
                       value={theme.buttonTo}
                       onChange={(e) => updateThemeField('buttonTo', e.target.value)}
-                      placeholder="e.g., pink-600"
+                      className="h-10 w-full cursor-pointer"
+                    />
+                    <Input
+                      value={theme.buttonTo}
+                      onChange={(e) => updateThemeField('buttonTo', e.target.value)}
+                      placeholder="e.g., #db2777"
                       className="bg-gray-800 border-gray-700 text-white mt-1"
                     />
                   </div>
@@ -174,9 +198,15 @@ export default function ThemeSettings() {
               <div className="space-y-3">
                 <Label className="text-white text-lg">Accent Color</Label>
                 <Input
+                  type="color"
                   value={theme.accentColor}
                   onChange={(e) => updateThemeField('accentColor', e.target.value)}
-                  placeholder="e.g., cyan-400"
+                  className="h-10 w-full cursor-pointer"
+                />
+                <Input
+                  value={theme.accentColor}
+                  onChange={(e) => updateThemeField('accentColor', e.target.value)}
+                  placeholder="e.g., #22d3ee"
                   className="bg-gray-800 border-gray-700 text-white"
                 />
                 <p className="text-xs text-gray-500">
@@ -216,15 +246,28 @@ export default function ThemeSettings() {
             </CardHeader>
             <CardContent>
               {/* Preview Card */}
-              <div className={`bg-gradient-to-br from-${theme.cardFrom} to-${theme.cardTo} rounded-2xl shadow-2xl p-6 border-2 border-cyan-500/30`}>
+              <div 
+                className="rounded-2xl shadow-2xl p-6 border-2 border-cyan-500/30"
+                style={{
+                  background: `linear-gradient(to bottom right, ${theme.cardFrom}, ${theme.cardTo})`
+                }}
+              >
                 <div className="bg-gray-800 rounded-lg h-48 mb-4 flex items-center justify-center text-gray-500">
                   <span className="text-sm">Item Image</span>
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">Sample Item Title</h3>
-                <div className={`text-3xl font-bold text-${theme.accentColor} mb-4`}>
+                <div 
+                  className="text-3xl font-bold mb-4"
+                  style={{ color: theme.accentColor }}
+                >
                   $99.99
                 </div>
-                <Button className={`w-full bg-gradient-to-r from-${theme.buttonFrom} to-${theme.buttonTo} hover:opacity-90`}>
+                <Button 
+                  className="w-full hover:opacity-90"
+                  style={{
+                    background: `linear-gradient(to right, ${theme.buttonFrom}, ${theme.buttonTo})`
+                  }}
+                >
                   <Eye className="w-4 h-4 mr-2" />
                   View Details
                 </Button>

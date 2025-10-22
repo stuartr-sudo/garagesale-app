@@ -11,15 +11,15 @@ import { getItemSpecialOffers, formatOfferText, getOfferBadgeColor } from '@/api
 export default function ItemCard({ item, seller, isSold = false, currentUser = null }) {
   const primaryImage = item.image_urls?.[0] || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop";
   
-  // Load theme from localStorage
+  // Load theme from localStorage (now using hex colors)
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem('marketplace-theme');
     return saved ? JSON.parse(saved) : {
-      cardFrom: 'blue-900',
-      cardTo: 'purple-900',
-      buttonFrom: 'purple-500',
-      buttonTo: 'pink-600',
-      accentColor: 'cyan-400'
+      cardFrom: '#1e3a8a',  // blue-900
+      cardTo: '#581c87',    // purple-900
+      buttonFrom: '#a855f7', // purple-500
+      buttonTo: '#db2777',  // pink-600
+      accentColor: '#22d3ee' // cyan-400
     };
   });
 
@@ -47,7 +47,12 @@ export default function ItemCard({ item, seller, isSold = false, currentUser = n
   }, [item.id]);
 
   return (
-    <Card className={`bg-gradient-to-br from-${theme.cardFrom} to-${theme.cardTo} rounded-2xl shadow-2xl shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 border-2 border-cyan-500/30 hover:border-cyan-400/60 overflow-hidden group hover:scale-[1.02] flex flex-col h-full ring-1 ring-cyan-400/20 hover:ring-cyan-400/40`}>
+    <Card 
+      className="rounded-2xl shadow-2xl shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 border-2 border-cyan-500/30 hover:border-cyan-400/60 overflow-hidden group hover:scale-[1.02] flex flex-col h-full ring-1 ring-cyan-400/20 hover:ring-cyan-400/40"
+      style={{
+        background: `linear-gradient(to bottom right, ${theme.cardFrom}, ${theme.cardTo})`
+      }}
+    >
       {/* EDIT: Use 4:3 aspect ratio to avoid squashed image */}
       <div className="relative overflow-hidden aspect-[4/3]">
         <img
@@ -113,7 +118,10 @@ export default function ItemCard({ item, seller, isSold = false, currentUser = n
           )}
 
           <div className="flex items-center justify-between mt-3">
-            <div className={`text-2xl font-bold text-${theme.accentColor}`}>
+            <div 
+              className="text-2xl font-bold"
+              style={{ color: theme.accentColor }}
+            >
               {item.price === 0 ? "Free" : `$${item.price}`}
             </div>
             <div className="flex items-center gap-1 text-gray-500 text-xs">
@@ -127,7 +135,10 @@ export default function ItemCard({ item, seller, isSold = false, currentUser = n
           <div className="mt-4">
             <Link to={`/ItemDetail/${item.id}`}>
               <Button
-                className={`w-full h-10 bg-gradient-to-r from-${theme.buttonFrom} to-${theme.buttonTo} hover:opacity-90`}
+                className="w-full h-10 hover:opacity-90"
+                style={{
+                  background: `linear-gradient(to right, ${theme.buttonFrom}, ${theme.buttonTo})`
+                }}
               >
                 <Eye className="w-4 h-4 mr-2" />
                 View Details
