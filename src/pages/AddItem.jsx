@@ -286,14 +286,50 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
     if (field === 'both') {
       setIsGeneratingContent(true);
       try {
-        // Build the prompt based on whether we have voice input
-        let promptText = 'Analyze this image and generate:\n1. A short, catchy marketplace listing title (max 60 characters)\n2. A detailed, compelling product description (max 200 words) that includes key features, condition, and benefits.';
+        // Enhanced prompt for superior product recognition and listing generation
+        let promptText = `Carefully analyze this product image and provide the following:
+
+**TITLE (max 60 characters):**
+Create a concise, searchable title using this exact format:
+[Brand] [Model/Product Type] - [1-2 Key Features] ([Condition])
+
+Guidelines:
+- Start with brand name if visible/identifiable
+- Include specific model numbers or product names
+- Add distinguishing features (color, size, capacity)
+- Use marketplace-friendly language (avoid special characters)
+- Prioritize searchability over creativity
+
+**DESCRIPTION (150-200 words):**
+Write a compelling, structured description with:
+
+1. OPENING: Lead with the product's main value proposition
+2. SPECIFICATIONS: List key technical details, dimensions, materials
+3. CONDITION: Assess and describe condition honestly (New/Like New/Excellent/Good/Fair/Poor)
+   - Note any visible wear, damage, or defects
+   - Highlight if original packaging/accessories are visible
+4. FEATURES & BENEFITS: Emphasize what makes this product desirable
+5. USE CASES: Briefly mention who this is ideal for or how it's used
+
+Style requirements:
+- Use clear, professional language
+- Write in third person or direct product description style
+- Include specific measurements if visible
+- Mention colors, materials, and finishes accurately
+- Avoid exaggeration or unverifiable claims
+- Use bullet points for technical specs if needed
+
+**CATEGORY SUGGESTION:**
+Recommend the most appropriate marketplace category (e.g., "Electronics > Cameras", "Home & Garden > Furniture")
+
+**QUALITY CHECK:**
+If image quality is poor or product is unclear, state: "Image quality insufficient - [specific issue]" and provide best-effort analysis.`;
         
         if (hasVoiceInput && voiceTranscription) {
-          promptText += `\n\nIMPORTANT: The seller has provided additional context via voice input: "${voiceTranscription}"\n\nAnalyze the voice input to intelligently extract:\n- If the seller mentions a title or name for the item, use that as the basis for the title\n- Extract key details, features, condition, and selling points for the description\n- The voice input contains the seller's own description of the item, so incorporate this information to make the listing more accurate and compelling\n- If the voice input is primarily about the title, focus the title on that and use image analysis for description\n- If the voice input is primarily descriptive, use it to enhance the description and let image analysis guide the title`;
+          promptText += `\n\nIMPORTANT: The seller has provided additional context via voice input: "${voiceTranscription}"\n\nUse this voice context to enhance your analysis:\n- If the seller mentions a specific brand, model, or product name, prioritize that information\n- Incorporate the seller's description of condition, features, and use cases\n- The voice input contains the seller's personal knowledge - use it to make the listing more accurate and authentic\n- Combine visual analysis with the seller's verbal description for the most complete product understanding`;
         }
         
-        promptText += '\n\nReturn in JSON format: {"title": "...", "description": "..."}';
+        promptText += '\n\nReturn in JSON format: {"title": "...", "description": "...", "category_suggestion": "...", "quality_note": "..."}';
 
         // Generate both title and description in a single AI call
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -334,8 +370,10 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
         }
         
         const result = JSON.parse(data.choices[0].message.content);
-        const generatedTitle = result.title.trim().replace(/^["']|["']$/g, '');
-        const generatedDescription = result.description.trim();
+        const generatedTitle = result.title?.trim().replace(/^["']|["']$/g, '') || '';
+        const generatedDescription = result.description?.trim() || '';
+        const categorySuggestion = result.category_suggestion?.trim() || '';
+        const qualityNote = result.quality_note?.trim() || '';
         
         setItemData(prev => ({ 
           ...prev, 
@@ -344,6 +382,25 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
           // Append to existing description if it exists, otherwise use generated description
           description: prev.description ? `${prev.description}\n\n${generatedDescription}` : generatedDescription
         }));
+        
+        // Show category suggestion if provided
+        if (categorySuggestion) {
+          toast({
+            title: "Category Suggestion",
+            description: `AI suggests: ${categorySuggestion}`,
+            duration: 5000
+          });
+        }
+        
+        // Show quality note if there are issues
+        if (qualityNote && qualityNote.includes('insufficient')) {
+          toast({
+            title: "Image Quality Note",
+            description: qualityNote,
+            variant: "destructive",
+            duration: 7000
+          });
+        }
         toast({ 
           title: "Success!", 
           description: hasVoiceInput ? "Title and description generated using both image and voice input!" : "Title and description generated from image with AI." 
@@ -375,7 +432,17 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
                 content: [
                   {
                     type: 'text',
-                    text: 'Analyze this image and generate a short, catchy marketplace listing title (max 60 characters). Just return the title, nothing else.'
+                    text: `Analyze this product image and create a concise, searchable title (max 60 characters) using this format:
+[Brand] [Model/Product Type] - [1-2 Key Features] ([Condition])
+
+Guidelines:
+- Start with brand name if visible/identifiable
+- Include specific model numbers or product names
+- Add distinguishing features (color, size, capacity)
+- Use marketplace-friendly language (avoid special characters)
+- Prioritize searchability over creativity
+
+Return only the title, nothing else.`
                   },
                   {
                     type: 'image_url',
@@ -431,7 +498,25 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
                 content: [
                   {
                     type: 'text',
-                    text: 'Analyze this image and generate a detailed, compelling marketplace product description (max 200 words). Include key features, condition, and benefits. Make it engaging for potential buyers. Just return the description, nothing else.'
+                    text: `Analyze this product image and write a compelling, structured description (150-200 words) with:
+
+1. OPENING: Lead with the product's main value proposition
+2. SPECIFICATIONS: List key technical details, dimensions, materials
+3. CONDITION: Assess and describe condition honestly (New/Like New/Excellent/Good/Fair/Poor)
+   - Note any visible wear, damage, or defects
+   - Highlight if original packaging/accessories are visible
+4. FEATURES & BENEFITS: Emphasize what makes this product desirable
+5. USE CASES: Briefly mention who this is ideal for or how it's used
+
+Style requirements:
+- Use clear, professional language
+- Write in third person or direct product description style
+- Include specific measurements if visible
+- Mention colors, materials, and finishes accurately
+- Avoid exaggeration or unverifiable claims
+- Use bullet points for technical specs if needed
+
+Return only the description, nothing else.`
                   },
                   {
                     type: 'image_url',
