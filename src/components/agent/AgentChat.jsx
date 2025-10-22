@@ -285,13 +285,7 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
 
         {/* Input */}
         <div className="border-t border-gray-800 p-4 bg-gray-950/50">
-          {offerAccepted ? (
-            <div className="text-center p-4 bg-green-900/20 border border-green-800 rounded-xl">
-              <CheckCircle className="w-8 h-8 text-green-400 mx-auto mb-2" />
-              <p className="text-green-300 font-semibold">Your offer has been accepted!</p>
-              <p className="text-gray-400 text-sm mt-1">The seller will contact you soon.</p>
-            </div>
-          ) : (
+          {!offerAccepted && (
             <div className="flex gap-2">
               <Input
                 value={input}
