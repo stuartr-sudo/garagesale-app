@@ -87,17 +87,28 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
           setConversationId(data.conversation_id);
         }
 
-        // Extract counter-offer from AI response ONLY if the response suggests a counter-offer
+        // Extract counter-offer from AI response ONLY if the AI is making a counter-offer
+        // Look for specific phrases that indicate the AI is proposing a price, not just mentioning the user's offer
         const responseLower = data.response.toLowerCase();
-        const isCounterOffer = responseLower.includes('counter') || 
+        const isCounterOffer = (responseLower.includes('counter') && responseLower.includes('offer')) || 
                                responseLower.includes('how about') || 
                                responseLower.includes('would you consider') ||
                                responseLower.includes('could you do') ||
-                               responseLower.includes('meet at') ||
-                               responseLower.includes('i can offer');
+                               (responseLower.includes('meet') && responseLower.includes('at')) ||
+                               responseLower.includes('i can offer') ||
+                               responseLower.includes("i'd accept") ||
+                               responseLower.includes("i would accept") ||
+                               responseLower.includes("willing to accept");
+        
+        // Also exclude if the response contains rejection phrases
+        const isRejection = responseLower.includes('below') || 
+                           responseLower.includes('too low') ||
+                           responseLower.includes('cannot accept') ||
+                           responseLower.includes("can't accept") ||
+                           responseLower.includes('decline');
         
         const counterOfferMatch = data.response.match(/\$(\d+(?:,\d{3})*(?:\.\d{2})?)/);
-        const counterOfferAmount = (isCounterOffer && counterOfferMatch) ? parseFloat(counterOfferMatch[1].replace(/,/g, '')) : null;
+        const counterOfferAmount = (isCounterOffer && !isRejection && counterOfferMatch) ? parseFloat(counterOfferMatch[1].replace(/,/g, '')) : null;
 
         // Add AI response
         setMessages(prev => [...prev, {
