@@ -100,7 +100,7 @@ export default function MoreFromSeller({ sellerId, currentItemId }) {
 
   if (isLoading) {
     return (
-      <div className="mt-8 p-8 bg-slate-700/50 rounded-2xl border-2 border-cyan-500/20">
+      <div className="mt-8 p-8 bg-slate-900/50 rounded-2xl border-2 border-cyan-500/20">
         <h2 className="text-2xl font-bold text-white mb-4">More from this Seller</h2>
         <div className="text-center py-8">
           <div className="text-gray-400">Loading more items...</div>
@@ -111,7 +111,7 @@ export default function MoreFromSeller({ sellerId, currentItemId }) {
 
   if (items.length === 0) {
     return (
-      <div className="mt-8 p-8 bg-slate-700/50 rounded-2xl border-2 border-cyan-500/20">
+      <div className="mt-8 p-8 bg-slate-900/50 rounded-2xl border-2 border-cyan-500/20">
         <h2 className="text-2xl font-bold text-white mb-4">More from this Seller</h2>
         <div className="text-center py-8">
           <div className="text-gray-400">This seller doesn't have any other items listed at the moment.</div>
@@ -121,7 +121,7 @@ export default function MoreFromSeller({ sellerId, currentItemId }) {
   }
 
   return (
-    <div className="mt-8 p-6 bg-slate-700/50 rounded-2xl border-2 border-cyan-500/20">
+    <div className="mt-8 p-6 bg-slate-900/50 rounded-2xl border-2 border-cyan-500/20">
       <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
         <span>More from this Seller</span>
         <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30">

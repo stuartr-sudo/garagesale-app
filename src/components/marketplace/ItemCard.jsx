@@ -156,7 +156,7 @@ export default function ItemCard({ item, seller, isSold = false, currentUser = n
   };
 
   return (
-    <Card className="bg-gradient-to-br from-slate-700 to-slate-600 rounded-2xl shadow-2xl shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 border-2 border-cyan-500/30 hover:border-cyan-400/60 overflow-hidden group hover:scale-[1.02] flex flex-col h-full ring-1 ring-cyan-400/20 hover:ring-cyan-400/40">
+    <Card className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-2xl shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 border-2 border-cyan-500/30 hover:border-cyan-400/60 overflow-hidden group hover:scale-[1.02] flex flex-col h-full ring-1 ring-cyan-400/20 hover:ring-cyan-400/40">
       {/* EDIT: Use 4:3 aspect ratio to avoid squashed image */}
       <div className="relative overflow-hidden aspect-[4/3]">
         <img

@@ -134,7 +134,7 @@ export default function RecentlySold({ limit = 10, showLocation = true }) {
             return (
               <div
                 key={sale.id}
-                className="flex gap-3 p-3 rounded-lg bg-slate-700/50 hover:bg-slate-700/70 transition-all border border-slate-600 hover:border-green-500/30 group"
+                className="flex gap-3 p-3 rounded-lg bg-slate-900/50 hover:bg-slate-800/70 transition-all border border-slate-700 hover:border-green-500/30 group"
                 style={{
                   animation: index < 3 ? `slideIn 0.5s ease-out ${index * 0.1}s both` : 'none'
                 }}
