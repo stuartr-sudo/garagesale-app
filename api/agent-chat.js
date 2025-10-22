@@ -8,7 +8,7 @@ import OpenAI from 'openai';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL?.trim();
 const supabaseServiceKey = process.env.NEW_SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
-const openaiApiKey = process.env.VITE_OPENAI_API_KEY;
+const openaiApiKey = process.env.VITE_OPENAI_API_KEY?.trim();
 
 // Verify environment variables are set
 if (!supabaseUrl || !supabaseServiceKey || !openaiApiKey) {
