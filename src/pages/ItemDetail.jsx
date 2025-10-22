@@ -160,11 +160,43 @@ export default function ItemDetail() {
     }
   };
 
-  const handleAcceptOffer = (acceptedAmount) => {
-    // Set the negotiated price and open the purchase modal
-    setNegotiatedPrice(acceptedAmount);
-    setOfferAccepted(true);
-    setShowPurchaseModal(true);
+  const handleAcceptOffer = async (acceptedAmount) => {
+    try {
+      // Set the negotiated price and offer accepted state
+      setNegotiatedPrice(acceptedAmount);
+      setOfferAccepted(true);
+      
+      // Automatically add item to cart with negotiated price
+      const user = await UserEntity.me();
+      const result = await addToCart({
+        itemId: item.id,
+        buyerId: user.id,
+        quantity: 1,
+        negotiatedPrice: acceptedAmount,
+        priceSource: 'negotiated'
+      });
+
+      if (result.success) {
+        setIsInCart(true);
+        toast({
+          title: "Offer Accepted & Added to Cart!",
+          description: `${item.title} has been reserved for 10 minutes at $${acceptedAmount}`,
+        });
+      } else {
+        toast({
+          title: "Offer Accepted",
+          description: `Price negotiated to $${acceptedAmount}, but item could not be added to cart`,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error handling offer acceptance:', error);
+      toast({
+        title: "Offer Accepted",
+        description: `Price negotiated to $${acceptedAmount}, but there was an error adding to cart`,
+        variant: "destructive"
+      });
+    }
   };
 
   const handleAddToCart = async () => {
@@ -548,11 +580,20 @@ export default function ItemDetail() {
               <CardContent className="p-4 text-center">
                 <div className="flex items-center justify-center gap-2 text-green-400 mb-2">
                   <Check className="w-5 h-5" />
-                  <span className="font-semibold">Offer Accepted!</span>
+                  <span className="font-semibold">Offer Accepted & Added to Cart!</span>
                 </div>
-                <p className="text-green-300 text-sm">
-                  Your offer of ${negotiatedPrice} has been accepted. Please proceed with the purchase.
+                <p className="text-green-300 text-sm mb-2">
+                  Your offer of ${negotiatedPrice} has been accepted and the item is now in your cart.
                 </p>
+                <div className="bg-green-800/30 rounded-lg p-3">
+                  <div className="flex items-center justify-center gap-2 text-green-400 text-sm font-medium mb-1">
+                    <ShoppingCart className="w-4 h-4" />
+                    <span>Reserved for 10 minutes</span>
+                  </div>
+                  <p className="text-green-300 text-xs">
+                    Complete your purchase before the reservation expires
+                  </p>
+                </div>
               </CardContent>
             </Card>
           )}
