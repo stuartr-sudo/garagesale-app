@@ -371,9 +371,9 @@ export default function Marketplace() {
         case 'price_desc':
           return parseFloat(b.price) - parseFloat(a.price);
         case 'popular':
-          return (b.view_count || 0) - (a.view_count || 0);
+          return (b.views_count || 0) - (a.views_count || 0);
         case 'views':
-          return (b.view_count || 0) - (a.view_count || 0);
+          return (b.views_count || 0) - (a.views_count || 0);
         default:
           return 0;
       }

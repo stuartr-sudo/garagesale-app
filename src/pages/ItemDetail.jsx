@@ -194,7 +194,7 @@ export default function ItemDetail() {
         description: `${item.title} has been reserved for 10 minutes`
       });
 
-      setTimeout(() => setIsInCart(false), 2000);
+      // Keep the button in "Added" state - don't reset it
     } catch (error) {
       console.error('Error adding to cart:', error);
       toast({

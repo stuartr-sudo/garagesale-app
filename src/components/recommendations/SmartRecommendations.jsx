@@ -102,7 +102,7 @@ export default function SmartRecommendations({
       .eq('status', 'active')
       .neq('id', currentItemId || '')
       .gte('created_date', sevenDaysAgo.toISOString())
-      .order('view_count', { ascending: false })
+      .order('views_count', { ascending: false })
       .limit(limit);
 
     if (error) throw error;
@@ -142,7 +142,7 @@ export default function SmartRecommendations({
       .neq('id', currentItemId)
       .gte('price', priceMin)
       .lte('price', priceMax)
-      .order('view_count', { ascending: false })
+      .order('views_count', { ascending: false })
       .limit(limit);
 
     if (error) throw error;
@@ -318,10 +318,10 @@ export default function SmartRecommendations({
                     Free
                   </Badge>
                 )}
-                {algorithm === 'trending' && item.view_count > 0 && (
+                {algorithm === 'trending' && item.views_count > 0 && (
                   <Badge className="absolute top-2 left-2 bg-pink-500/90 text-white text-xs">
                     <TrendingUp className="w-3 h-3 mr-1" />
-                    {item.view_count}
+                    {item.views_count}
                   </Badge>
                 )}
               </div>
