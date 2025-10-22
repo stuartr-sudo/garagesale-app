@@ -89,7 +89,11 @@ export default function AddItem() {
     if (voiceTargetField === 'title') {
       setItemData(prev => ({ ...prev, title: transcript }));
     } else if (voiceTargetField === 'description') {
-      setItemData(prev => ({ ...prev, description: transcript }));
+      // For description, append to existing content or replace if empty
+      setItemData(prev => ({ 
+        ...prev, 
+        description: prev.description ? `${prev.description}\n\n${transcript}` : transcript 
+      }));
     }
     setShowVoiceInput(false);
   };
@@ -582,7 +586,10 @@ export default function AddItem() {
                   <div className="flex gap-3 justify-center">
                     <Button
                       type="button"
-                      onClick={() => openVoiceInput('description')}
+                      onClick={() => {
+                        setVoiceTargetField('description');
+                        openVoiceInput('description');
+                      }}
                       variant="outline"
                       className="border-purple-500 text-purple-400 hover:bg-purple-500/10"
                     >

@@ -19,16 +19,20 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { audioData, audioFormat = 'webm' } = req.body;
+    const { audioBase64, audioData, audioFormat = 'webm' } = req.body;
+    
+    // Support both parameter names for backward compatibility
+    const audioDataParam = audioBase64 || audioData;
 
-    if (!audioData) {
+    if (!audioDataParam) {
       return res.status(400).json({ error: 'Audio data is required' });
     }
 
-    console.log('Processing audio with Whisper...');
+    console.log('Processing audio with Whisper...', 'Data length:', audioDataParam.length);
 
     // Convert base64 audio to buffer
-    const audioBuffer = Buffer.from(audioData, 'base64');
+    const audioBuffer = Buffer.from(audioDataParam, 'base64');
+    console.log('Audio buffer size:', audioBuffer.length, 'bytes');
 
     // Create a temporary file-like object for Whisper
     const audioFile = new File([audioBuffer], `audio.${audioFormat}`, {
