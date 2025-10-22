@@ -4,8 +4,9 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tag, Star, Eye } from "lucide-react";
+import { Tag, Star, Eye, Gift, TrendingDown } from "lucide-react";
 import { formatDistanceToNow } from 'date-fns';
+import { getItemSpecialOffers, formatOfferText, getOfferBadgeColor } from '@/api/offers';
 
 export default function ItemCard({ item, seller, isSold = false, currentUser = null }) {
   const primaryImage = item.image_urls?.[0] || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop";
@@ -35,6 +36,16 @@ export default function ItemCard({ item, seller, isSold = false, currentUser = n
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
+  // Load special offers for this item
+  const [specialOffers, setSpecialOffers] = useState([]);
+  useEffect(() => {
+    async function loadOffers() {
+      const offers = await getItemSpecialOffers(item.id);
+      setSpecialOffers(offers);
+    }
+    loadOffers();
+  }, [item.id]);
+
   return (
     <Card className={`bg-gradient-to-br from-${theme.cardFrom} to-${theme.cardTo} rounded-2xl shadow-2xl shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 border-2 border-cyan-500/30 hover:border-cyan-400/60 overflow-hidden group hover:scale-[1.02] flex flex-col h-full ring-1 ring-cyan-400/20 hover:ring-cyan-400/40`}>
       {/* EDIT: Use 4:3 aspect ratio to avoid squashed image */}
@@ -47,6 +58,22 @@ export default function ItemCard({ item, seller, isSold = false, currentUser = n
             e.target.src = "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop";
           }}
         />
+        {/* Special Offer Badge - Top Left */}
+        {!isSold && specialOffers.length > 0 && (
+          <div className="absolute top-3 left-3 z-10">
+            {specialOffers.slice(0, 1).map(offer => (
+              <Badge 
+                key={offer.id}
+                className={`${getOfferBadgeColor(offer.offer_type)} text-white font-bold shadow-lg animate-pulse flex items-center gap-1`}
+              >
+                <Gift className="w-3 h-3" />
+                {formatOfferText(offer)}
+              </Badge>
+            ))}
+          </div>
+        )}
+        
+        {/* Status Badges - Top Right */}
         <div className="absolute top-3 right-3 flex flex-col gap-2">
           {isSold && (
             <Badge className="bg-green-500 text-white font-bold">Sold</Badge>

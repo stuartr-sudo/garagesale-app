@@ -14,6 +14,7 @@ import { createPageUrl } from '@/utils';
 import PurchaseModal from '@/components/marketplace/PurchaseModal';
 import MoreFromSeller from '@/components/marketplace/MoreFromSeller';
 import SmartRecommendations from '@/components/recommendations/SmartRecommendations';
+import SpecialOffersSection from '@/components/marketplace/SpecialOffersSection';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
@@ -532,6 +533,11 @@ export default function ItemDetail() {
           )}
         </div>
       </div>
+
+      {/* Special Offers Section */}
+      {seller && (
+        <SpecialOffersSection itemId={item.id} sellerId={seller.id} />
+      )}
 
       {/* More from this Seller */}
       {seller && (
