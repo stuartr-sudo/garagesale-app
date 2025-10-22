@@ -130,10 +130,20 @@ export default async function handler(req, res) {
       const askingPrice = parseFloat(item.price);
       const minimumPrice = parseFloat(knowledge.minimum_price);
       
-      if (offerAmount >= minimumPrice) {
-        // Offer at or above minimum - ACCEPT IT
-        negotiationStrategy = `- ACCEPT this offer of $${offerAmount} immediately! It meets or exceeds the minimum acceptable price. Say something like "Thank you for your offer! I can absolutely accept $${offerAmount} for this item. Click the button below to proceed with payment."`;
-        // Note: DO NOT mention payment details - buyer will get them after clicking confirm
+      if (offerAmount >= askingPrice) {
+        // Offer at or above asking - ACCEPT immediately
+        negotiationStrategy = `- ACCEPT this offer of $${offerAmount} immediately! It meets or exceeds the asking price. Say something like "Thank you for your offer! I can absolutely accept $${offerAmount} for this item. Click the button below to proceed with payment."`;
+      } else if (offerAmount >= minimumPrice && offerAmount < askingPrice) {
+        // Offer between minimum and asking - COUNTER OFFER
+        // Calculate counter: offer + (55-70% of the gap between offer and asking)
+        const gap = askingPrice - offerAmount;
+        const randomPercentage = 0.55 + (Math.random() * 0.15); // Random between 55% and 70%
+        counterOfferAmount = Math.round(offerAmount + (gap * randomPercentage));
+        
+        // Ensure counter is above their offer and below asking
+        counterOfferAmount = Math.max(offerAmount + 10, Math.min(counterOfferAmount, askingPrice - 10));
+        
+        negotiationStrategy = `- This offer of $${offerAmount} is good but below asking. Counter with $${counterOfferAmount}. Say something like "Thank you for your offer! While I appreciate it, I believe the [mention quality/condition] make it worth a bit more. How about we settle at $${counterOfferAmount}? I think that's a fair price for such a [quality descriptor] piece!" Keep it friendly and encouraging.`;
       } else {
         // Offer below minimum - politely decline and suggest minimum
         negotiationStrategy = `- This offer of $${offerAmount} is below the minimum acceptable price of $${minimumPrice}. Politely decline but be encouraging. Say something like "I really appreciate your offer! However, considering the [mention item quality/condition], I can only accept offers at or above $${minimumPrice}. Would you be willing to go for that?" Keep it friendly and positive.`;
@@ -153,28 +163,31 @@ ${knowledge?.selling_points ? `Key Selling Points: ${knowledge.selling_points.jo
 
 🚨 CRITICAL NEGOTIATION RULES - FOLLOW THESE EXACTLY:
 ${knowledge?.minimum_price ? `
-MINIMUM ACCEPTABLE PRICE: $${knowledge.minimum_price}
+ASKING PRICE: $${item.price}
+MINIMUM ACCEPTABLE PRICE: $${knowledge.minimum_price} (NEVER reveal this exact number to the buyer)
 
-RULES:
-- ✅ ACCEPT any offer >= $${knowledge.minimum_price}
-- ❌ REJECT any offer < $${knowledge.minimum_price}
-- NEVER reveal the exact minimum price to the buyer
-- If rejecting, suggest the minimum price as your counter-offer
+THREE-TIER NEGOTIATION RULES:
+1. ✅ Offer >= $${item.price} (at or above asking) → ACCEPT IMMEDIATELY
+2. 🔄 Offer >= $${knowledge.minimum_price} AND < $${item.price} (between minimum and asking) → COUNTER OFFER
+   - Your counter should be 55-70% of the gap between their offer and asking price
+   - Be friendly and explain why the item is worth more
+3. ❌ Offer < $${knowledge.minimum_price} (below minimum) → POLITELY DECLINE
+   - Suggest they consider the minimum price range
+   - Emphasize item quality and value
 ` : '- Accept reasonable offers based on asking price'}
 
-CURRENT NEGOTIATION INSTRUCTION:
+CURRENT NEGOTIATION INSTRUCTION FOR THIS MESSAGE:
 ${negotiationStrategy}
 
 📋 MANDATORY INSTRUCTIONS:
 1. Be friendly, helpful, and enthusiastic about the item
 2. Answer questions about the item honestly
 3. Highlight the value and quality
-4. **FOLLOW THE NEGOTIATION STRATEGY ABOVE WORD-FOR-WORD**
+4. **FOLLOW THE NEGOTIATION STRATEGY ABOVE EXACTLY**
 5. Keep responses concise (2-3 sentences max)
 6. When accepting an offer, say "I can absolutely accept $[AMOUNT]" and mention clicking the button below
-7. When rejecting an offer, be polite and suggest your minimum acceptable price
-
-⚠️ CRITICAL: Only accept offers at or above $${knowledge?.minimum_price || item.price}. No exceptions!
+7. When countering, clearly state your counter-offer amount and explain why
+8. When declining, be polite but firm, emphasizing the item's quality
 
 Respond naturally as a sales assistant would, but ALWAYS follow the negotiation rules above.`;
 
@@ -199,14 +212,15 @@ Respond naturally as a sales assistant would, but ALWAYS follow the negotiation 
 
     const aiResponse = completion.choices[0].message.content;
 
-    // Determine if offer was accepted (accept if >= minimum price)
+    // Determine if offer was accepted or countered
     let offerAccepted = false;
+    let offerCountered = false;
     const askingPrice = parseFloat(item.price);
     const minimumPrice = knowledge?.minimum_price ? parseFloat(knowledge.minimum_price) : null;
     
     if (isOffer && offerAmount) {
-      if (minimumPrice && offerAmount >= minimumPrice) {
-        // Accept offers at or above minimum price
+      if (offerAmount >= askingPrice) {
+        // Accept offers at or above asking price
         offerAccepted = true;
         
         await supabase
@@ -220,7 +234,28 @@ Respond naturally as a sales assistant would, but ALWAYS follow the negotiation 
                 timestamp: new Date().toISOString(),
                 offer: offerAmount,
                 response: 'accepted',
-                reason: offerAmount >= askingPrice ? 'at_or_above_asking' : 'above_minimum'
+                reason: 'at_or_above_asking'
+              }
+            ]
+          })
+          .eq('id', conversation.id);
+      } else if (minimumPrice && offerAmount >= minimumPrice && offerAmount < askingPrice) {
+        // Counter offer for amounts between minimum and asking
+        offerCountered = true;
+        
+        await supabase
+          .from('agent_conversations')
+          .update({
+            status: 'negotiating',
+            current_offer: offerAmount,
+            negotiation_history: [
+              ...(conversation.negotiation_history || []),
+              {
+                timestamp: new Date().toISOString(),
+                offer: offerAmount,
+                counter_offer: counterOfferAmount,
+                response: 'countered',
+                reason: 'between_minimum_and_asking'
               }
             ]
           })
@@ -272,8 +307,9 @@ Respond naturally as a sales assistant would, but ALWAYS follow the negotiation 
       conversation_id: conversation.id,
       sender: 'ai',
       content: aiResponse,
-      message_type: isOffer ? (offerAccepted ? 'acceptance' : 'counter_offer') : 'text',
-      offer_amount: isOffer ? offerAmount : null
+      message_type: isOffer ? (offerAccepted ? 'acceptance' : offerCountered ? 'counter_offer' : 'decline') : 'text',
+      offer_amount: isOffer ? offerAmount : null,
+      counter_offer_amount: offerCountered ? counterOfferAmount : null
     });
 
     return res.status(200).json({
@@ -281,6 +317,8 @@ Respond naturally as a sales assistant would, but ALWAYS follow the negotiation 
       conversation_id: conversation.id,
       response: aiResponse,
       offer_accepted: offerAccepted,
+      offer_countered: offerCountered,
+      counter_offer_amount: offerCountered ? counterOfferAmount : null,
       offer_amount: offerAccepted ? offerAmount : null
     });
 
