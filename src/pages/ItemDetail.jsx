@@ -302,9 +302,9 @@ export default function ItemDetail() {
                           e.stopPropagation();
                           setSelectedImage(selectedImage - 1);
                         }}
-                        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-gray-800/80 hover:bg-gray-800 text-white rounded-full p-2 transition-all"
+                        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 w-12 h-12 bg-green-500 hover:bg-green-600 text-white rounded-full border-2 border-yellow-400 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 flex items-center justify-center"
                       >
-                        <ChevronLeft className="w-5 h-5" />
+                        <ChevronLeft className="w-6 h-6" />
                       </button>
                     )}
 
@@ -315,14 +315,14 @@ export default function ItemDetail() {
                           e.stopPropagation();
                           setSelectedImage(selectedImage + 1);
                         }}
-                        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-gray-800/80 hover:bg-gray-800 text-white rounded-full p-2 transition-all"
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 w-12 h-12 bg-green-500 hover:bg-green-600 text-white rounded-full border-2 border-yellow-400 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 flex items-center justify-center"
                       >
-                        <ChevronRight className="w-5 h-5" />
+                        <ChevronRight className="w-6 h-6" />
                       </button>
                     )}
 
                     {/* Image Counter */}
-                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800/80 text-white px-3 py-1 rounded-full text-sm">
+                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800/90 text-white px-4 py-2 rounded-full text-sm font-medium border border-gray-600">
                       {selectedImage + 1} / {validImages.length}
                     </div>
                   </>
