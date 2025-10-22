@@ -125,9 +125,16 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Gmail send error:', error)
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    })
+    
     return new Response(JSON.stringify({ 
       success: false, 
-      error: error.message 
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     }), {
       status: 500,
       headers: { 
@@ -195,9 +202,17 @@ async function sendGmailMessage(message: GmailMessage, credentials: {
 
   } catch (error) {
     console.error('Gmail send error:', error)
+    console.error('Gmail API error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      code: error.code
+    })
+    
     return {
       success: false,
-      error: error.message
+      error: error.message,
+      details: error.code ? `Gmail API Error Code: ${error.code}` : undefined
     }
   }
 }
