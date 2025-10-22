@@ -13,6 +13,7 @@ import {
   Settings,
   LogOut,
   Home,
+  Palette,
   BarChart3,
   LayoutTemplate,
   Megaphone,
@@ -137,6 +138,11 @@ const navigationItems = [
     title: "Settings",
     url: createPageUrl("Settings"),
     icon: Settings,
+  },
+  {
+    title: "Theme Settings",
+    url: createPageUrl("ThemeSettings"),
+    icon: Palette,
   }
 ];
 

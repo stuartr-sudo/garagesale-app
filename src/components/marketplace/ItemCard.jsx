@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,9 +9,34 @@ import { formatDistanceToNow } from 'date-fns';
 
 export default function ItemCard({ item, seller, isSold = false, currentUser = null }) {
   const primaryImage = item.image_urls?.[0] || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop";
+  
+  // Load theme from localStorage
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('marketplace-theme');
+    return saved ? JSON.parse(saved) : {
+      cardFrom: 'blue-900',
+      cardTo: 'purple-900',
+      buttonFrom: 'purple-500',
+      buttonTo: 'pink-600',
+      accentColor: 'cyan-400'
+    };
+  });
+
+  // Listen for theme changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem('marketplace-theme');
+      if (saved) {
+        setTheme(JSON.parse(saved));
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   return (
-    <Card className="bg-gradient-to-br from-blue-900 to-purple-900 rounded-2xl shadow-2xl shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 border-2 border-cyan-500/30 hover:border-cyan-400/60 overflow-hidden group hover:scale-[1.02] flex flex-col h-full ring-1 ring-cyan-400/20 hover:ring-cyan-400/40">
+    <Card className={`bg-gradient-to-br from-${theme.cardFrom} to-${theme.cardTo} rounded-2xl shadow-2xl shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 border-2 border-cyan-500/30 hover:border-cyan-400/60 overflow-hidden group hover:scale-[1.02] flex flex-col h-full ring-1 ring-cyan-400/20 hover:ring-cyan-400/40`}>
       {/* EDIT: Use 4:3 aspect ratio to avoid squashed image */}
       <div className="relative overflow-hidden aspect-[4/3]">
         <img
@@ -61,7 +86,7 @@ export default function ItemCard({ item, seller, isSold = false, currentUser = n
           )}
 
           <div className="flex items-center justify-between mt-3">
-            <div className="text-2xl font-bold text-cyan-400">
+            <div className={`text-2xl font-bold text-${theme.accentColor}`}>
               {item.price === 0 ? "Free" : `$${item.price}`}
             </div>
             <div className="flex items-center gap-1 text-gray-500 text-xs">
@@ -75,7 +100,7 @@ export default function ItemCard({ item, seller, isSold = false, currentUser = n
           <div className="mt-4">
             <Link to={`/ItemDetail/${item.id}`}>
               <Button
-                className="w-full h-10 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700"
+                className={`w-full h-10 bg-gradient-to-r from-${theme.buttonFrom} to-${theme.buttonTo} hover:opacity-90`}
               >
                 <Eye className="w-4 h-4 mr-2" />
                 View Details

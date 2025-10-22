@@ -60,6 +60,8 @@ import Cart from "./Cart";
 
 import SpecialOffers from "./SpecialOffers";
 
+import ThemeSettings from "./ThemeSettings";
+
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
 const PAGES = {
@@ -123,6 +125,8 @@ const PAGES = {
     Cart: Cart,
     
     SpecialOffers: SpecialOffers,
+    
+    ThemeSettings: ThemeSettings,
     
 }
 
@@ -210,6 +214,8 @@ function PagesContent() {
                 <Route path="/Cart" element={<Cart />} />
                 
                 <Route path="/SpecialOffers" element={<SpecialOffers />} />
+                
+                <Route path="/ThemeSettings" element={<ThemeSettings />} />
             </Routes>
         </Layout>
     );
