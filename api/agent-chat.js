@@ -116,17 +116,27 @@ export default async function handler(req, res) {
 
     // Check if message contains an offer
     const messageLower = message.toLowerCase();
-    const offerKeywords = ['offer', 'pay', 'give', 'how about', 'would you take', 'willing to pay', 'can i pay', 'could i pay', 'accept', 'buy for', 'purchase for', 'will you take'];
+    const offerKeywords = [
+      'offer', 'pay', 'give', 'how about', 'would you take', 
+      'willing to pay', 'can i pay', 'could i pay', 'accept', 
+      'buy for', 'purchase for', 'will you take',
+      'i\'ll give', 'my offer is', 'what about', 'can you do',
+      'would you accept', 'i can do', 'my budget is', 'tops'
+    ];
     const containsOfferKeyword = offerKeywords.some(keyword => messageLower.includes(keyword));
     
-    const offerMatch = message.match(/\$?\s*(\d+(?:,\d{3})*(?:\.\d{2})?)/);
+    const offerMatch = message.match(/\$?\s*(\d+(?:,\d{3})*(?:\.\d{2})?)|(\d+(?:,\d{3})*(?:\.\d{2})?)\s*(?:dollars?|bucks?)/i);
     let isOffer = false;
     let offerAmount = null;
 
     if (offerMatch && containsOfferKeyword) {
+      // Extract the amount from either capture group
+      const amount = offerMatch[1] || offerMatch[2];
+      if (amount) {
       // Remove commas from the number
-      offerAmount = parseFloat(offerMatch[1].replace(/,/g, ''));
+        offerAmount = parseFloat(amount.replace(/,/g, ''));
       isOffer = true;
+      }
     }
 
     // ============================================
@@ -136,7 +146,7 @@ export default async function handler(req, res) {
     let counterOfferAmount = null;
     let offerAccepted = false;
     let isSecondNegotiation = false;
-
+    
     console.log('🔍 NEGOTIATION DEBUG:', {
       isOffer,
       offerAmount,
@@ -144,7 +154,7 @@ export default async function handler(req, res) {
       minimumPrice: knowledge?.minimum_price,
       hasKnowledge: !!knowledge
     });
-
+    
     if (isOffer && offerAmount !== null) {
       const askingPrice = parseFloat(item.price);
       
@@ -177,7 +187,14 @@ export default async function handler(req, res) {
       // STANDARD NEGOTIATION (Minimum IS Set)
       // ============================================
       else {
-        const minimumPrice = parseFloat(knowledge.minimum_price);
+        let minimumPrice = parseFloat(knowledge.minimum_price);
+        
+        // Safety check: minimum can't be higher than asking
+        if (minimumPrice > askingPrice) {
+          console.warn(`⚠️ WARNING: Minimum ($${minimumPrice}) > Asking ($${askingPrice}). Using asking as minimum.`);
+          minimumPrice = askingPrice;
+        }
+        
         const negotiationHistory = conversation.negotiation_history || [];
         
         // Determine if this is the second negotiation
@@ -395,8 +412,8 @@ ${negotiationStrategy}
             ]
           })
           .eq('id', conversation.id);
-      } else if (offerAmount < minimumPrice) {
-        // Offer declined (below minimum)
+      } else if (minimumPrice && offerAmount < minimumPrice) {
+        // Offer declined (below minimum) - only if minimum exists
         await supabase
           .from('agent_conversations')
           .update({
@@ -409,6 +426,24 @@ ${negotiationStrategy}
                 user_offer: offerAmount,
                 response: 'declined',
                 reason: 'below_minimum'
+              }
+            ]
+          })
+          .eq('id', conversation.id);
+      } else if (!minimumPrice && offerAmount < askingPrice) {
+        // No minimum set and offer below asking - decline
+        await supabase
+          .from('agent_conversations')
+          .update({
+            status: 'declined',
+            current_offer: offerAmount,
+            negotiation_history: [
+              ...negotiationHistory,
+              {
+                timestamp: new Date().toISOString(),
+                user_offer: offerAmount,
+                response: 'declined',
+                reason: 'no_minimum_below_asking'
               }
             ]
           })
@@ -433,7 +468,10 @@ ${negotiationStrategy}
       offer_accepted: offerAccepted,
       offer_countered: !!counterOfferAmount,
       counter_offer_amount: counterOfferAmount,
-      offer_amount: offerAccepted ? offerAmount : null
+      offer_amount: offerAccepted ? offerAmount : null,
+      is_final_counter: isSecondNegotiation, // NEW - tells frontend this is the last chance
+      show_accept_button: offerAccepted || !!counterOfferAmount, // NEW - explicit button trigger
+      expires_at: counterOfferAmount ? new Date(Date.now() + 10 * 60 * 1000).toISOString() : null // NEW - 10 min expiry
     });
 
   } catch (error) {
