@@ -22,22 +22,28 @@ interface GmailMessage {
 
 serve(async (req) => {
   try {
-    // Handle CORS
+    // Handle CORS for all requests
+    const corsHeaders = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+      'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+      'Access-Control-Max-Age': '86400',
+    }
+
     if (req.method === 'OPTIONS') {
       return new Response(null, {
         status: 200,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-          'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        },
+        headers: corsHeaders,
       })
     }
 
     if (req.method !== 'POST') {
       return new Response(JSON.stringify({ error: 'Method not allowed' }), {
         status: 405,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          ...corsHeaders
+        }
       })
     }
 
@@ -50,7 +56,10 @@ serve(async (req) => {
         error: 'Missing required fields: to and subject are required' 
       }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          ...corsHeaders
+        }
       })
     }
 
@@ -65,7 +74,10 @@ serve(async (req) => {
         error: 'Gmail OAuth credentials not configured' 
       }), {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          ...corsHeaders
+        }
       })
     }
 
@@ -93,7 +105,10 @@ serve(async (req) => {
         message: 'Email sent successfully'
       }), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          ...corsHeaders
+        }
       })
     } else {
       return new Response(JSON.stringify({ 
@@ -101,7 +116,10 @@ serve(async (req) => {
         error: result.error 
       }), {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          ...corsHeaders
+        }
       })
     }
 
@@ -112,7 +130,10 @@ serve(async (req) => {
       error: error.message 
     }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 
+        'Content-Type': 'application/json',
+        ...corsHeaders
+      }
     })
   }
 })
