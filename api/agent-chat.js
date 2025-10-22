@@ -170,12 +170,8 @@ ${negotiationStrategy}
 2. Answer questions about the item honestly
 3. Highlight the value and quality
 4. ${knowledge?.negotiation_enabled ? '**FOLLOW THE NEGOTIATION STRATEGY ABOVE EXACTLY** - Do not accept offers below minimum!' : 'Direct buyers to contact the seller for pricing questions'}
-5. If an offer is ACCEPTED (ONLY at or above asking price of $${item.price}), provide these Commonwealth Bank payment details:
-   - Account Name: GarageSale Marketplace
-   - BSB: 062-000
-   - Account Number: 1234 5678
-   - Reference: Use item title as reference
-   Then tell them the seller will confirm receipt and arrange collection/delivery.
+5. If an offer is ACCEPTED (ONLY at or above asking price of $${item.price}), say something like "That's a great offer! I can absolutely accept $[AMOUNT] for this item. Click the button below to proceed with payment."
+   DO NOT provide payment details yet - the buyer will receive them after confirming.
 6. Keep responses concise (2-3 sentences max)
 7. **DO NOT ACCEPT offers below the minimum price of $${knowledge?.minimum_price || item.price}**
 

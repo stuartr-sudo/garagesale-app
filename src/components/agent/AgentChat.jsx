@@ -87,28 +87,39 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
           setConversationId(data.conversation_id);
         }
 
-        // Extract counter-offer from AI response ONLY if the AI is making a counter-offer
-        // Look for specific phrases that indicate the AI is proposing a price, not just mentioning the user's offer
+        // Extract counter-offer or accepted offer amount from AI response
         const responseLower = data.response.toLowerCase();
-        const isCounterOffer = (responseLower.includes('counter') && responseLower.includes('offer')) || 
-                               responseLower.includes('how about') || 
-                               responseLower.includes('would you consider') ||
-                               responseLower.includes('could you do') ||
-                               (responseLower.includes('meet') && responseLower.includes('at')) ||
-                               responseLower.includes('i can offer') ||
-                               responseLower.includes("i'd accept") ||
-                               responseLower.includes("i would accept") ||
-                               responseLower.includes("willing to accept");
+        const priceMatch = data.response.match(/\$(\d+(?:,\d{3})*(?:\.\d{2})?)/);
         
-        // Also exclude if the response contains rejection phrases
-        const isRejection = responseLower.includes('below') || 
-                           responseLower.includes('too low') ||
-                           responseLower.includes('cannot accept') ||
-                           responseLower.includes("can't accept") ||
-                           responseLower.includes('decline');
+        let counterOfferAmount = null;
+        let acceptedOfferAmount = null;
         
-        const counterOfferMatch = data.response.match(/\$(\d+(?:,\d{3})*(?:\.\d{2})?)/);
-        const counterOfferAmount = (isCounterOffer && !isRejection && counterOfferMatch) ? parseFloat(counterOfferMatch[1].replace(/,/g, '')) : null;
+        // If offer was accepted, extract the accepted amount
+        if (data.offer_accepted && priceMatch) {
+          acceptedOfferAmount = parseFloat(priceMatch[1].replace(/,/g, ''));
+        } else {
+          // Otherwise check if it's a counter-offer
+          const isCounterOffer = (responseLower.includes('counter') && responseLower.includes('offer')) || 
+                                 responseLower.includes('how about') || 
+                                 responseLower.includes('would you consider') ||
+                                 responseLower.includes('could you do') ||
+                                 (responseLower.includes('meet') && responseLower.includes('at')) ||
+                                 responseLower.includes('i can offer') ||
+                                 responseLower.includes("i'd accept") ||
+                                 responseLower.includes("i would accept") ||
+                                 responseLower.includes("willing to accept");
+          
+          // Also exclude if the response contains rejection phrases
+          const isRejection = responseLower.includes('below') || 
+                             responseLower.includes('too low') ||
+                             responseLower.includes('cannot accept') ||
+                             responseLower.includes("can't accept") ||
+                             responseLower.includes('decline');
+          
+          if (isCounterOffer && !isRejection && priceMatch) {
+            counterOfferAmount = parseFloat(priceMatch[1].replace(/,/g, ''));
+          }
+        }
 
         // Add AI response
         setMessages(prev => [...prev, {
@@ -116,20 +127,9 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
           content: data.response,
           timestamp: new Date().toISOString(),
           offer_accepted: data.offer_accepted,
-          counter_offer: counterOfferAmount
+          counter_offer: counterOfferAmount,
+          accepted_offer: acceptedOfferAmount
         }]);
-
-        // Handle accepted offer
-        if (data.offer_accepted) {
-          setOfferAccepted(true);
-          setTimeout(() => {
-            setMessages(prev => [...prev, {
-              sender: 'system',
-              content: `🎉 Congratulations! Your offer has been accepted! The seller will contact you shortly to complete the purchase.`,
-              timestamp: new Date().toISOString()
-            }]);
-          }, 1000);
-        }
       } else {
         throw new Error(data.error || 'Failed to send message');
       }
@@ -201,16 +201,37 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
                   )}
                 </div>
                 
-                {/* Show Accept Deal button if there's a counter-offer */}
-                {msg.sender === 'ai' && msg.counter_offer && !offerAccepted && (
-                  <Button
-                    onClick={() => sendMessage(`I accept your offer of $${msg.counter_offer}`)}
-                    className="mt-2 w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold shadow-lg"
-                    disabled={loading}
-                  >
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Accept Deal - ${msg.counter_offer}
-                  </Button>
+                {/* Show Accept Deal button if there's a counter-offer OR if offer was accepted */}
+                {msg.sender === 'ai' && !offerAccepted && (
+                  <>
+                    {msg.counter_offer && (
+                      <Button
+                        onClick={() => sendMessage(`I accept your offer of $${msg.counter_offer}`)}
+                        className="mt-2 w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold shadow-lg"
+                        disabled={loading}
+                      >
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Accept Deal - ${msg.counter_offer}
+                      </Button>
+                    )}
+                    {msg.accepted_offer && (
+                      <Button
+                        onClick={() => {
+                          setOfferAccepted(true);
+                          setMessages(prev => [...prev, {
+                            sender: 'system',
+                            content: `🎉 Congratulations! Your offer of $${msg.accepted_offer} has been accepted!\n\n💳 Payment Details:\n• Account Name: GarageSale Marketplace\n• BSB: 062-000\n• Account Number: 1234 5678\n• Reference: "${itemTitle}"\n\nOnce the payment is confirmed, the seller will arrange for collection or delivery.`,
+                            timestamp: new Date().toISOString()
+                          }]);
+                        }}
+                        className="mt-2 w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold shadow-lg animate-pulse"
+                        disabled={loading}
+                      >
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Confirm Purchase - ${msg.accepted_offer}
+                      </Button>
+                    )}
+                  </>
                 )}
               </div>
             </div>
