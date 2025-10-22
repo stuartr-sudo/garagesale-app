@@ -129,12 +129,14 @@ export default async function handler(req, res) {
       isOffer = true;
     }
 
-    // NEGOTIATION LOGIC - USER'S EXACT SPECIFICATIONS
+    // ============================================
+    // NEGOTIATION LOGIC - MATHEMATICALLY PERFECT
+    // ============================================
     let negotiationStrategy = '';
     let counterOfferAmount = null;
     let offerAccepted = false;
     let isSecondNegotiation = false;
-    
+
     console.log('🔍 NEGOTIATION DEBUG:', {
       isOffer,
       offerAmount,
@@ -142,121 +144,194 @@ export default async function handler(req, res) {
       minimumPrice: knowledge?.minimum_price,
       hasKnowledge: !!knowledge
     });
-    
-    if (isOffer && offerAmount) {
+
+    if (isOffer && offerAmount !== null) {
       const askingPrice = parseFloat(item.price);
-      const minimumPrice = knowledge?.minimum_price ? parseFloat(knowledge.minimum_price) : askingPrice * 0.7; // Default to 70% if no minimum set
-      const negotiationHistory = conversation.negotiation_history || [];
       
-      console.log('💰 PRICE COMPARISON:', {
-        offerAmount,
-        askingPrice,
-        minimumPrice,
-        isAboveAsking: offerAmount >= askingPrice,
-        isBelowMinimum: offerAmount < minimumPrice,
-        isBetween: offerAmount >= minimumPrice && offerAmount < askingPrice
-      });
-      
-      // Check if this is a second negotiation (user already got a counter-offer)
-      const previousCounter = negotiationHistory.find(h => h.counter_offer);
-      isSecondNegotiation = !!previousCounter;
-      
-      console.log('📊 NEGOTIATION STATE:', {
-        isSecondNegotiation,
-        previousCounter: previousCounter?.counter_offer,
-        negotiationHistoryLength: negotiationHistory.length
-      });
-      
-      if (offerAmount >= askingPrice) {
-        // CASE 1: Offer at or above asking - ACCEPT immediately
+      // ============================================
+      // SPECIAL CASE: FREE ITEMS ($0)
+      // ============================================
+      if (askingPrice === 0) {
         offerAccepted = true;
-        negotiationStrategy = `✅ ACCEPT this offer of $${offerAmount} immediately! Say: "Thank you for your offer! I can absolutely accept $${offerAmount} for this item. Click the button below to proceed with payment."`;
-        console.log('✅ CASE 1: Accepting offer at/above asking');
-        
-      } else if (offerAmount < minimumPrice) {
-        // CASE 2: Offer below minimum - POLITELY DECLINE (no counter-offer)
-        negotiationStrategy = `❌ This offer of $${offerAmount} is below minimum ($${minimumPrice}). Politely decline WITHOUT revealing the exact minimum. Say something like: "Thank you for your interest! However, I'm unable to accept $${offerAmount} for this item. Given its quality and condition, the listed price of $${askingPrice} truly reflects its value. Let me know if you'd like to reconsider!"`;
-        console.log('❌ CASE 2: Declining offer below minimum');
-        
-      } else if (isSecondNegotiation && previousCounter) {
-        // CASE 3: SECOND negotiation - Calculate between previous counter and new offer (FINAL OFFER)
-        const previousCounterAmount = previousCounter.counter_offer;
-        
-        if (offerAmount >= previousCounterAmount) {
-          // User accepted or exceeded our counter - ACCEPT
+        negotiationStrategy = `✅ FREE ITEM - Accept immediately. This is a free item, so simply confirm it's available and guide them to claim it.`;
+        console.log('✅ FREE ITEM: No negotiation needed');
+      }
+      
+      // ============================================
+      // SPECIAL CASE: NO MINIMUM PRICE SET
+      // ============================================
+      else if (!knowledge?.minimum_price) {
+        if (offerAmount >= askingPrice) {
+          // Accept offers at or above asking
           offerAccepted = true;
-          negotiationStrategy = `✅ ACCEPT this offer of $${offerAmount}! They met/exceeded your previous counter of $${previousCounterAmount}. Say: "Thank you for your offer! I can absolutely accept $${offerAmount} for this item. Click the button below to proceed with payment."`;
-          console.log('✅ CASE 3A: Accepting offer that met previous counter');
+          negotiationStrategy = `✅ ACCEPT IMMEDIATELY - Offer ($${offerAmount.toFixed(2)}) is at or above asking price ($${askingPrice.toFixed(2)}). No minimum is set, so accept this offer enthusiastically.`;
+          console.log('✅ NO MIN SET: Accepting at/above asking');
         } else {
-          // Calculate FINAL counter between previous counter and new offer
-          const gap = previousCounterAmount - offerAmount;
-          counterOfferAmount = Math.round(offerAmount + (gap * 0.5)); // Meet in the middle
-          
-          // Ensure it's at least minimum and reasonable
-          counterOfferAmount = Math.max(minimumPrice, counterOfferAmount);
-          
-          negotiationStrategy = `🔄 FINAL COUNTER: This is the second negotiation. Your previous counter was $${previousCounterAmount}, they offered $${offerAmount}. Counter with $${counterOfferAmount} (split the difference) as your FINAL offer. Say: "I appreciate you working with me! To meet you halfway, I can offer $${counterOfferAmount} as my final price. This is truly the best I can do for such a quality item. What do you think?"`;
-          console.log('🔄 CASE 3B: Final counter-offer', { counterOfferAmount });
+          // Decline all offers below asking (no minimum to negotiate from)
+          negotiationStrategy = `❌ DECLINE POLITELY - No minimum price is set, so you can only accept the full asking price of $${askingPrice.toFixed(2)}. This offer of $${offerAmount.toFixed(2)} is below that. Politely explain the price is firm and encourage them to reconsider.`;
+          console.log('❌ NO MIN SET: Declining below asking');
+        }
+      }
+      
+      // ============================================
+      // STANDARD NEGOTIATION (Minimum IS Set)
+      // ============================================
+      else {
+        const minimumPrice = parseFloat(knowledge.minimum_price);
+        const negotiationHistory = conversation.negotiation_history || [];
+        
+        // Determine if this is the second negotiation
+        const previousCounter = negotiationHistory.find(h => h.counter_offer && h.response === 'countered');
+        isSecondNegotiation = !!previousCounter;
+        
+        console.log('💰 NEGOTIATION STATE:', {
+          offerAmount: offerAmount.toFixed(2),
+          askingPrice: askingPrice.toFixed(2),
+          minimumPrice: minimumPrice.toFixed(2),
+          isSecondNegotiation,
+          previousCounter: previousCounter?.counter_offer
+        });
+        
+        // ----------------------------------------
+        // CASE 1: Offer >= Asking Price → ACCEPT
+        // ----------------------------------------
+        if (offerAmount >= askingPrice) {
+          offerAccepted = true;
+          negotiationStrategy = `✅ ACCEPT IMMEDIATELY - Offer ($${offerAmount.toFixed(2)}) meets or exceeds asking price ($${askingPrice.toFixed(2)}). Accept enthusiastically and direct them to the payment button.`;
+          console.log('✅ CASE 1: Accept at/above asking');
         }
         
-      } else {
-        // CASE 4: FIRST negotiation between minimum and asking - Counter with 65-75% of gap
-        const gap = askingPrice - offerAmount;
-        const randomPercentage = 0.65 + (Math.random() * 0.10); // Random between 65% and 75%
-        counterOfferAmount = Math.round(offerAmount + (gap * randomPercentage));
+        // ----------------------------------------
+        // CASE 2: Offer < Minimum → DECLINE (No Counter)
+        // ----------------------------------------
+        else if (offerAmount < minimumPrice) {
+          negotiationStrategy = `❌ DECLINE - Offer ($${offerAmount.toFixed(2)}) is below minimum acceptable ($${minimumPrice.toFixed(2)}). Politely decline WITHOUT revealing the exact minimum. Emphasize the item's value and quality. Do NOT make a counter-offer.`;
+          console.log('❌ CASE 2: Decline below minimum');
+        }
         
-        // Ensure counter is above their offer and at least minimum
-        counterOfferAmount = Math.max(minimumPrice, Math.max(offerAmount + 10, counterOfferAmount));
+        // ----------------------------------------
+        // CASE 3: SECOND Negotiation → Final Counter (15% down)
+        // ----------------------------------------
+        else if (isSecondNegotiation && previousCounter) {
+          const previousCounterAmount = parseFloat(previousCounter.counter_offer);
+          
+          // Sub-case: User met or exceeded previous counter
+          if (offerAmount >= previousCounterAmount) {
+            offerAccepted = true;
+            negotiationStrategy = `✅ ACCEPT - User's offer ($${offerAmount.toFixed(2)}) meets or exceeds your previous counter ($${previousCounterAmount.toFixed(2)}). Accept this offer warmly.`;
+            console.log('✅ CASE 3A: Accept - met previous counter');
+          }
+          // Sub-case: User came back lower - Make FINAL counter
+          else {
+            // FORMULA: Final Counter = Previous Counter × 0.85 (reduce by 15%)
+            const rawFinalCounter = previousCounterAmount * 0.85;
+            
+            // Round to nearest dollar (ceiling for precision)
+            let finalCounter = Math.ceil(rawFinalCounter);
+            
+            // Safety checks:
+            // 1. Must be at least minimum
+            // 2. Must be above user's current offer (otherwise no point)
+            finalCounter = Math.max(minimumPrice, finalCounter);
+            
+            if (finalCounter <= offerAmount) {
+              // Edge case: calculation brought us at/below their offer
+              // Set to minimum or slightly above their offer, whichever is higher
+              finalCounter = Math.max(minimumPrice, Math.ceil(offerAmount + 1));
+            }
+            
+            counterOfferAmount = finalCounter;
+            
+            negotiationStrategy = `🔄 FINAL COUNTER (Second Negotiation) - Previous counter was $${previousCounterAmount.toFixed(2)}, user offered $${offerAmount.toFixed(2)}. Make your FINAL counter at $${counterOfferAmount.toFixed(2)} (15% reduction: $${previousCounterAmount.toFixed(2)} × 0.85 = $${rawFinalCounter.toFixed(2)} → rounded to $${counterOfferAmount.toFixed(2)}). This is your last offer. Make it clear this is final and valid for 10 minutes. Be friendly but firm.`;
+            
+            console.log('🔄 CASE 3B: Final counter', {
+              previousCounter: previousCounterAmount.toFixed(2),
+              reduction: (previousCounterAmount * 0.15).toFixed(2),
+              rawCalculation: rawFinalCounter.toFixed(2),
+              finalCounter: counterOfferAmount.toFixed(2),
+              ensuredAboveMinimum: counterOfferAmount >= minimumPrice
+            });
+          }
+        }
         
-        negotiationStrategy = `🔄 FIRST COUNTER: Offer of $${offerAmount} is between minimum ($${minimumPrice}) and asking ($${askingPrice}). Counter with $${counterOfferAmount} (65-75% of gap). Say: "Thank you for your offer! I appreciate your interest. Given the quality and condition of this item, I'd be willing to accept $${counterOfferAmount}. I think that's a fair price that reflects its true value. Would that work for you?"`;
-        console.log('🔄 CASE 4: First counter-offer', { gap, randomPercentage, counterOfferAmount });
+        // ----------------------------------------
+        // CASE 4: FIRST Negotiation → Counter (55-75% of gap)
+        // ----------------------------------------
+        else {
+          // FORMULA: Counter = Min + (Asking - Min) × random(0.55, 0.75)
+          const gap = askingPrice - minimumPrice;
+          const randomPercentage = 0.55 + (Math.random() * 0.20); // Random between 0.55 and 0.75
+          const rawCounter = minimumPrice + (gap * randomPercentage);
+          
+          // Round to nearest dollar (ceiling for precision)
+          let firstCounter = Math.ceil(rawCounter);
+          
+          // Safety checks:
+          // 1. Must be at least minimum
+          // 2. Should be meaningfully above user's offer
+          firstCounter = Math.max(minimumPrice, firstCounter);
+          
+          if (firstCounter <= offerAmount) {
+            // Edge case: their offer is already near our calculated counter
+            // Adjust to at least $1-5 above their offer
+            firstCounter = Math.ceil(offerAmount + Math.min(5, gap * 0.05));
+          }
+          
+          counterOfferAmount = firstCounter;
+          
+          negotiationStrategy = `🔄 FIRST COUNTER - User offered $${offerAmount.toFixed(2)}, which is between minimum ($${minimumPrice.toFixed(2)}) and asking ($${askingPrice.toFixed(2)}). Counter with $${counterOfferAmount.toFixed(2)} (Formula: $${minimumPrice.toFixed(2)} + ($${gap.toFixed(2)} × ${(randomPercentage * 100).toFixed(1)}%) = $${rawCounter.toFixed(2)} → rounded to $${counterOfferAmount.toFixed(2)}). Be friendly, emphasize value, and mention the offer is valid for 10 minutes.`;
+          
+          console.log('🔄 CASE 4: First counter', {
+            gap: gap.toFixed(2),
+            percentage: (randomPercentage * 100).toFixed(1) + '%',
+            calculation: `${minimumPrice.toFixed(2)} + (${gap.toFixed(2)} × ${randomPercentage.toFixed(2)})`,
+            rawCounter: rawCounter.toFixed(2),
+            finalCounter: counterOfferAmount.toFixed(2),
+            aboveOffer: (counterOfferAmount - offerAmount).toFixed(2)
+          });
+        }
       }
     }
 
     // Build agent prompt
-    const systemPrompt = `You are a friendly AI sales assistant helping to sell this item:
+    const systemPrompt = `You are a friendly AI sales assistant managing the sale of this item:
 
-Title: ${item.title}
-Description: ${item.description}
-Listed Price: $${item.price}
-Category: ${item.category}
-Condition: ${item.condition}
-${item.location ? `Location: ${item.location}` : ''}
-${knowledge?.selling_points ? `Key Selling Points: ${knowledge.selling_points.join(', ')}` : ''}
-${hasVoiceInput && voiceTranscription ? `
-🎤 SELLER'S VOICE DESCRIPTION:
-"${voiceTranscription}"
+**ITEM DETAILS:**
+- Title: ${item.title}
+- Description: ${item.description}
+- Listed Price: $${item.price}
+- Category: ${item.category}
+- Condition: ${item.condition}
+${item.location ? `- Location: ${item.location}` : ''}
+${knowledge?.selling_points ? `- Key Selling Points: ${knowledge.selling_points.join(', ')}` : ''}
+${hasVoiceInput && voiceTranscription ? `\n**SELLER'S PERSONAL DESCRIPTION:**\n"${voiceTranscription}"\n(Use this authentic description to answer detailed questions about the item)` : ''}
 
-Use this personal description from the seller to provide more authentic, detailed answers about the item. This is the seller's own words about their item, so reference it when answering questions about features, condition, or history.
-` : ''}
+---
 
-🚨 CRITICAL NEGOTIATION RULES:
-${knowledge?.minimum_price ? `
-ASKING PRICE: $${item.price}
-MINIMUM ACCEPTABLE: $${knowledge.minimum_price} (NEVER reveal this exact number)
+**YOUR ROLE & PERSONALITY:**
+- Be warm, friendly, and professional
+- Answer questions about the item honestly and enthusiastically
+- Highlight the item's value, quality, and unique features
+- Build trust and encourage the buyer
+- Keep responses concise (2-3 sentences max)
 
-NEGOTIATION LOGIC:
-1. ❌ Below Minimum → Politely decline, NO counter-offer
-2. 🔄 First Offer (between min-ask) → Counter with 65-75% of gap
-3. 🔄 Second Offer → Counter between previous and new offer (FINAL)
-4. ✅ At/Above Asking → Accept immediately
-` : '- Accept reasonable offers based on asking price'}
+---
 
-🎯 CURRENT INSTRUCTION FOR THIS MESSAGE:
+**NEGOTIATION INSTRUCTIONS FOR THIS MESSAGE:**
 ${negotiationStrategy}
 
-📋 MANDATORY RULES:
-1. Be friendly, warm, and encouraging
-2. Answer questions about the item honestly
-3. Highlight value and quality
-4. **FOLLOW THE INSTRUCTION ABOVE EXACTLY - DO NOT DEVIATE**
-5. Keep responses concise (2-3 sentences)
-6. When accepting: Say "I can absolutely accept $[AMOUNT]" and mention button
-7. When countering: State your counter clearly and explain why
-8. When declining: Be polite, emphasize value, NO counter-offer
-9. NEVER reveal the exact minimum price
+---
 
-Respond naturally but FOLLOW THE NEGOTIATION INSTRUCTION EXACTLY.`;
+**CRITICAL RULES:**
+1. **Follow the negotiation instruction above precisely** - it contains the exact price and strategy
+2. When **ACCEPTING** an offer: Say you can accept the amount and direct them to click the button to proceed
+3. When making a **COUNTER-OFFER**: State your counter price clearly, briefly explain why it's fair, and mention the 10-minute validity
+4. When **DECLINING**: Be polite, emphasize the item's value, and encourage them to reconsider the asking price
+5. **NEVER reveal the minimum acceptable price** - it's confidential
+6. For **general questions** (not offers): Answer naturally and build interest in the item
+7. Use the seller's voice description if available to add personal, authentic details
+
+**Be natural and conversational, but follow the pricing strategy exactly as instructed above.**`;
 
     const conversationHistory = messages.slice(-10).map(m => ({
       role: m.sender === 'ai' ? 'assistant' : 'user',
@@ -271,8 +346,8 @@ Respond naturally but FOLLOW THE NEGOTIATION INSTRUCTION EXACTLY.`;
         ...conversationHistory,
         { role: 'user', content: message }
       ],
-      temperature: 0.7,
-      max_tokens: 200
+      temperature: 0.3, // Lower temperature for more consistent adherence
+      max_tokens: 250 // Increased slightly for complete responses
     });
 
     const aiResponse = completion.choices[0].message.content;
