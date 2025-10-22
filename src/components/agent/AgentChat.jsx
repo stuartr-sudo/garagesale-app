@@ -96,15 +96,32 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
         let counterOfferAmount = null;
         let acceptedOfferAmount = null;
         
+        // Check for rejection/decline phrases FIRST (highest priority)
+        const isRejection = responseLower.includes("can't accept") ||
+                           responseLower.includes("cannot accept") ||
+                           responseLower.includes("can not accept") ||
+                           responseLower.includes("unable to accept") ||
+                           responseLower.includes("too low") ||
+                           responseLower.includes("below") ||
+                           responseLower.includes("minimum") ||
+                           responseLower.includes("appreciate your offer") ||
+                           responseLower.includes("appreciate your interest") ||
+                           responseLower.includes("thank you for your interest") ||
+                           (responseLower.includes('however') && responseLower.includes('can')) ||
+                           (responseLower.includes('while') && responseLower.includes('appreciate'));
+        
         // If offer was accepted by the API, extract the accepted amount
         if (data.offer_accepted && allPriceMatches.length > 0) {
           acceptedOfferAmount = parseFloat(allPriceMatches[0][1].replace(/,/g, ''));
-        } else if (allPriceMatches.length > 0) {
+        } else if (!isRejection && allPriceMatches.length > 0) {
+          // Only check for acceptance/counter if NOT a rejection
+          
           // Check if AI is accepting the user's offer (not the API flag, but the text)
-          const isAcceptingOffer = (responseLower.includes('can') && responseLower.includes('accept')) ||
-                                    (responseLower.includes('absolutely') && responseLower.includes('accept')) ||
-                                    (responseLower.includes('happy') && responseLower.includes('accept')) ||
-                                    (responseLower.includes('great') && responseLower.includes('offer') && responseLower.includes('accept'));
+          const isAcceptingOffer = (responseLower.includes('i can absolutely accept') ||
+                                    responseLower.includes('i can accept') ||
+                                    (responseLower.includes('absolutely') && responseLower.includes('accept') && !responseLower.includes("can't")) ||
+                                    (responseLower.includes('happy to accept')) ||
+                                    (responseLower.includes('great') && responseLower.includes('offer') && responseLower.includes('accept')));
           
           if (isAcceptingOffer) {
             // AI is accepting the user's offer - treat as accepted offer
@@ -117,14 +134,10 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
                                    responseLower.includes('could you do') ||
                                    (responseLower.includes('meet') && responseLower.includes('at')) ||
                                    responseLower.includes('i can offer') ||
+                                   responseLower.includes('settle at') ||
                                    (responseLower.includes('happy to') && responseLower.includes('counter'));
             
-            // Check for rejection phrases
-            const isRejection = responseLower.includes('appreciate your offer') ||
-                               responseLower.includes('thank you for') ||
-                               (responseLower.includes('while') && responseLower.includes('appreciate'));
-            
-            if (isCounterOffer && !isRejection) {
+            if (isCounterOffer) {
               // If there are multiple prices, the LAST one is usually the counter-offer
               // The first one is usually the user's rejected offer
               const lastPriceMatch = allPriceMatches[allPriceMatches.length - 1];
