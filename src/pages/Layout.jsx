@@ -48,6 +48,7 @@ import NerdBackground from "@/components/ui/NerdBackground"; // Import the new c
 import FloatingCameraButton from "@/components/camera/FloatingCameraButton";
 import CartIcon from "@/components/cart/CartIcon";
 import SuspensionBanner from "@/components/SuspensionBanner";
+import AccountRestrictionBanner from "@/components/payment/AccountRestrictionBanner";
 import { checkUserStatus, checkExpiredOrders } from "@/api/penalties";
 
 const navigationItems = [
@@ -80,6 +81,11 @@ const navigationItems = [
     title: "Shopping Cart",
     url: createPageUrl("Cart"),
     icon: ShoppingCart,
+  },
+  {
+    title: "Payment Confirmations",
+    url: createPageUrl("PaymentConfirmations"),
+    icon: Clock,
   },
   {
     title: "Special Offers",
@@ -439,6 +445,10 @@ function LayoutContent({ currentUser, currentPageName, visibleNavItems, handleLo
           )}
 
           <div className="flex-1">
+            {/* Account Restriction Banner */}
+            {currentUser && (
+              <AccountRestrictionBanner userId={currentUser.id} />
+            )}
             {children}
           </div>
         </main>

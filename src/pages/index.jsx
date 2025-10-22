@@ -64,6 +64,8 @@ import SpecialOffers from "./SpecialOffers";
 
 import ThemeSettings from "./ThemeSettings";
 
+import PaymentConfirmations from "./PaymentConfirmations";
+
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
 const PAGES = {
@@ -238,6 +240,8 @@ function PagesContent() {
                 <Route path="/SpecialOffers" element={<SpecialOffers />} />
                 
                 <Route path="/ThemeSettings" element={<ThemeSettings />} />
+                
+                <Route path="/PaymentConfirmations" element={<PaymentConfirmations />} />
             </Routes>
         </Layout>
     );
