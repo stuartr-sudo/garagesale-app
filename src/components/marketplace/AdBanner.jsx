@@ -3,6 +3,33 @@ import React, { useState, useEffect } from "react";
 import { Advertisement } from "@/api/entities";
 import { ArrowRight, Zap, Star, Clock } from "lucide-react";
 
+// Load theme colors from localStorage
+const getThemeColors = () => {
+  try {
+    const saved = localStorage.getItem('marketplace-theme');
+    if (saved) {
+      const theme = JSON.parse(saved);
+      return {
+        bannerFrom: theme.adBannerFrom || '#701a75',
+        bannerTo: theme.adBannerTo || '#1f2937',
+        borderColor: theme.adBorderColor || '#a21caf',
+        buttonFrom: theme.adButtonFrom || '#22d3ee',
+        buttonTo: theme.adButtonTo || '#3b82f6'
+      };
+    }
+  } catch (error) {
+    console.error('Error loading theme:', error);
+  }
+  
+  return {
+    bannerFrom: '#701a75',
+    bannerTo: '#1f2937',
+    borderColor: '#a21caf',
+    buttonFrom: '#22d3ee',
+    buttonTo: '#3b82f6'
+  };
+};
+
 // Placeholder advertisements for demo purposes
 const DEMO_ADS = {
   top_banner: {
@@ -54,6 +81,17 @@ const DEMO_ADS = {
 export default function AdBanner({ placement = "top_banner", className = "", onAdClick }) {
   const [ads, setAds] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
+  const [themeColors, setThemeColors] = useState(getThemeColors());
+
+  // Listen for theme changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setThemeColors(getThemeColors());
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   useEffect(() => {
     loadAds();
@@ -159,7 +197,13 @@ export default function AdBanner({ placement = "top_banner", className = "", onA
   if (placement === "top_banner") {
     return (
       <AdContainer ad={currentAd}>
-        <div className="bg-gradient-to-r from-gray-900 via-fuchsia-950 to-gray-900 rounded-2xl p-6 shadow-lg border border-fuchsia-800 cursor-pointer group hover:shadow-2xl hover:border-fuchsia-700 transition-all duration-300 relative">
+        <div 
+          className="rounded-2xl p-6 shadow-lg border cursor-pointer group hover:shadow-2xl transition-all duration-300 relative"
+          style={{
+            background: `linear-gradient(to right, ${themeColors.bannerFrom}, ${themeColors.bannerTo})`,
+            borderColor: themeColors.borderColor
+          }}
+        >
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <h3 className="text-xl font-bold text-fuchsia-400 mb-2 group-hover:text-fuchsia-300">
@@ -210,7 +254,13 @@ export default function AdBanner({ placement = "top_banner", className = "", onA
   if (placement === "between_items") {
     return (
       <AdContainer ad={currentAd}>
-        <div className="bg-gradient-to-r from-cyan-950 to-gray-900 rounded-2xl p-6 shadow-lg border border-cyan-800 cursor-pointer group hover:shadow-xl transition-all duration-300 relative">
+        <div 
+          className="rounded-2xl p-6 shadow-lg border cursor-pointer group hover:shadow-xl transition-all duration-300 relative"
+          style={{
+            background: `linear-gradient(to right, ${themeColors.bannerFrom}, ${themeColors.bannerTo})`,
+            borderColor: themeColors.borderColor
+          }}
+        >
           <div className="flex items-center gap-4">
             <img src={currentAd.image_url} alt={currentAd.title} className="w-16 h-16 object-cover rounded-xl shadow-md group-hover:scale-105 transition-transform duration-300 flex-shrink-0" onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=100&h=100&fit=crop"; }} />
             <div className="flex-1">
@@ -260,11 +310,12 @@ export default function AdBanner({ placement = "top_banner", className = "", onA
                 <div className="flex items-center gap-1 text-gray-500 text-xs"><span className="truncate">Sponsored Content</span></div>
               </div>
             </div>
-            <div className={`w-full h-11 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-2 mt-4 ${
-              isLocalDeal 
-                ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 hover:shadow-orange-500/20' 
-                : 'bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 hover:shadow-cyan-500/20'
-            }`}>
+            <div 
+              className="w-full h-11 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-2 mt-4"
+              style={{
+                background: `linear-gradient(to right, ${themeColors.buttonFrom}, ${themeColors.buttonTo})`
+              }}
+            >
               <ArrowRight className="w-4 h-4" />
               Learn More
             </div>

@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import { Palette, RotateCcw, Save, Eye } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 
@@ -13,42 +14,73 @@ const THEME_PRESETS = {
     cardTo: '#581c87',    // purple-900
     buttonFrom: '#a855f7', // purple-500
     buttonTo: '#db2777',  // pink-600
-    accentColor: '#22d3ee' // cyan-400
+    accentColor: '#22d3ee', // cyan-400
+    // Advertisement colors
+    adBannerFrom: '#701a75', // fuchsia-900
+    adBannerTo: '#1f2937',   // gray-800
+    adBorderColor: '#a21caf', // fuchsia-700
+    adButtonFrom: '#22d3ee',  // cyan-400
+    adButtonTo: '#3b82f6'     // blue-500
   },
   'Dark Slate': {
     cardFrom: '#334155',  // slate-700
     cardTo: '#475569',    // slate-600
     buttonFrom: '#a855f7', // purple-500
     buttonTo: '#db2777',  // pink-600
-    accentColor: '#22d3ee' // cyan-400
+    accentColor: '#22d3ee', // cyan-400
+    adBannerFrom: '#701a75',
+    adBannerTo: '#1f2937',
+    adBorderColor: '#a21caf',
+    adButtonFrom: '#22d3ee',
+    adButtonTo: '#3b82f6'
   },
   'Ocean Blue': {
     cardFrom: '#1e40af',  // blue-800
     cardTo: '#164e63',    // cyan-900
     buttonFrom: '#3b82f6', // blue-500
     buttonTo: '#0891b2',  // cyan-600
-    accentColor: '#93c5fd' // blue-300
+    accentColor: '#93c5fd', // blue-300
+    adBannerFrom: '#164e63', // cyan-900
+    adBannerTo: '#1e3a8a',   // blue-900
+    adBorderColor: '#0891b2', // cyan-600
+    adButtonFrom: '#06b6d4',  // cyan-500
+    adButtonTo: '#3b82f6'     // blue-500
   },
   'Sunset': {
     cardFrom: '#9a3412',  // orange-800
     cardTo: '#831843',    // pink-900
     buttonFrom: '#f97316', // orange-500
     buttonTo: '#db2777',  // pink-600
-    accentColor: '#fdba74' // orange-300
+    accentColor: '#fdba74', // orange-300
+    adBannerFrom: '#9a3412', // orange-800
+    adBannerTo: '#7c2d12',   // orange-900
+    adBorderColor: '#ea580c', // orange-600
+    adButtonFrom: '#f97316',  // orange-500
+    adButtonTo: '#fb923c'     // orange-400
   },
   'Forest': {
     cardFrom: '#14532d',  // green-900
     cardTo: '#064e3b',    // emerald-900
     buttonFrom: '#22c55e', // green-500
     buttonTo: '#10b981',  // emerald-600
-    accentColor: '#86efac' // green-300
+    accentColor: '#86efac', // green-300
+    adBannerFrom: '#064e3b', // emerald-900
+    adBannerTo: '#14532d',   // green-900
+    adBorderColor: '#059669', // emerald-600
+    adButtonFrom: '#10b981',  // emerald-500
+    adButtonTo: '#22c55e'     // green-500
   },
   'Royal': {
     cardFrom: '#581c87',  // purple-900
     cardTo: '#312e81',    // indigo-900
     buttonFrom: '#a855f7', // purple-500
     buttonTo: '#6366f1',  // indigo-600
-    accentColor: '#c4b5fd' // purple-300
+    accentColor: '#c4b5fd', // purple-300
+    adBannerFrom: '#581c87', // purple-900
+    adBannerTo: '#312e81',   // indigo-900
+    adBorderColor: '#7c3aed', // violet-600
+    adButtonFrom: '#a855f7',  // purple-500
+    adButtonTo: '#8b5cf6'     // violet-500
   }
 };
 
@@ -212,6 +244,114 @@ export default function ThemeSettings() {
                 <p className="text-xs text-gray-500">
                   Used for price text and highlights
                 </p>
+              </div>
+
+              <Separator className="my-6 bg-gray-700" />
+
+              {/* Advertisement Colors Section */}
+              <div className="space-y-4 bg-amber-900/10 border border-amber-700/30 rounded-lg p-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">📢</span>
+                  <h3 className="text-xl font-bold text-white">Advertisement & Promoted Items</h3>
+                </div>
+                <p className="text-sm text-gray-400">Customize colors for advertisements, sponsored content, and promoted products</p>
+
+                {/* Ad Banner Gradient */}
+                <div className="space-y-3">
+                  <Label className="text-white text-lg">Ad Banner Background</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-sm text-gray-400">From Color</Label>
+                      <Input
+                        type="color"
+                        value={theme.adBannerFrom || '#701a75'}
+                        onChange={(e) => updateThemeField('adBannerFrom', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.adBannerFrom || '#701a75'}
+                        onChange={(e) => updateThemeField('adBannerFrom', e.target.value)}
+                        placeholder="e.g., #701a75"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-400">To Color</Label>
+                      <Input
+                        type="color"
+                        value={theme.adBannerTo || '#1f2937'}
+                        onChange={(e) => updateThemeField('adBannerTo', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.adBannerTo || '#1f2937'}
+                        onChange={(e) => updateThemeField('adBannerTo', e.target.value)}
+                        placeholder="e.g., #1f2937"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Ad Border Color */}
+                <div className="space-y-3">
+                  <Label className="text-white text-lg">Ad Border Color</Label>
+                  <Input
+                    type="color"
+                    value={theme.adBorderColor || '#a21caf'}
+                    onChange={(e) => updateThemeField('adBorderColor', e.target.value)}
+                    className="h-10 w-full cursor-pointer"
+                  />
+                  <Input
+                    value={theme.adBorderColor || '#a21caf'}
+                    onChange={(e) => updateThemeField('adBorderColor', e.target.value)}
+                    placeholder="e.g., #a21caf"
+                    className="bg-gray-800 border-gray-700 text-white"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Border color for advertisement cards
+                  </p>
+                </div>
+
+                {/* Ad Button Gradient */}
+                <div className="space-y-3">
+                  <Label className="text-white text-lg">Ad Button Gradient</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-sm text-gray-400">From Color</Label>
+                      <Input
+                        type="color"
+                        value={theme.adButtonFrom || '#22d3ee'}
+                        onChange={(e) => updateThemeField('adButtonFrom', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.adButtonFrom || '#22d3ee'}
+                        onChange={(e) => updateThemeField('adButtonFrom', e.target.value)}
+                        placeholder="e.g., #22d3ee"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-400">To Color</Label>
+                      <Input
+                        type="color"
+                        value={theme.adButtonTo || '#3b82f6'}
+                        onChange={(e) => updateThemeField('adButtonTo', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.adButtonTo || '#3b82f6'}
+                        onChange={(e) => updateThemeField('adButtonTo', e.target.value)}
+                        placeholder="e.g., #3b82f6"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Call-to-action button colors for ads
+                  </p>
+                </div>
               </div>
 
               {/* Action Buttons */}
