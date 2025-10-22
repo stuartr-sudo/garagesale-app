@@ -42,6 +42,7 @@ export default function EditItem() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [itemLoaded, setItemLoaded] = useState(false);
   
   const [itemData, setItemData] = useState({
     title: "",
@@ -96,9 +97,11 @@ export default function EditItem() {
         condition: item.condition || "good",
         category: item.category || "other",
         postcode: item.postcode || user.postcode || "",
-        tags: item.tags || [],
-        image_urls: item.image_urls || []
+        tags: Array.isArray(item.tags) ? item.tags : [],
+        image_urls: Array.isArray(item.image_urls) ? item.image_urls : []
       });
+      
+      setItemLoaded(true);
       
     } catch (error) {
       console.error("Error loading item:", error);
@@ -270,12 +273,30 @@ export default function EditItem() {
     }
   };
 
-  if (isLoading || !itemData.title) {
+  // Show loading screen until item is fully loaded
+  if (isLoading || !itemLoaded) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-cyan-400 mx-auto mb-4" />
           <p className="text-gray-400">Loading item details...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // Double-check that we have valid data
+  if (!itemData.title || !Array.isArray(itemData.image_urls)) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-400">Error: Invalid item data</p>
+          <Button
+            onClick={() => navigate(createPageUrl('MyItems'))}
+            className="mt-4"
+          >
+            Back to My Items
+          </Button>
         </div>
       </div>
     );
