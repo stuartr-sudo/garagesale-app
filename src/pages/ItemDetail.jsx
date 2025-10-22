@@ -17,6 +17,7 @@ import SmartRecommendations from '@/components/recommendations/SmartRecommendati
 import SpecialOffersSection from '@/components/marketplace/SpecialOffersSection';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { addToCart } from '@/utils/cart';
 
 export default function ItemDetail() {
   const { id } = useParams();
@@ -169,46 +170,22 @@ export default function ItemDetail() {
     try {
       const user = await UserEntity.me();
       
-      // Try to reserve the item first
-      const { reserveItem } = await import('@/api/functions');
-      const reserved = await reserveItem(item.id, 'cart', 10);
-      
-      if (!reserved) {
+      // Use the new reservation system
+      const result = await addToCart({
+        itemId: item.id,
+        buyerId: user.id,
+        quantity: 1,
+        negotiatedPrice: negotiatedPrice,
+        priceSource: negotiatedPrice ? 'negotiated' : 'original'
+      });
+
+      if (!result.success) {
         toast({
           title: "Item Not Available",
-          description: "This item is currently reserved by another user. Please try again in a few minutes.",
+          description: result.error || "This item is currently reserved by another user. Please try again in a few minutes.",
           variant: "destructive"
         });
         return;
-      }
-      
-      // Check if already in cart
-      const { data: existing } = await supabase
-        .from('cart_items')
-        .select('id, quantity')
-        .eq('buyer_id', user.id)
-        .eq('item_id', item.id)
-        .single();
-
-      if (existing) {
-        // Update quantity
-        const { error } = await supabase
-          .from('cart_items')
-          .update({ quantity: existing.quantity + 1 })
-          .eq('id', existing.id);
-
-        if (error) throw error;
-      } else {
-        // Add new
-        const { error } = await supabase
-          .from('cart_items')
-          .insert({
-            buyer_id: user.id,
-            item_id: item.id,
-            quantity: 1
-          });
-
-        if (error) throw error;
       }
 
       setIsInCart(true);
