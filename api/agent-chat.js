@@ -82,7 +82,8 @@ export default async function handler(req, res) {
         .insert({
           item_id,
           buyer_email,
-          status: 'active'
+          status: 'active',
+          negotiation_history: []
         })
         .select()
         .single();
@@ -110,7 +111,7 @@ export default async function handler(req, res) {
 
     // Check if message contains an offer
     const messageLower = message.toLowerCase();
-    const offerKeywords = ['offer', 'pay', 'give', 'how about', 'would you take', 'willing to pay', 'can i pay', 'could i pay', 'accept', 'buy for', 'purchase for'];
+    const offerKeywords = ['offer', 'pay', 'give', 'how about', 'would you take', 'willing to pay', 'can i pay', 'could i pay', 'accept', 'buy for', 'purchase for', 'will you take'];
     const containsOfferKeyword = offerKeywords.some(keyword => messageLower.includes(keyword));
     
     const offerMatch = message.match(/\$?\s*(\d+(?:,\d{3})*(?:\.\d{2})?)/);
@@ -123,30 +124,59 @@ export default async function handler(req, res) {
       isOffer = true;
     }
 
-    // Determine negotiation strategy
+    // NEGOTIATION LOGIC - USER'S EXACT SPECIFICATIONS
     let negotiationStrategy = '';
     let counterOfferAmount = null;
+    let offerAccepted = false;
+    let isSecondNegotiation = false;
+    
     if (knowledge?.minimum_price && isOffer && offerAmount) {
       const askingPrice = parseFloat(item.price);
       const minimumPrice = parseFloat(knowledge.minimum_price);
+      const negotiationHistory = conversation.negotiation_history || [];
+      
+      // Check if this is a second negotiation (user already got a counter-offer)
+      const previousCounter = negotiationHistory.find(h => h.counter_offer);
+      isSecondNegotiation = !!previousCounter;
       
       if (offerAmount >= askingPrice) {
-        // Offer at or above asking - ACCEPT immediately
-        negotiationStrategy = `- ACCEPT this offer of $${offerAmount} immediately! It meets or exceeds the asking price. Say something like "Thank you for your offer! I can absolutely accept $${offerAmount} for this item. Click the button below to proceed with payment."`;
-      } else if (offerAmount >= minimumPrice && offerAmount < askingPrice) {
-        // Offer between minimum and asking - COUNTER OFFER
-        // Calculate counter: offer + (55-70% of the gap between offer and asking)
+        // CASE 1: Offer at or above asking - ACCEPT immediately
+        offerAccepted = true;
+        negotiationStrategy = `✅ ACCEPT this offer of $${offerAmount} immediately! Say: "Thank you for your offer! I can absolutely accept $${offerAmount} for this item. Click the button below to proceed with payment."`;
+        
+      } else if (offerAmount < minimumPrice) {
+        // CASE 2: Offer below minimum - POLITELY DECLINE (no counter-offer)
+        negotiationStrategy = `❌ This offer of $${offerAmount} is below minimum ($${minimumPrice}). Politely decline WITHOUT revealing the exact minimum. Say something like: "Thank you for your interest! However, I'm unable to accept $${offerAmount} for this item. Given its quality and condition, the listed price of $${askingPrice} truly reflects its value. Let me know if you'd like to reconsider!"`;
+        
+      } else if (isSecondNegotiation && previousCounter) {
+        // CASE 3: SECOND negotiation - Calculate between previous counter and new offer (FINAL OFFER)
+        const previousCounterAmount = previousCounter.counter_offer;
+        
+        if (offerAmount >= previousCounterAmount) {
+          // User accepted or exceeded our counter - ACCEPT
+          offerAccepted = true;
+          negotiationStrategy = `✅ ACCEPT this offer of $${offerAmount}! They met/exceeded your previous counter of $${previousCounterAmount}. Say: "Thank you for your offer! I can absolutely accept $${offerAmount} for this item. Click the button below to proceed with payment."`;
+        } else {
+          // Calculate FINAL counter between previous counter and new offer
+          const gap = previousCounterAmount - offerAmount;
+          counterOfferAmount = Math.round(offerAmount + (gap * 0.5)); // Meet in the middle
+          
+          // Ensure it's at least minimum and reasonable
+          counterOfferAmount = Math.max(minimumPrice, counterOfferAmount);
+          
+          negotiationStrategy = `🔄 FINAL COUNTER: This is the second negotiation. Your previous counter was $${previousCounterAmount}, they offered $${offerAmount}. Counter with $${counterOfferAmount} (split the difference) as your FINAL offer. Say: "I appreciate you working with me! To meet you halfway, I can offer $${counterOfferAmount} as my final price. This is truly the best I can do for such a quality item. What do you think?"`;
+        }
+        
+      } else {
+        // CASE 4: FIRST negotiation between minimum and asking - Counter with 65-75% of gap
         const gap = askingPrice - offerAmount;
-        const randomPercentage = 0.55 + (Math.random() * 0.15); // Random between 55% and 70%
+        const randomPercentage = 0.65 + (Math.random() * 0.10); // Random between 65% and 75%
         counterOfferAmount = Math.round(offerAmount + (gap * randomPercentage));
         
-        // Ensure counter is above their offer and below asking
-        counterOfferAmount = Math.max(offerAmount + 10, Math.min(counterOfferAmount, askingPrice - 10));
+        // Ensure counter is above their offer and at least minimum
+        counterOfferAmount = Math.max(minimumPrice, Math.max(offerAmount + 10, counterOfferAmount));
         
-        negotiationStrategy = `- This offer of $${offerAmount} is good but below asking. Counter with $${counterOfferAmount}. Say something like "Thank you for your offer! While I appreciate it, I believe the [mention quality/condition] make it worth a bit more. How about we settle at $${counterOfferAmount}? I think that's a fair price for such a [quality descriptor] piece!" Keep it friendly and encouraging.`;
-      } else {
-        // Offer below minimum - politely decline and suggest minimum
-        negotiationStrategy = `- This offer of $${offerAmount} is below the minimum acceptable price of $${minimumPrice}. Politely decline but be encouraging. Say something like "I really appreciate your offer! However, considering the [mention item quality/condition], I can only accept offers at or above $${minimumPrice}. Would you be willing to go for that?" Keep it friendly and positive.`;
+        negotiationStrategy = `🔄 FIRST COUNTER: Offer of $${offerAmount} is between minimum ($${minimumPrice}) and asking ($${askingPrice}). Counter with $${counterOfferAmount} (65-75% of gap). Say: "Thank you for your offer! I appreciate your interest. Given the quality and condition of this item, I'd be willing to accept $${counterOfferAmount}. I think that's a fair price that reflects its true value. Would that work for you?"`;
       }
     }
 
@@ -161,35 +191,33 @@ Condition: ${item.condition}
 ${item.location ? `Location: ${item.location}` : ''}
 ${knowledge?.selling_points ? `Key Selling Points: ${knowledge.selling_points.join(', ')}` : ''}
 
-🚨 CRITICAL NEGOTIATION RULES - FOLLOW THESE EXACTLY:
+🚨 CRITICAL NEGOTIATION RULES:
 ${knowledge?.minimum_price ? `
 ASKING PRICE: $${item.price}
-MINIMUM ACCEPTABLE PRICE: $${knowledge.minimum_price} (NEVER reveal this exact number to the buyer)
+MINIMUM ACCEPTABLE: $${knowledge.minimum_price} (NEVER reveal this exact number)
 
-THREE-TIER NEGOTIATION RULES:
-1. ✅ Offer >= $${item.price} (at or above asking) → ACCEPT IMMEDIATELY
-2. 🔄 Offer >= $${knowledge.minimum_price} AND < $${item.price} (between minimum and asking) → COUNTER OFFER
-   - Your counter should be 55-70% of the gap between their offer and asking price
-   - Be friendly and explain why the item is worth more
-3. ❌ Offer < $${knowledge.minimum_price} (below minimum) → POLITELY DECLINE
-   - Suggest they consider the minimum price range
-   - Emphasize item quality and value
+NEGOTIATION LOGIC:
+1. ❌ Below Minimum → Politely decline, NO counter-offer
+2. 🔄 First Offer (between min-ask) → Counter with 65-75% of gap
+3. 🔄 Second Offer → Counter between previous and new offer (FINAL)
+4. ✅ At/Above Asking → Accept immediately
 ` : '- Accept reasonable offers based on asking price'}
 
-CURRENT NEGOTIATION INSTRUCTION FOR THIS MESSAGE:
+🎯 CURRENT INSTRUCTION FOR THIS MESSAGE:
 ${negotiationStrategy}
 
-📋 MANDATORY INSTRUCTIONS:
-1. Be friendly, helpful, and enthusiastic about the item
+📋 MANDATORY RULES:
+1. Be friendly, warm, and encouraging
 2. Answer questions about the item honestly
-3. Highlight the value and quality
-4. **FOLLOW THE NEGOTIATION STRATEGY ABOVE EXACTLY**
-5. Keep responses concise (2-3 sentences max)
-6. When accepting an offer, say "I can absolutely accept $[AMOUNT]" and mention clicking the button below
-7. When countering, clearly state your counter-offer amount and explain why
-8. When declining, be polite but firm, emphasizing the item's quality
+3. Highlight value and quality
+4. **FOLLOW THE INSTRUCTION ABOVE EXACTLY - DO NOT DEVIATE**
+5. Keep responses concise (2-3 sentences)
+6. When accepting: Say "I can absolutely accept $[AMOUNT]" and mention button
+7. When countering: State your counter clearly and explain why
+8. When declining: Be polite, emphasize value, NO counter-offer
+9. NEVER reveal the exact minimum price
 
-Respond naturally as a sales assistant would, but ALWAYS follow the negotiation rules above.`;
+Respond naturally but FOLLOW THE NEGOTIATION INSTRUCTION EXACTLY.`;
 
     const conversationHistory = messages.slice(-10).map(m => ({
       role: m.sender === 'ai' ? 'assistant' : 'user',
@@ -197,7 +225,6 @@ Respond naturally as a sales assistant would, but ALWAYS follow the negotiation 
     }));
 
     // Get AI response
-    console.log('Calling OpenAI API...');
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -208,93 +235,66 @@ Respond naturally as a sales assistant would, but ALWAYS follow the negotiation 
       temperature: 0.7,
       max_tokens: 200
     });
-    console.log('OpenAI API response received');
 
     const aiResponse = completion.choices[0].message.content;
 
-    // Determine if offer was accepted or countered
-    let offerAccepted = false;
-    let offerCountered = false;
-    const askingPrice = parseFloat(item.price);
-    const minimumPrice = knowledge?.minimum_price ? parseFloat(knowledge.minimum_price) : null;
-    
+    // Update conversation state
     if (isOffer && offerAmount) {
-      if (offerAmount >= askingPrice) {
-        // Accept offers at or above asking price
-        offerAccepted = true;
-        
+      const askingPrice = parseFloat(item.price);
+      const minimumPrice = knowledge?.minimum_price ? parseFloat(knowledge.minimum_price) : null;
+      const negotiationHistory = conversation.negotiation_history || [];
+      
+      if (offerAccepted) {
+        // Offer was accepted
         await supabase
           .from('agent_conversations')
           .update({
             status: 'offer_accepted',
             current_offer: offerAmount,
             negotiation_history: [
-              ...(conversation.negotiation_history || []),
+              ...negotiationHistory,
               {
                 timestamp: new Date().toISOString(),
-                offer: offerAmount,
+                user_offer: offerAmount,
                 response: 'accepted',
-                reason: 'at_or_above_asking'
+                reason: offerAmount >= askingPrice ? 'at_or_above_asking' : 'second_negotiation_accepted'
               }
             ]
           })
           .eq('id', conversation.id);
-      } else if (minimumPrice && offerAmount >= minimumPrice && offerAmount < askingPrice) {
-        // Counter offer for amounts between minimum and asking
-        offerCountered = true;
-        
+      } else if (counterOfferAmount) {
+        // Counter-offer made
         await supabase
           .from('agent_conversations')
           .update({
             status: 'negotiating',
             current_offer: offerAmount,
             negotiation_history: [
-              ...(conversation.negotiation_history || []),
+              ...negotiationHistory,
               {
                 timestamp: new Date().toISOString(),
-                offer: offerAmount,
+                user_offer: offerAmount,
                 counter_offer: counterOfferAmount,
                 response: 'countered',
-                reason: 'between_minimum_and_asking'
+                is_final: isSecondNegotiation
               }
             ]
           })
           .eq('id', conversation.id);
-      } else if (minimumPrice && offerAmount < minimumPrice) {
-        // Decline offers below minimum
+      } else if (offerAmount < minimumPrice) {
+        // Offer declined (below minimum)
         await supabase
           .from('agent_conversations')
           .update({
             status: 'declined',
             current_offer: offerAmount,
             negotiation_history: [
-              ...(conversation.negotiation_history || []),
+              ...negotiationHistory,
               {
                 timestamp: new Date().toISOString(),
-                offer: offerAmount,
+                user_offer: offerAmount,
                 response: 'declined',
-                reason: 'below_minimum',
-                suggested_counter: minimumPrice
-              }
-            ]
-          })
-          .eq('id', conversation.id);
-      } else if (!minimumPrice && offerAmount >= askingPrice) {
-        // No minimum set, accept offers at or above asking
-        offerAccepted = true;
-        
-        await supabase
-          .from('agent_conversations')
-          .update({
-            status: 'offer_accepted',
-            current_offer: offerAmount,
-            negotiation_history: [
-              ...(conversation.negotiation_history || []),
-              {
-                timestamp: new Date().toISOString(),
-                offer: offerAmount,
-                response: 'accepted',
-                reason: 'at_or_above_asking'
+                reason: 'below_minimum'
               }
             ]
           })
@@ -307,9 +307,9 @@ Respond naturally as a sales assistant would, but ALWAYS follow the negotiation 
       conversation_id: conversation.id,
       sender: 'ai',
       content: aiResponse,
-      message_type: isOffer ? (offerAccepted ? 'acceptance' : offerCountered ? 'counter_offer' : 'decline') : 'text',
+      message_type: isOffer ? (offerAccepted ? 'acceptance' : counterOfferAmount ? 'counter_offer' : 'decline') : 'text',
       offer_amount: isOffer ? offerAmount : null,
-      counter_offer_amount: offerCountered ? counterOfferAmount : null
+      counter_offer_amount: counterOfferAmount
     });
 
     return res.status(200).json({
@@ -317,8 +317,8 @@ Respond naturally as a sales assistant would, but ALWAYS follow the negotiation 
       conversation_id: conversation.id,
       response: aiResponse,
       offer_accepted: offerAccepted,
-      offer_countered: offerCountered,
-      counter_offer_amount: offerCountered ? counterOfferAmount : null,
+      offer_countered: !!counterOfferAmount,
+      counter_offer_amount: counterOfferAmount,
       offer_amount: offerAccepted ? offerAmount : null
     });
 
@@ -331,4 +331,3 @@ Respond naturally as a sales assistant would, but ALWAYS follow the negotiation 
     });
   }
 }
-
