@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Trash2, Eye, EyeOff, CheckCircle } from "lucide-react";
+import { MoreHorizontal, Trash2, Eye, EyeOff, CheckCircle, Edit } from "lucide-react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -73,6 +73,16 @@ export default function MyItemCard({ item, onDelete, onStatusChange }) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 bg-gray-800 border-gray-700">
+              <DropdownMenuItem 
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  navigate(createPageUrl(`EditItem/${item.id}`)); 
+                }} 
+                className="text-white hover:bg-gray-700"
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Item
+              </DropdownMenuItem>
               {item.status === "active" && (
                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onStatusChange("inactive"); }} className="text-white hover:bg-gray-700">
                   <EyeOff className="w-4 h-4 mr-2" />

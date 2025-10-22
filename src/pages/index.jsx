@@ -6,6 +6,8 @@ import MyItems from "./MyItems";
 
 import AddItem from "./AddItem";
 
+import EditItem from "./EditItem";
+
 import Users from "./Users";
 
 import Home from "./Home";
@@ -71,6 +73,8 @@ const PAGES = {
     MyItems: MyItems,
     
     AddItem: AddItem,
+    
+    EditItem: EditItem,
     
     Users: Users,
     
@@ -145,6 +149,11 @@ function _getCurrentPage(url) {
         return 'ItemDetail';
     }
     
+    // Handle EditItem pages
+    if (url.includes('/EditItem/')) {
+        return 'EditItem';
+    }
+    
     let urlLastPart = url.split('/').pop();
     if (urlLastPart.includes('?')) {
         urlLastPart = urlLastPart.split('?')[0];
@@ -171,6 +180,8 @@ function PagesContent() {
                 <Route path="/MyItems" element={<MyItems />} />
                 
                 <Route path="/AddItem" element={<AddItem />} />
+                
+                <Route path="/EditItem/:id" element={<EditItem />} />
                 
                 <Route path="/Users" element={<Users />} />
                 

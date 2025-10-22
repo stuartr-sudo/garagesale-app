@@ -1,0 +1,489 @@
+import React, { useState, useEffect } from "react";
+import { Item } from "@/api/entities";
+import { User } from "@/api/entities";
+import { supabase } from "@/lib/supabase";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
+import { useNavigate, useParams } from "react-router-dom";
+import { createPageUrl } from "@/utils";
+import { ArrowLeft, Save, Loader2, X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import ImageUpload from "../components/additem/ImageUpload";
+
+const categories = [
+  { value: "electronics", label: "Electronics" },
+  { value: "clothing", label: "Clothing" },
+  { value: "furniture", label: "Furniture" },
+  { value: "books", label: "Books" },
+  { value: "toys", label: "Toys" },
+  { value: "sports", label: "Sports" },
+  { value: "home_garden", label: "Home & Garden" },
+  { value: "automotive", label: "Automotive" },
+  { value: "collectibles", label: "Collectibles" },
+  { value: "other", label: "Other" }
+];
+
+const conditions = [
+  { value: "new", label: "New" },
+  { value: "like_new", label: "Like New" },
+  { value: "good", label: "Good" },
+  { value: "fair", label: "Fair" },
+  { value: "poor", label: "Poor" }
+];
+
+export default function EditItem() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  
+  const [itemData, setItemData] = useState({
+    title: "",
+    description: "",
+    price: "",
+    minimum_price: "",
+    condition: "good",
+    category: "other",
+    postcode: "",
+    tags: [],
+    image_urls: []
+  });
+
+  useEffect(() => {
+    loadUserAndItem();
+  }, [id]);
+
+  const loadUserAndItem = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Load current user
+      const user = await User.me();
+      setCurrentUser(user);
+      
+      // Load item details
+      const { data: item, error } = await supabase
+        .from('items')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error) throw error;
+      
+      // Verify ownership - only seller can edit their own items
+      if (item.seller_id !== user.id) {
+        toast({
+          title: "Access Denied",
+          description: "You can only edit your own listings.",
+          variant: "destructive"
+        });
+        navigate(createPageUrl('MyItems'));
+        return;
+      }
+      
+      // Populate form with existing data
+      setItemData({
+        title: item.title || "",
+        description: item.description || "",
+        price: item.price ? item.price.toString() : "",
+        minimum_price: item.minimum_price ? item.minimum_price.toString() : "",
+        condition: item.condition || "good",
+        category: item.category || "other",
+        postcode: item.postcode || user.postcode || "",
+        tags: item.tags || [],
+        image_urls: item.image_urls || []
+      });
+      
+    } catch (error) {
+      console.error("Error loading item:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load item details",
+        variant: "destructive"
+      });
+      navigate(createPageUrl('MyItems'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleImageUpload = async (files) => {
+    if (!currentUser) {
+      toast({
+        title: "Please wait",
+        description: "Loading user data...",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to upload images.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const uploadedUrls = [];
+      
+      for (const file of files) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${currentUser.id}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        
+        const { data, error } = await supabase.storage
+          .from('item-images')
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (error) {
+          console.error('Upload error:', error);
+          throw error;
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('item-images')
+          .getPublicUrl(fileName);
+
+        uploadedUrls.push(publicUrl);
+      }
+      
+      setItemData(prev => ({
+        ...prev,
+        image_urls: [...prev.image_urls, ...uploadedUrls]
+      }));
+
+      toast({
+        title: "Success!",
+        description: `${uploadedUrls.length} image(s) uploaded successfully`
+      });
+
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Failed to upload images",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const removeImage = (index) => {
+    setItemData(prev => ({
+      ...prev,
+      image_urls: prev.image_urls.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleSubmit = async () => {
+    // Validation
+    if (!itemData.title.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter a title for your item",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!itemData.description.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter a description",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!itemData.price || parseFloat(itemData.price) <= 0) {
+      toast({
+        title: "Invalid Price",
+        description: "Please enter a valid price",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (itemData.image_urls.length === 0) {
+      toast({
+        title: "Missing Images",
+        description: "Please upload at least one image",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Update the item
+      const { error: updateError } = await supabase
+        .from('items')
+        .update({
+          title: itemData.title.trim(),
+          description: itemData.description.trim(),
+          price: parseFloat(itemData.price),
+          minimum_price: itemData.minimum_price ? parseFloat(itemData.minimum_price) : null,
+          condition: itemData.condition,
+          category: itemData.category,
+          postcode: itemData.postcode || null,
+          tags: itemData.tags,
+          image_urls: itemData.image_urls,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('seller_id', currentUser.id); // Extra safety check
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Success!",
+        description: "Your listing has been updated"
+      });
+
+      navigate(createPageUrl('MyItems'));
+
+    } catch (error) {
+      console.error('Error updating item:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update item",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-cyan-400 mx-auto mb-4" />
+          <p className="text-gray-400">Loading item details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-950 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <Button
+            variant="ghost"
+            onClick={() => navigate(createPageUrl('MyItems'))}
+            className="text-gray-400 hover:text-white mb-4"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to My Items
+          </Button>
+          
+          <h1 className="text-4xl font-bold text-white mb-2">
+            Edit Listing
+          </h1>
+          <p className="text-gray-400">
+            Update your item information
+          </p>
+        </div>
+
+        {/* Form Content */}
+        <Card className="bg-gray-900 border-gray-800 shadow-2xl">
+          <CardContent className="p-8 space-y-6">
+            
+            {/* Title */}
+            <div>
+              <Label htmlFor="title" className="text-white text-lg">Item Title *</Label>
+              <Input
+                id="title"
+                value={itemData.title}
+                onChange={(e) => setItemData(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="e.g., Vintage Leather Jacket"
+                className="mt-2 bg-gray-800 border-gray-700 text-white placeholder-gray-500"
+                maxLength={100}
+              />
+              <p className="text-xs text-gray-500 mt-1">{itemData.title.length}/100 characters</p>
+            </div>
+
+            {/* Description */}
+            <div>
+              <Label htmlFor="description" className="text-white text-lg">Description *</Label>
+              <Textarea
+                id="description"
+                value={itemData.description}
+                onChange={(e) => setItemData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Describe your item in detail..."
+                className="mt-2 bg-gray-800 border-gray-700 text-white placeholder-gray-500 min-h-[150px]"
+                maxLength={1000}
+              />
+              <p className="text-xs text-gray-500 mt-1">{itemData.description.length}/1000 characters</p>
+            </div>
+
+            {/* Price and Minimum Price */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <Label htmlFor="price" className="text-white text-lg">Asking Price * ($)</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={itemData.price}
+                  onChange={(e) => setItemData(prev => ({ ...prev, price: e.target.value }))}
+                  placeholder="0.00"
+                  className="mt-2 bg-gray-800 border-gray-700 text-white placeholder-gray-500"
+                />
+              </div>
+              <div>
+                <Label htmlFor="minimum_price" className="text-white text-lg">Minimum Price ($)</Label>
+                <Input
+                  id="minimum_price"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={itemData.minimum_price}
+                  onChange={(e) => setItemData(prev => ({ ...prev, minimum_price: e.target.value }))}
+                  placeholder="Optional - for AI negotiation"
+                  className="mt-2 bg-gray-800 border-gray-700 text-white placeholder-gray-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">AI agent won't go below this price</p>
+              </div>
+            </div>
+
+            {/* Condition and Category */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <Label className="text-white text-lg">Condition *</Label>
+                <Select value={itemData.condition} onValueChange={(value) => setItemData(prev => ({ ...prev, condition: value }))}>
+                  <SelectTrigger className="mt-2 bg-gray-800 border-gray-700 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-700">
+                    {conditions.map(condition => (
+                      <SelectItem key={condition.value} value={condition.value} className="text-white hover:bg-gray-700">
+                        {condition.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-white text-lg">Category *</Label>
+                <Select value={itemData.category} onValueChange={(value) => setItemData(prev => ({ ...prev, category: value }))}>
+                  <SelectTrigger className="mt-2 bg-gray-800 border-gray-700 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-700">
+                    {categories.map(category => (
+                      <SelectItem key={category.value} value={category.value} className="text-white hover:bg-gray-700">
+                        {category.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Postcode */}
+            <div>
+              <Label htmlFor="postcode" className="text-white text-lg">Postcode</Label>
+              <Input
+                id="postcode"
+                value={itemData.postcode}
+                onChange={(e) => setItemData(prev => ({ ...prev, postcode: e.target.value }))}
+                placeholder="e.g., SW1A 1AA"
+                className="mt-2 bg-gray-800 border-gray-700 text-white placeholder-gray-500"
+              />
+            </div>
+
+            {/* Images */}
+            <div>
+              <Label className="text-white text-lg">Photos *</Label>
+              <p className="text-sm text-gray-400 mb-3">Upload images of your item (max 5)</p>
+              
+              {itemData.image_urls.length < 5 && (
+                <ImageUpload 
+                  onUpload={handleImageUpload}
+                  maxImages={5 - itemData.image_urls.length}
+                  isUploading={isUploading}
+                />
+              )}
+
+              {itemData.image_urls.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                  {itemData.image_urls.map((url, index) => (
+                    <div key={index} className="relative group">
+                      <img 
+                        src={url} 
+                        alt={`Item ${index + 1}`} 
+                        className="w-full h-48 object-cover rounded-lg border-2 border-gray-700"
+                      />
+                      <button
+                        onClick={() => removeImage(index)}
+                        className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                      {index === 0 && (
+                        <div className="absolute bottom-2 left-2 bg-cyan-600 text-white text-xs px-2 py-1 rounded">
+                          Primary
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Submit Button */}
+            <div className="pt-6 border-t border-gray-700 flex gap-4">
+              <Button
+                onClick={() => navigate(createPageUrl('MyItems'))}
+                variant="outline"
+                className="flex-1 bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white shadow-lg"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
+            </div>
+
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
