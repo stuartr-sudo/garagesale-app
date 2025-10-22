@@ -131,6 +131,11 @@ const PAGES = {
 }
 
 function _getCurrentPage(url) {
+    // Handle root path explicitly
+    if (url === '/' || url === '') {
+        return 'Home';
+    }
+    
     if (url.endsWith('/')) {
         url = url.slice(0, -1);
     }
@@ -140,7 +145,7 @@ function _getCurrentPage(url) {
     }
 
     const pageName = Object.keys(PAGES).find(page => page.toLowerCase() === urlLastPart.toLowerCase());
-    return pageName || Object.keys(PAGES)[0];
+    return pageName || 'Home'; // Default to 'Home' instead of first page
 }
 
 // Create a wrapper component that uses useLocation inside the Router context
