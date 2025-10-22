@@ -51,7 +51,7 @@ export default function EditItem() {
     minimum_price: "",
     condition: "good",
     category: "other",
-    postcode: "",
+    location: "",
     tags: [],
     image_urls: []
   });
@@ -149,7 +149,7 @@ export default function EditItem() {
         minimum_price: ensureString(item.minimum_price),
         condition: ensureString(item.condition) || "good",
         category: ensureString(item.category) || "other",
-        postcode: ensureString(item.postcode) || ensureString(user.postcode),
+        location: ensureString(item.location) || ensureString(user.postcode),
         tags: ensureArray(item.tags),
         image_urls: ensureArray(validImageUrls)
       };
@@ -306,7 +306,7 @@ export default function EditItem() {
           minimum_price: itemData.minimum_price ? parseFloat(itemData.minimum_price) : null,
           condition: itemData.condition,
           category: itemData.category,
-          postcode: itemData.postcode || null,
+          location: itemData.location || null,
           tags: itemData.tags,
           image_urls: itemData.image_urls,
           updated_at: new Date().toISOString()
@@ -488,14 +488,14 @@ export default function EditItem() {
               </div>
             </div>
 
-            {/* Postcode */}
+            {/* Location */}
             <div>
-              <Label htmlFor="postcode" className="text-white text-lg">Postcode</Label>
+              <Label htmlFor="location" className="text-white text-lg">Location</Label>
               <Input
-                id="postcode"
-                value={itemData.postcode}
-                onChange={(e) => setItemData(prev => ({ ...prev, postcode: e.target.value }))}
-                placeholder="e.g., SW1A 1AA"
+                id="location"
+                value={itemData.location}
+                onChange={(e) => setItemData(prev => ({ ...prev, location: e.target.value }))}
+                placeholder="e.g., London, UK or SW1A 1AA"
                 className="mt-2 bg-gray-800 border-gray-700 text-white placeholder-gray-500"
               />
             </div>
