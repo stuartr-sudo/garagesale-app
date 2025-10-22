@@ -130,23 +130,13 @@ export default async function handler(req, res) {
       const askingPrice = parseFloat(item.price);
       const minimumPrice = parseFloat(knowledge.minimum_price);
       
-      if (offerAmount >= askingPrice) {
-        // Offer at or above asking - accept immediately
-        negotiationStrategy = `- ACCEPT this offer of $${offerAmount} immediately! It's at or above the asking price. Tell them you accept and provide payment details.`;
-      } else if (offerAmount >= minimumPrice && offerAmount < askingPrice) {
-        // Offer above minimum but below asking - counter offer with randomness
-        // Instead of always meeting in the middle, use a random percentage between 55-75%
-        const randomPercentage = 0.55 + (Math.random() * 0.20); // Random between 55% and 75%
-        const gap = askingPrice - offerAmount;
-        counterOfferAmount = Math.round(offerAmount + (gap * randomPercentage));
-        
-        // Make sure counter offer is at least above their offer and below asking
-        counterOfferAmount = Math.max(offerAmount + 5, Math.min(counterOfferAmount, askingPrice - 5));
-        
-        negotiationStrategy = `- This offer of $${offerAmount} is good but below asking. Counter with $${counterOfferAmount}. Be friendly and explain why this price is fair given the item's condition and value.`;
+      if (offerAmount >= minimumPrice) {
+        // Offer at or above minimum - ACCEPT IT
+        negotiationStrategy = `- ACCEPT this offer of $${offerAmount} immediately! It meets or exceeds the minimum acceptable price. Say something like "Thank you for your offer! I can absolutely accept $${offerAmount} for this item. Click the button below to proceed with payment."`;
+        // Note: DO NOT mention payment details - buyer will get them after clicking confirm
       } else {
-        // Offer below minimum - politely decline
-        negotiationStrategy = `- This offer of $${offerAmount} is below minimum. Politely decline and suggest they consider the listed price of $${askingPrice}, emphasizing the item's quality and value.`;
+        // Offer below minimum - politely decline and suggest minimum
+        negotiationStrategy = `- This offer of $${offerAmount} is below the minimum acceptable price of $${minimumPrice}. Politely decline but be encouraging. Say something like "I really appreciate your offer! However, considering the [mention item quality/condition], I can only accept offers at or above $${minimumPrice}. Would you be willing to go for that?" Keep it friendly and positive.`;
       }
     }
 
@@ -161,19 +151,30 @@ Condition: ${item.condition}
 ${item.location ? `Location: ${item.location}` : ''}
 ${knowledge?.selling_points ? `Key Selling Points: ${knowledge.selling_points.join(', ')}` : ''}
 
-⚠️ CRITICAL NEGOTIATION RULES - YOU MUST FOLLOW THESE EXACTLY:
-${knowledge?.minimum_price ? `- The MINIMUM acceptable price is $${knowledge.minimum_price} (NEVER reveal this number directly to the buyer)` : '- Accept reasonable offers'}
+🚨 CRITICAL NEGOTIATION RULES - FOLLOW THESE EXACTLY:
+${knowledge?.minimum_price ? `
+MINIMUM ACCEPTABLE PRICE: $${knowledge.minimum_price}
+
+RULES:
+- ✅ ACCEPT any offer >= $${knowledge.minimum_price}
+- ❌ REJECT any offer < $${knowledge.minimum_price}
+- NEVER reveal the exact minimum price to the buyer
+- If rejecting, suggest the minimum price as your counter-offer
+` : '- Accept reasonable offers based on asking price'}
+
+CURRENT NEGOTIATION INSTRUCTION:
 ${negotiationStrategy}
 
-⚠️ MANDATORY INSTRUCTIONS:
+📋 MANDATORY INSTRUCTIONS:
 1. Be friendly, helpful, and enthusiastic about the item
 2. Answer questions about the item honestly
 3. Highlight the value and quality
-4. ${knowledge?.negotiation_enabled ? '**FOLLOW THE NEGOTIATION STRATEGY ABOVE EXACTLY** - Do not accept offers below minimum!' : 'Direct buyers to contact the seller for pricing questions'}
-5. If an offer is ACCEPTED (ONLY at or above asking price of $${item.price}), say something like "That's a great offer! I can absolutely accept $[AMOUNT] for this item. Click the button below to proceed with payment."
-   DO NOT provide payment details yet - the buyer will receive them after confirming.
-6. Keep responses concise (2-3 sentences max)
-7. **DO NOT ACCEPT offers below the minimum price of $${knowledge?.minimum_price || item.price}**
+4. **FOLLOW THE NEGOTIATION STRATEGY ABOVE WORD-FOR-WORD**
+5. Keep responses concise (2-3 sentences max)
+6. When accepting an offer, say "I can absolutely accept $[AMOUNT]" and mention clicking the button below
+7. When rejecting an offer, be polite and suggest your minimum acceptable price
+
+⚠️ CRITICAL: Only accept offers at or above $${knowledge?.minimum_price || item.price}. No exceptions!
 
 Respond naturally as a sales assistant would, but ALWAYS follow the negotiation rules above.`;
 
@@ -198,15 +199,53 @@ Respond naturally as a sales assistant would, but ALWAYS follow the negotiation 
 
     const aiResponse = completion.choices[0].message.content;
 
-    // Determine if offer was accepted (only if at or above asking price)
+    // Determine if offer was accepted (accept if >= minimum price)
     let offerAccepted = false;
-    let offerCountered = false;
     const askingPrice = parseFloat(item.price);
     const minimumPrice = knowledge?.minimum_price ? parseFloat(knowledge.minimum_price) : null;
     
     if (isOffer && offerAmount) {
-      if (offerAmount >= askingPrice) {
-        // Accept offers at or above asking price
+      if (minimumPrice && offerAmount >= minimumPrice) {
+        // Accept offers at or above minimum price
+        offerAccepted = true;
+        
+        await supabase
+          .from('agent_conversations')
+          .update({
+            status: 'offer_accepted',
+            current_offer: offerAmount,
+            negotiation_history: [
+              ...(conversation.negotiation_history || []),
+              {
+                timestamp: new Date().toISOString(),
+                offer: offerAmount,
+                response: 'accepted',
+                reason: offerAmount >= askingPrice ? 'at_or_above_asking' : 'above_minimum'
+              }
+            ]
+          })
+          .eq('id', conversation.id);
+      } else if (minimumPrice && offerAmount < minimumPrice) {
+        // Decline offers below minimum
+        await supabase
+          .from('agent_conversations')
+          .update({
+            status: 'declined',
+            current_offer: offerAmount,
+            negotiation_history: [
+              ...(conversation.negotiation_history || []),
+              {
+                timestamp: new Date().toISOString(),
+                offer: offerAmount,
+                response: 'declined',
+                reason: 'below_minimum',
+                suggested_counter: minimumPrice
+              }
+            ]
+          })
+          .eq('id', conversation.id);
+      } else if (!minimumPrice && offerAmount >= askingPrice) {
+        // No minimum set, accept offers at or above asking
         offerAccepted = true;
         
         await supabase
@@ -221,45 +260,6 @@ Respond naturally as a sales assistant would, but ALWAYS follow the negotiation 
                 offer: offerAmount,
                 response: 'accepted',
                 reason: 'at_or_above_asking'
-              }
-            ]
-          })
-          .eq('id', conversation.id);
-      } else if (minimumPrice && offerAmount >= minimumPrice && offerAmount < askingPrice) {
-        // Counter offer for amounts between minimum and asking
-        offerCountered = true;
-        const counterOffer = Math.round((offerAmount + askingPrice) / 2);
-        
-        await supabase
-          .from('agent_conversations')
-          .update({
-            status: 'negotiating',
-            current_offer: offerAmount,
-            negotiation_history: [
-              ...(conversation.negotiation_history || []),
-              {
-                timestamp: new Date().toISOString(),
-                offer: offerAmount,
-                counter_offer: counterOffer,
-                response: 'countered',
-                reason: 'below_asking_above_minimum'
-              }
-            ]
-          })
-          .eq('id', conversation.id);
-      } else if (minimumPrice && offerAmount < minimumPrice) {
-        // Decline offers below minimum
-        await supabase
-          .from('agent_conversations')
-          .update({
-            current_offer: offerAmount,
-            negotiation_history: [
-              ...(conversation.negotiation_history || []),
-              {
-                timestamp: new Date().toISOString(),
-                offer: offerAmount,
-                response: 'declined',
-                reason: 'below_minimum'
               }
             ]
           })
