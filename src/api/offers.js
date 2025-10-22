@@ -97,26 +97,68 @@ export async function getOfferItems(offerId) {
 }
 
 /**
- * Format offer text for display
+ * Format offer text for display on badge
  */
 export function formatOfferText(offer) {
   const config = offer.config || {};
+  const itemCount = offer.item_ids?.length || 0;
+  
+  // Support both 'percentage' and 'discount_percentage' field names
+  const discountPercent = config.percentage || config.discount_percentage || 0;
   
   switch (offer.offer_type) {
     case 'bogo':
-      return `Buy ${config.buy_quantity || 1}, Get ${config.get_quantity || 1} Free!`;
+      const buyQty = config.buy_quantity || 1;
+      const getQty = config.get_quantity || 1;
+      return `Buy ${buyQty}, Get ${getQty} Free!`;
     
     case 'bulk_discount':
-      return `Buy ${config.min_quantity || 2}+, Save ${config.discount_percentage || 0}%`;
+      const minQty = config.min_quantity || 2;
+      return `Buy ${minQty}+ & Save ${discountPercent}%`;
     
     case 'percentage_off':
-      return `${config.discount_percentage || 0}% OFF`;
+      if (itemCount > 1) {
+        return `${discountPercent}% OFF - ${itemCount} Items`;
+      }
+      return `${discountPercent}% OFF`;
     
     case 'bundle':
-      return `Bundle Deal: ${config.discount_percentage || 0}% OFF`;
+      return `Bundle ${itemCount} Items - Save ${discountPercent}%`;
     
     default:
       return offer.title || 'Special Offer';
+  }
+}
+
+/**
+ * Format offer description for display on detail sections
+ */
+export function formatOfferDescription(offer) {
+  const config = offer.config || {};
+  const itemCount = offer.item_ids?.length || 0;
+  const discountPercent = config.percentage || config.discount_percentage || 0;
+  
+  switch (offer.offer_type) {
+    case 'bogo':
+      const buyQty = config.buy_quantity || 1;
+      const getQty = config.get_quantity || 1;
+      return `Buy ${buyQty} item(s) and get ${getQty} free! This seller is offering a special BOGO deal.`;
+    
+    case 'bulk_discount':
+      const minQty = config.min_quantity || 2;
+      return `This seller is offering a bulk discount! Purchase ${minQty} or more items and save ${discountPercent}% on your order.`;
+    
+    case 'percentage_off':
+      if (itemCount > 1) {
+        return `This seller is offering ${discountPercent}% off on ${itemCount} selected items! Browse all items in this special offer.`;
+      }
+      return `Get ${discountPercent}% off this item!`;
+    
+    case 'bundle':
+      return `Bundle Deal! This seller is offering ${discountPercent}% off when you buy these ${itemCount} items together.`;
+    
+    default:
+      return offer.description || 'Limited time special offer from this seller!';
   }
 }
 

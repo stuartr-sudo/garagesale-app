@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Gift, TrendingDown, Package, Sparkles } from "lucide-react";
-import { getItemSpecialOffers, getOfferItems, formatOfferText, getOfferBadgeColor } from '@/api/offers';
+import { getItemSpecialOffers, getOfferItems, formatOfferText, formatOfferDescription, getOfferBadgeColor } from '@/api/offers';
 import { Link } from 'react-router-dom';
 
 export default function SpecialOffersSection({ itemId, sellerId }) {
@@ -111,7 +111,7 @@ export default function SpecialOffersSection({ itemId, sellerId }) {
                       {formatOfferText(offer)}
                     </Badge>
                   </CardTitle>
-                  <p className="text-gray-400 text-sm mt-1">{details.description}</p>
+                  <p className="text-gray-400 text-sm mt-1">{formatOfferDescription(offer)}</p>
                 </div>
               </div>
             </CardHeader>
