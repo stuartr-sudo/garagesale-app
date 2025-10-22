@@ -6,8 +6,6 @@ import { Separator } from "@/components/ui/separator";
 import {
   ShoppingCart,
   Trash2,
-  Plus,
-  Minus,
   Tag,
   Sparkles,
   ArrowRight,
@@ -118,30 +116,6 @@ export default function Cart() {
       setAppliedOffers(applicableOffers);
     } catch (error) {
       console.error('❌ Error checking offers:', error);
-    }
-  };
-
-  const updateQuantity = async (cartItemId, newQuantity) => {
-    if (newQuantity < 1) return;
-
-    try {
-      const { error } = await supabase
-        .from('cart_items')
-        .update({ quantity: newQuantity })
-        .eq('id', cartItemId);
-
-      if (error) throw error;
-
-      setCartItems(prev => prev.map(item => 
-        item.id === cartItemId ? { ...item, quantity: newQuantity } : item
-      ));
-    } catch (error) {
-      console.error('Error updating quantity:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update quantity",
-        variant: "destructive"
-      });
     }
   };
 
@@ -381,31 +355,7 @@ export default function Cart() {
                             </Button>
                           </div>
 
-                          <div className="flex items-center justify-between mt-4">
-                            {/* Quantity Controls */}
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => updateQuantity(cartItem.id, cartItem.quantity - 1)}
-                                disabled={cartItem.quantity <= 1}
-                                className="h-8 w-8 bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
-                              >
-                                <Minus className="w-4 h-4" />
-                              </Button>
-                              <span className="text-white font-semibold w-8 text-center">
-                                {cartItem.quantity}
-                              </span>
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => updateQuantity(cartItem.id, cartItem.quantity + 1)}
-                                className="h-8 w-8 bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
-                              >
-                                <Plus className="w-4 h-4" />
-                              </Button>
-                            </div>
-
+                          <div className="flex items-center justify-end mt-4">
                             {/* Price */}
                             <div className="text-right">
                               {/* Show negotiated price badge if applicable */}
