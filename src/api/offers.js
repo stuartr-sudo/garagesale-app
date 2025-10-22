@@ -7,12 +7,11 @@ export async function getItemSpecialOffers(itemId) {
   try {
     console.log('🔍 Fetching offers for item:', itemId);
     
-    // First, get all active offers
+    // Get all active offers (including those with no end date)
     const { data: allOffers, error } = await supabase
       .from('special_offers')
       .select('*')
       .eq('is_active', true)
-      .gte('ends_at', new Date().toISOString())
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -22,10 +21,15 @@ export async function getItemSpecialOffers(itemId) {
     
     console.log('📦 All active offers:', allOffers?.length || 0);
     
-    // Filter offers that include this item
-    const itemOffers = (allOffers || []).filter(offer => 
-      offer.item_ids && Array.isArray(offer.item_ids) && offer.item_ids.includes(itemId)
-    );
+    // Filter offers that:
+    // 1. Include this item in item_ids array
+    // 2. Haven't expired (ends_at is null or in the future)
+    const now = new Date();
+    const itemOffers = (allOffers || []).filter(offer => {
+      const hasItem = offer.item_ids && Array.isArray(offer.item_ids) && offer.item_ids.includes(itemId);
+      const notExpired = !offer.ends_at || new Date(offer.ends_at) > now;
+      return hasItem && notExpired;
+    });
     
     console.log('✅ Found offers for item:', itemOffers.length, itemOffers);
     return itemOffers;
@@ -40,16 +44,22 @@ export async function getItemSpecialOffers(itemId) {
  */
 export async function getSellerSpecialOffers(sellerId) {
   try {
-    const { data, error } = await supabase
+    const { data: allOffers, error } = await supabase
       .from('special_offers')
       .select('*')
       .eq('seller_id', sellerId)
       .eq('is_active', true)
-      .gte('ends_at', new Date().toISOString())
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    
+    // Filter out expired offers (keep those with no end date or future end date)
+    const now = new Date();
+    const activeOffers = (allOffers || []).filter(offer => 
+      !offer.ends_at || new Date(offer.ends_at) > now
+    );
+    
+    return activeOffers;
   } catch (error) {
     console.error('Error fetching seller special offers:', error);
     return [];
