@@ -6,9 +6,9 @@
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 
-const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEW_SUPABASE_SERVICE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
-const openaiApiKey = process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY;
+const supabaseUrl = process.env.VITE_SUPABASE_URL?.trim();
+const supabaseServiceKey = process.env.NEW_SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+const openaiApiKey = process.env.VITE_OPENAI_API_KEY;
 
 // Debug environment variables
 console.log('Environment check:', {
@@ -24,15 +24,6 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 const openai = new OpenAI({ apiKey: openaiApiKey });
 
 export default async function handler(req, res) {
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -42,16 +33,10 @@ export default async function handler(req, res) {
     console.error('Missing environment variables:', {
       supabaseUrl: !!supabaseUrl,
       supabaseServiceKey: !!supabaseServiceKey,
-      openaiApiKey: !!openaiApiKey,
-      allEnvVars: Object.keys(process.env).filter(key => key.includes('SUPABASE') || key.includes('OPENAI'))
+      openaiApiKey: !!openaiApiKey
     });
     return res.status(500).json({ 
-      error: 'Server configuration error - missing environment variables',
-      details: {
-        supabaseUrl: !!supabaseUrl,
-        supabaseServiceKey: !!supabaseServiceKey,
-        openaiApiKey: !!openaiApiKey
-      }
+      error: 'Server configuration error - missing environment variables' 
     });
   }
 
