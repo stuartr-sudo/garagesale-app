@@ -1,16 +1,31 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Upload, Camera, X, Plus, Loader2 } from "lucide-react";
+import { Upload, Camera, X, Plus, Loader2, ImageIcon } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import MobileCameraCapture from "@/components/camera/MobileCameraCapture";
 
 export default function ImageUpload({ images = [], onUpload, onRemove, isUploading = false }) {
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
+  const [showMobileCamera, setShowMobileCamera] = useState(false);
+  const isMobile = useIsMobile();
 
   const handleFileSelect = (e) => {
     const files = e.target.files;
     if (files.length > 0) {
       onUpload(files);
     }
+  };
+
+  const handleMobileCameraCapture = (result) => {
+    // Convert the captured image to a File object
+    fetch(result.image)
+      .then(res => res.blob())
+      .then(blob => {
+        const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
+        onUpload([file]);
+        setShowMobileCamera(false);
+      });
   };
 
   // Ensure images is always an array
@@ -75,43 +90,77 @@ export default function ImageUpload({ images = [], onUpload, onRemove, isUploadi
             </>
           ) : (
             <>
-              <Upload className="w-4 h-4 mr-2" />
-              Upload Photos
+              <ImageIcon className="w-4 h-4 mr-2" />
+              {isMobile ? "Choose Photos" : "Upload Photos"}
             </>
           )}
         </Button>
 
-        <input
-          ref={cameraInputRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          onChange={handleFileSelect}
-          className="hidden"
-        />
-        <Button
-          type="button"
-          onClick={() => cameraInputRef.current?.click()}
-          disabled={isUploading}
-          className="flex-1 h-12 rounded-xl bg-white hover:bg-gray-100 text-gray-900 border-2 border-gray-300 font-semibold"
-        >
-          {isUploading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Uploading...
-            </>
-          ) : (
-            <>
-              <Camera className="w-4 h-4 mr-2" />
-              Take Photo
-            </>
-          )}
-        </Button>
+        {isMobile ? (
+          <Button
+            type="button"
+            onClick={() => setShowMobileCamera(true)}
+            disabled={isUploading}
+            className="flex-1 h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+          >
+            {isUploading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Uploading...
+              </>
+            ) : (
+              <>
+                <Camera className="w-4 h-4 mr-2" />
+                Take Photo
+              </>
+            )}
+          </Button>
+        ) : (
+          <>
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            <Button
+              type="button"
+              onClick={() => cameraInputRef.current?.click()}
+              disabled={isUploading}
+              className="flex-1 h-12 rounded-xl bg-white hover:bg-gray-100 text-gray-900 border-2 border-gray-300 font-semibold"
+            >
+              {isUploading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <Camera className="w-4 h-4 mr-2" />
+                  Take Photo
+                </>
+              )}
+            </Button>
+          </>
+        )}
       </div>
 
       <p className="text-sm text-gray-500 text-center">
-        Add up to 8 photos. The first photo will be the main image.
+        {isMobile 
+          ? "Add up to 8 photos. Tap 'Choose Photos' for your gallery or 'Take Photo' for camera."
+          : "Add up to 8 photos. The first photo will be the main image."
+        }
       </p>
+
+      {/* Mobile Camera Modal */}
+      {showMobileCamera && (
+        <MobileCameraCapture
+          onCapture={handleMobileCameraCapture}
+          onClose={() => setShowMobileCamera(false)}
+        />
+      )}
     </div>
   );
 }
