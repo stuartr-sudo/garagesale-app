@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload, Camera, X, Plus, Loader2 } from "lucide-react";
 
-export default function ImageUpload({ images, onUpload, onRemove, isUploading = false }) {
+export default function ImageUpload({ images = [], onUpload, onRemove, isUploading = false }) {
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
 
@@ -13,10 +13,13 @@ export default function ImageUpload({ images, onUpload, onRemove, isUploading = 
     }
   };
 
+  // Ensure images is always an array
+  const safeImages = Array.isArray(images) ? images : [];
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {images.map((imageUrl, index) => (
+        {safeImages.map((imageUrl, index) => (
           <div key={index} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
             <img
               src={imageUrl}
@@ -42,7 +45,7 @@ export default function ImageUpload({ images, onUpload, onRemove, isUploading = 
           </div>
         ))}
         
-        {images.length < 8 && (
+        {safeImages.length < 8 && (
           <div className="aspect-square border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center space-y-2 bg-gray-50 hover:bg-gray-100 transition-colors">
             <Plus className="w-8 h-8 text-gray-400" />
             <span className="text-sm text-gray-500">Add Photo</span>

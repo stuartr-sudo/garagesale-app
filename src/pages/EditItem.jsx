@@ -60,7 +60,13 @@ export default function EditItem() {
   const ensureArray = (value) => {
     if (Array.isArray(value)) return value;
     if (value === null || value === undefined) return [];
-    if (typeof value === 'string') return value.split(',').filter(Boolean);
+    if (typeof value === 'string') {
+      // Handle both comma-separated strings and single URLs
+      if (value.startsWith('http://') || value.startsWith('https://')) {
+        return [value];
+      }
+      return value.split(',').filter(Boolean);
+    }
     return [];
   };
 
@@ -118,12 +124,21 @@ export default function EditItem() {
           // Filter out blob URLs and ensure we have proper URLs
           return url.startsWith('http://') || url.startsWith('https://');
         });
+      } else if (item.image_urls && typeof item.image_urls === 'string') {
+        // Handle case where image_urls might be a single string instead of array
+        const url = item.image_urls;
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+          validImageUrls = [url];
+        }
       }
       
       console.log("Loaded item data:", {
         title: item.title,
         imageCount: validImageUrls.length,
-        tags: item.tags
+        tags: item.tags,
+        image_urls: item.image_urls,
+        image_urls_type: typeof item.image_urls,
+        is_array: Array.isArray(item.image_urls)
       });
       
       // Populate form with existing data - with BULLETPROOF validation
@@ -140,6 +155,13 @@ export default function EditItem() {
       };
       
       console.log("Setting item data:", newItemData);
+      
+      // Final safety check before setting data
+      if (!Array.isArray(newItemData.image_urls)) {
+        console.error("image_urls is not an array:", newItemData.image_urls);
+        newItemData.image_urls = [];
+      }
+      
       setItemData(newItemData);
       setItemLoaded(true);
       
@@ -327,6 +349,11 @@ export default function EditItem() {
   
   // Double-check that we have valid data
   if (!itemData.title || !Array.isArray(itemData.image_urls)) {
+    console.error("Invalid item data:", {
+      title: itemData.title,
+      image_urls: itemData.image_urls,
+      isArray: Array.isArray(itemData.image_urls)
+    });
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="text-center">
@@ -480,8 +507,9 @@ export default function EditItem() {
               
               {(!itemData.image_urls || itemData.image_urls.length < 5) && (
                 <ImageUpload 
+                  images={itemData.image_urls || []}
                   onUpload={handleImageUpload}
-                  maxImages={5 - (itemData.image_urls?.length || 0)}
+                  onRemove={removeImage}
                   isUploading={isUploading}
                 />
               )}
@@ -500,7 +528,14 @@ export default function EditItem() {
                         className="w-full h-48 object-cover rounded-lg border-2 border-gray-700"
                         onError={(e) => {
                           console.error('Image load error:', url);
-                          e.target.src = 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop';
+                          // Remove the broken image from the array
+                          setItemData(prev => ({
+                            ...prev,
+                            image_urls: prev.image_urls.filter((_, i) => i !== index)
+                          }));
+                        }}
+                        onLoad={() => {
+                          console.log('Image loaded successfully:', url);
                         }}
                       />
                       <button
