@@ -10,12 +10,14 @@ const supabaseUrl = process.env.VITE_SUPABASE_URL?.trim();
 const supabaseServiceKey = process.env.NEW_SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 const openaiApiKey = process.env.VITE_OPENAI_API_KEY;
 
-// Debug environment variables
-console.log('Environment check:', {
-  supabaseUrl: !!supabaseUrl,
-  supabaseServiceKey: !!supabaseServiceKey,
-  openaiApiKey: !!openaiApiKey
-});
+// Verify environment variables are set
+if (!supabaseUrl || !supabaseServiceKey || !openaiApiKey) {
+  console.error('MISSING ENVIRONMENT VARIABLES:', {
+    supabaseUrl: !!supabaseUrl,
+    supabaseServiceKey: !!supabaseServiceKey,
+    openaiApiKey: !!openaiApiKey
+  });
+}
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   auth: { autoRefreshToken: false, persistSession: false }
@@ -24,34 +26,20 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 const openai = new OpenAI({ apiKey: openaiApiKey });
 
 export default async function handler(req, res) {
-  console.log('=== AGENT CHAT REQUEST START ===');
-  console.log('Method:', req.method);
-  console.log('URL:', req.url);
-  
   try {
     if (req.method !== 'POST') {
       return res.status(405).json({ error: 'Method not allowed' });
     }
 
     // Check environment variables
-    console.log('Checking environment variables...');
-    console.log('supabaseUrl exists:', !!supabaseUrl);
-    console.log('supabaseServiceKey exists:', !!supabaseServiceKey);
-    console.log('openaiApiKey exists:', !!openaiApiKey);
-    
     if (!supabaseUrl || !supabaseServiceKey || !openaiApiKey) {
       console.error('MISSING ENVIRONMENT VARIABLES!');
       return res.status(500).json({ 
-        error: 'Server configuration error - missing environment variables',
-        debug: {
-          supabaseUrl: !!supabaseUrl,
-          supabaseServiceKey: !!supabaseServiceKey,
-          openaiApiKey: !!openaiApiKey
-        }
+        error: 'Server configuration error',
+        success: false
       });
     }
 
-    console.log('Environment variables OK, processing request...');
     const { item_id, message, conversation_id, buyer_email } = req.body;
 
     if (!item_id || !message) {
@@ -59,18 +47,15 @@ export default async function handler(req, res) {
     }
 
     // Get item details
-    console.log('Querying item with ID:', item_id);
     const { data: item, error: itemError } = await supabase
       .from('items')
       .select('*')
       .eq('id', item_id)
       .single();
 
-    console.log('Item query result:', { item, itemError });
-
     if (itemError || !item) {
       console.error('Item not found:', itemError);
-      return res.status(404).json({ error: 'Item not found' });
+      return res.status(404).json({ error: 'Item not found', success: false });
     }
 
     // Get agent knowledge (including minimum price)
@@ -298,26 +283,11 @@ Respond naturally as a sales assistant would.`;
     });
 
   } catch (error) {
-    console.error('=== AGENT CHAT ERROR ===');
-    console.error('Error:', error);
-    console.error('Error message:', error.message);
-    console.error('Error stack:', error.stack);
-    console.error('Error name:', error.name);
-    console.error('Environment check:', {
-      supabaseUrl: !!supabaseUrl,
-      supabaseServiceKey: !!supabaseServiceKey,
-      openaiApiKey: !!openaiApiKey
-    });
+    console.error('Agent chat error:', error.message);
     return res.status(500).json({ 
       error: 'Internal server error',
       message: error.message,
-      type: error.name,
-      stack: error.stack,
-      env: {
-        supabaseUrl: !!supabaseUrl,
-        supabaseServiceKey: !!supabaseServiceKey,
-        openaiApiKey: !!openaiApiKey
-      }
+      success: false
     });
   }
 }

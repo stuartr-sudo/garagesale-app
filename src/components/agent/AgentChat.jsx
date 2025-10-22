@@ -69,6 +69,12 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
         })
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('API Error Response:', errorData);
+        throw new Error(errorData.message || errorData.error || 'Failed to send message');
+      }
+
       const data = await response.json();
 
       if (data.success) {
