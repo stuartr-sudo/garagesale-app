@@ -56,7 +56,7 @@ export default function Donations() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-gray-200">
+    <div className="min-h-screen bg-slate-800 text-gray-200">
       <div className="p-6 md:p-8">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
@@ -73,7 +73,7 @@ export default function Donations() {
 
           <div className="grid md:grid-cols-2 gap-8">
             {/* Impact Section */}
-            <Card className="bg-gray-900/80 backdrop-blur-sm shadow-xl border border-gray-800 rounded-2xl">
+            <Card className="bg-slate-700/80 backdrop-blur-sm shadow-xl border border-slate-600 rounded-2xl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-pink-400">
                   <Users className="w-6 h-6" />
@@ -81,7 +81,7 @@ export default function Donations() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center gap-4 p-4 bg-gray-800/50 rounded-xl">
+                <div className="flex items-center gap-4 p-4 bg-slate-600/50 rounded-xl">
                   <div className="text-2xl">💻</div>
                   <div>
                     <h3 className="font-semibold text-white">Platform Development</h3>
@@ -89,7 +89,7 @@ export default function Donations() {
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-4 p-4 bg-gray-800/50 rounded-xl">
+                <div className="flex items-center gap-4 p-4 bg-slate-600/50 rounded-xl">
                   <div className="text-2xl">🎉</div>
                   <div>
                     <h3 className="font-semibold text-white">Community Events</h3>
@@ -97,7 +97,7 @@ export default function Donations() {
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-4 p-4 bg-gray-800/50 rounded-xl">
+                <div className="flex items-center gap-4 p-4 bg-slate-600/50 rounded-xl">
                   <div className="text-2xl">🆓</div>
                   <div>
                     <h3 className="font-semibold text-white">Keep It Free</h3>
@@ -105,7 +105,7 @@ export default function Donations() {
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-4 p-4 bg-gray-800/50 rounded-xl">
+                <div className="flex items-center gap-4 p-4 bg-slate-600/50 rounded-xl">
                   <div className="text-2xl">📱</div>
                   <div>
                     <h3 className="font-semibold text-white">Mobile App</h3>
@@ -116,7 +116,7 @@ export default function Donations() {
             </Card>
 
             {/* Donation Form */}
-            <Card className="bg-gray-900/80 backdrop-blur-sm shadow-xl border border-gray-800 rounded-2xl">
+            <Card className="bg-slate-700/80 backdrop-blur-sm shadow-xl border border-slate-600 rounded-2xl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-pink-400">
                   <Gift className="w-6 h-6" />
@@ -135,7 +135,7 @@ export default function Donations() {
                         onClick={() => setSelectedAmount(amount)}
                         className={selectedAmount === amount ? 
                           "bg-pink-600 hover:bg-pink-700" : 
-                          "hover:bg-gray-700 border-gray-700 text-gray-300"
+                          "hover:bg-gray-700 border-slate-500 text-gray-300"
                         }
                       >
                         ${amount}
@@ -149,7 +149,7 @@ export default function Donations() {
                       onClick={() => setSelectedAmount('custom')}
                       className={selectedAmount === 'custom' ? 
                         "bg-pink-600 hover:bg-pink-700" : 
-                        "hover:bg-gray-700 border-gray-700 text-gray-300"
+                        "hover:bg-gray-700 border-slate-500 text-gray-300"
                       }
                     >
                       Custom
@@ -162,7 +162,7 @@ export default function Donations() {
                           placeholder="Enter amount"
                           value={customAmount}
                           onChange={(e) => setCustomAmount(e.target.value)}
-                          className="pl-10 bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
+                          className="pl-10 bg-slate-600 border-slate-500 text-white placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
                           min="5"
                         />
                       </div>
@@ -180,7 +180,7 @@ export default function Donations() {
                         value={donorInfo.name}
                         onChange={(e) => setDonorInfo(prev => ({...prev, name: e.target.value}))}
                         placeholder="Your name"
-                        className="bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
+                        className="bg-slate-600 border-slate-500 text-white placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
                       />
                     </div>
                     <div className="space-y-2">
@@ -191,7 +191,7 @@ export default function Donations() {
                         value={donorInfo.email}
                         onChange={(e) => setDonorInfo(prev => ({...prev, email: e.target.value}))}
                         placeholder="your.email@example.com"
-                        className="bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
+                        className="bg-slate-600 border-slate-500 text-white placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
                         required
                       />
                     </div>
@@ -205,7 +205,7 @@ export default function Donations() {
                       onChange={(e) => setDonorInfo(prev => ({...prev, message: e.target.value}))}
                       placeholder="Leave a message of support..."
                       rows={3}
-                      className="bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
+                      className="bg-slate-600 border-slate-500 text-white placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
                     />
                   </div>
                 </div>

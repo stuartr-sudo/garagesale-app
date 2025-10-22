@@ -19,7 +19,7 @@ export default function AdModal({ ad, onClose }) {
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="modal-glow card-gradient max-w-2xl max-h-[90vh] overflow-auto bg-gray-950 border-gray-800">
+      <DialogContent className="modal-glow card-gradient max-w-2xl max-h-[90vh] overflow-auto bg-gray-950 border-slate-600">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl text-white">
             <span className="bg-gradient-to-r from-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
@@ -30,7 +30,7 @@ export default function AdModal({ ad, onClose }) {
 
         <div className="space-y-6">
           {/* Main Image */}
-          <div className="relative aspect-video rounded-2xl overflow-hidden bg-gray-800">
+          <div className="relative aspect-video rounded-2xl overflow-hidden bg-slate-600">
             <img
               src={ad.image_url}
               alt={ad.title}
@@ -56,7 +56,7 @@ export default function AdModal({ ad, onClose }) {
             </div>
 
             {/* Stats */}
-            <div className="flex flex-wrap gap-4 p-4 bg-gray-900 rounded-xl">
+            <div className="flex flex-wrap gap-4 p-4 bg-slate-700 rounded-xl">
               <div className="flex items-center gap-2 text-gray-400">
                 <Eye className="w-4 h-4" />
                 <span className="text-sm">
@@ -100,7 +100,7 @@ export default function AdModal({ ad, onClose }) {
             <Button
               variant="outline"
               onClick={onClose}
-              className="flex-1 h-12 rounded-xl bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
+              className="flex-1 h-12 rounded-xl bg-slate-600 border-slate-500 text-white hover:bg-gray-700"
             >
               Close
             </Button>

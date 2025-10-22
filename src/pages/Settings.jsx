@@ -117,8 +117,8 @@ export default function Settings() {
       <div className="p-6 md:p-8">
         <div className="max-w-2xl mx-auto">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-800 rounded w-48 mb-6"></div>
-            <div className="h-64 bg-gray-800 rounded-2xl"></div>
+            <div className="h-8 bg-slate-600 rounded w-48 mb-6"></div>
+            <div className="h-64 bg-slate-600 rounded-2xl"></div>
           </div>
         </div>
       </div>
@@ -126,7 +126,7 @@ export default function Settings() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-gray-200">
+    <div className="min-h-screen bg-slate-800 text-gray-200">
       <div className="p-6 md:p-8">
         <div className="max-w-2xl mx-auto">
           <div className="mb-8">
@@ -154,7 +154,7 @@ export default function Settings() {
             </div>
           )}
 
-          <Card className="bg-gray-900/80 backdrop-blur-sm shadow-xl border border-gray-800 rounded-2xl">
+          <Card className="bg-slate-700/80 backdrop-blur-sm shadow-xl border border-slate-600 rounded-2xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-pink-400">
                 <UserIcon className="w-6 h-6" />
@@ -180,7 +180,7 @@ export default function Settings() {
                         id="full_name"
                         value={formData.full_name}
                         onChange={handleInputChange}
-                        className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white focus:border-pink-500 focus:ring-pink-500"
+                        className="h-12 rounded-xl bg-slate-600 border-slate-500 text-white focus:border-pink-500 focus:ring-pink-500"
                       />
                     </div>
                     <div className="space-y-2">
@@ -191,7 +191,7 @@ export default function Settings() {
                         value={formData.phone}
                         onChange={handleInputChange}
                         placeholder="e.g., (555) 123-4567"
-                        className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white focus:border-pink-500 focus:ring-pink-500"
+                        className="h-12 rounded-xl bg-slate-600 border-slate-500 text-white focus:border-pink-500 focus:ring-pink-500"
                       />
                     </div>
                   </div>
@@ -203,7 +203,7 @@ export default function Settings() {
                       type="email"
                       value={formData.email}
                       disabled
-                      className="h-12 rounded-xl bg-gray-800 border-gray-700 text-gray-400"
+                      className="h-12 rounded-xl bg-slate-600 border-slate-500 text-gray-400"
                     />
                     <p className="text-xs text-gray-500">Your email is used for login and cannot be changed.</p>
                   </div>
@@ -223,10 +223,10 @@ export default function Settings() {
                         value={formData.country}
                         onValueChange={handleCountryChange}
                       >
-                        <SelectTrigger className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white">
+                        <SelectTrigger className="h-12 rounded-xl bg-slate-600 border-slate-500 text-white">
                           <SelectValue placeholder="Select your country" />
                         </SelectTrigger>
-                        <SelectContent className="bg-gray-800 border-gray-700">
+                        <SelectContent className="bg-slate-600 border-slate-500">
                           {countries.map(country => (
                             <SelectItem key={country.code} value={country.code} className="text-white hover:bg-gray-700">
                               <div className="flex items-center gap-2">
@@ -252,10 +252,10 @@ export default function Settings() {
                           value={formData.state_region}
                           onValueChange={(value) => setFormData(prev => ({ ...prev, state_region: value }))}
                         >
-                          <SelectTrigger className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white">
+                          <SelectTrigger className="h-12 rounded-xl bg-slate-600 border-slate-500 text-white">
                             <SelectValue placeholder={`Select ${selectedCountry.code === 'US' ? 'state' : 'region'}`} />
                           </SelectTrigger>
-                          <SelectContent className="bg-gray-800 border-gray-700">
+                          <SelectContent className="bg-slate-600 border-slate-500">
                             {selectedCountry.states.map(state => (
                               <SelectItem key={state} value={state} className="text-white hover:bg-gray-700">
                                 {state}
@@ -269,7 +269,7 @@ export default function Settings() {
                           value={formData.state_region}
                           onChange={handleInputChange}
                           placeholder="Enter your state/region"
-                          className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white focus:border-pink-500 focus:ring-pink-500"
+                          className="h-12 rounded-xl bg-slate-600 border-slate-500 text-white focus:border-pink-500 focus:ring-pink-500"
                         />
                       )}
                     </div>
@@ -283,7 +283,7 @@ export default function Settings() {
                         value={formData.city}
                         onChange={handleInputChange}
                         placeholder="Enter your city"
-                        className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white focus:border-pink-500 focus:ring-pink-500"
+                        className="h-12 rounded-xl bg-slate-600 border-slate-500 text-white focus:border-pink-500 focus:ring-pink-500"
                       />
                     </div>
                     <div className="space-y-2">
@@ -304,7 +304,7 @@ export default function Settings() {
                           'Enter postal code'
                         }
                         required
-                        className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white focus:border-pink-500 focus:ring-pink-500"
+                        className="h-12 rounded-xl bg-slate-600 border-slate-500 text-white focus:border-pink-500 focus:ring-pink-500"
                       />
                     </div>
                   </div>

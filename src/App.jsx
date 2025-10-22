@@ -2,6 +2,7 @@ import './App.css'
 import Pages from "@/pages/index.jsx"
 import { Toaster } from "@/components/ui/toaster"
 import { useEffect } from 'react'
+import { startReservationCleanup } from '@/api/functions'
 
 function App() {
   // TEMPORARY FIX: Redirect any OAuth callback URLs to home
@@ -11,6 +12,12 @@ function App() {
       console.log('Detected OAuth URL, redirecting to marketplace...');
       window.location.href = '/marketplace';
     }
+  }, []);
+
+  // Start automatic cleanup of expired reservations
+  useEffect(() => {
+    const cleanupInterval = startReservationCleanup();
+    return () => clearInterval(cleanupInterval);
   }, []);
 
   return (

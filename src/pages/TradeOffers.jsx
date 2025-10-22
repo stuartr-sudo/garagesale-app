@@ -64,8 +64,8 @@ export default function TradeOffers() {
       case 'declined': return 'bg-red-900/50 text-red-300 border-red-700';
       case 'counter_offered': return 'bg-purple-900/50 text-purple-300 border-purple-700';
       case 'completed': return 'bg-blue-900/50 text-blue-300 border-blue-700';
-      case 'cancelled': return 'bg-gray-700 text-gray-300 border-gray-600';
-      default: return 'bg-gray-700 text-gray-300 border-gray-600';
+      case 'cancelled': return 'bg-gray-700 text-gray-300 border-slate-500';
+      default: return 'bg-gray-700 text-gray-300 border-slate-500';
     }
   };
 
@@ -74,8 +74,8 @@ export default function TradeOffers() {
     const isExpired = new Date(offer.expires_at) < new Date();
     
     return (
-      <Card className="bg-gray-900/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-800 rounded-2xl">
-        <CardHeader className="bg-gray-800/50 border-b border-gray-700">
+      <Card className="bg-slate-700/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-600 rounded-2xl">
+        <CardHeader className="bg-slate-600/50 border-b border-slate-500">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold">
@@ -109,7 +109,7 @@ export default function TradeOffers() {
             <h4 className="text-gray-300 text-sm font-medium mb-2">
               {isReceived ? "Your item:" : "Item you want:"}
             </h4>
-            <div className="flex gap-3 items-center bg-gray-800/50 rounded-xl p-3">
+            <div className="flex gap-3 items-center bg-slate-600/50 rounded-xl p-3">
               <img
                 src={offer.targetItem?.image_urls?.[0] || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=100&h=100&fit=crop"}
                 alt={offer.targetItem?.title}
@@ -129,7 +129,7 @@ export default function TradeOffers() {
             </h4>
             <div className="space-y-2">
               {offer.offered_items?.map((item, index) => (
-                <div key={index} className="flex gap-3 items-center bg-gray-800/30 rounded-lg p-2">
+                <div key={index} className="flex gap-3 items-center bg-slate-600/30 rounded-lg p-2">
                   <img
                     src={item.item_image_url || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=100&h=100&fit=crop"}
                     alt={item.item_title}
@@ -157,7 +157,7 @@ export default function TradeOffers() {
           </div>
 
           {/* Value Comparison */}
-          <div className="bg-gray-800/30 rounded-xl p-4 mb-4">
+          <div className="bg-slate-600/30 rounded-xl p-4 mb-4">
             <div className="flex items-center justify-between">
               <span className="text-gray-300">Total Offer Value:</span>
               <span className="text-xl font-bold text-purple-400">${offer.total_offered_value}</span>
@@ -180,7 +180,7 @@ export default function TradeOffers() {
 
           {/* Message */}
           {offer.message && (
-            <div className="bg-gray-800/30 rounded-xl p-3 mb-4">
+            <div className="bg-slate-600/30 rounded-xl p-3 mb-4">
               <p className="text-gray-300 text-sm italic">"{offer.message}"</p>
             </div>
           )}
@@ -234,10 +234,10 @@ export default function TradeOffers() {
       <div className="p-6 md:p-8">
         <div className="max-w-6xl mx-auto">
           <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-gray-800 rounded w-48"></div>
+            <div className="h-8 bg-slate-600 rounded w-48"></div>
             <div className="grid gap-6">
               {Array(3).fill(0).map((_, i) => (
-                <div key={i} className="h-64 bg-gray-800 rounded-2xl"></div>
+                <div key={i} className="h-64 bg-slate-600 rounded-2xl"></div>
               ))}
             </div>
           </div>
@@ -247,7 +247,7 @@ export default function TradeOffers() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-gray-200">
+    <div className="min-h-screen bg-slate-800 text-gray-200">
       <div className="p-6 md:p-8">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
@@ -256,7 +256,7 @@ export default function TradeOffers() {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-gray-800 rounded-xl p-1 mb-8">
+            <TabsList className="grid w-full grid-cols-2 bg-slate-600 rounded-xl p-1 mb-8">
               <TabsTrigger 
                 value="received" 
                 className="rounded-lg text-gray-300 data-[state=active]:bg-purple-600 data-[state=active]:text-white"

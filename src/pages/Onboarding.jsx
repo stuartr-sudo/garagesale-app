@@ -172,16 +172,16 @@ export default function Onboarding() {
 
   if (loading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-slate-950">
+      <div className="flex h-screen w-full items-center justify-center bg-slate-800">
         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-pink-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-gray-200">
+    <div className="min-h-screen bg-slate-800 text-gray-200">
       {/* Header */}
-      <div className="bg-gray-900/80 backdrop-blur-sm border-b border-gray-800 p-6">
+      <div className="bg-slate-700/80 backdrop-blur-sm border-b border-slate-600 p-6">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-fuchsia-600 rounded-2xl flex items-center justify-center shadow-lg">
@@ -209,7 +209,7 @@ export default function Onboarding() {
                     <div className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
                       completedSteps.includes(step.id) ? 'bg-green-600 border-green-600' :
                       currentStep === step.id ? 'bg-pink-600 border-pink-600' :
-                      'bg-gray-800 border-gray-600'
+                      'bg-slate-600 border-slate-500'
                     }`}>
                       {completedSteps.includes(step.id) ? (
                         <CheckCircle className="w-6 h-6 text-white" />
@@ -235,8 +235,8 @@ export default function Onboarding() {
           </div>
 
           {/* Form Content */}
-          <Card className="bg-gray-900/80 backdrop-blur-sm shadow-xl border border-gray-800 rounded-2xl overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-pink-900/50 to-fuchsia-900/50 border-b border-gray-700">
+          <Card className="bg-slate-700/80 backdrop-blur-sm shadow-xl border border-slate-600 rounded-2xl overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-pink-900/50 to-fuchsia-900/50 border-b border-slate-500">
               <CardTitle className="flex items-center gap-3 text-white text-2xl">
                 {currentStep === 1 && <><UserIcon className="w-7 h-7 text-pink-400" /> Personal & Location Information</>}
                 {currentStep === 2 && <><Shield className="w-7 h-7 text-pink-400" /> Terms & Policies</>}
@@ -261,7 +261,7 @@ export default function Onboarding() {
                         value={formData.full_name}
                         onChange={handleInputChange}
                         placeholder="Enter your full name"
-                        className="h-14 rounded-xl bg-gray-800 border-gray-700 text-white text-lg placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
+                        className="h-14 rounded-xl bg-slate-600 border-slate-500 text-white text-lg placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
                         required
                       />
                     </div>
@@ -273,13 +273,13 @@ export default function Onboarding() {
                         type="email"
                         value={formData.email}
                         disabled
-                        className="h-14 rounded-xl bg-gray-800 border-gray-700 text-gray-400 text-lg"
+                        className="h-14 rounded-xl bg-slate-600 border-slate-500 text-gray-400 text-lg"
                       />
                       <p className="text-xs text-gray-500">Your email is used for login and cannot be changed.</p>
                     </div>
 
                     {/* Location Section */}
-                    <div className="pt-6 border-t border-gray-700">
+                    <div className="pt-6 border-t border-slate-500">
                       <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                         <MapPin className="w-5 h-5 text-pink-400" />
                         Location Details
@@ -293,10 +293,10 @@ export default function Onboarding() {
                             value={formData.country}
                             onValueChange={handleCountryChange}
                           >
-                            <SelectTrigger className="h-14 rounded-xl bg-gray-800 border-gray-700 text-white text-lg">
+                            <SelectTrigger className="h-14 rounded-xl bg-slate-600 border-slate-500 text-white text-lg">
                               <SelectValue placeholder="Select your country" />
                             </SelectTrigger>
-                            <SelectContent className="bg-gray-800 border-gray-700">
+                            <SelectContent className="bg-slate-600 border-slate-500">
                               <SelectItem value="AU" className="text-white hover:bg-gray-700 text-lg py-3">
                                 <div className="flex items-center gap-2">
                                   <Globe className="w-4 h-4" />
@@ -315,10 +315,10 @@ export default function Onboarding() {
                               value={formData.state_region}
                               onValueChange={(value) => setFormData(prev => ({ ...prev, state_region: value }))}
                             >
-                              <SelectTrigger className="h-14 rounded-xl bg-gray-800 border-gray-700 text-white text-lg">
+                              <SelectTrigger className="h-14 rounded-xl bg-slate-600 border-slate-500 text-white text-lg">
                                 <SelectValue placeholder="Select state/territory" />
                               </SelectTrigger>
-                              <SelectContent className="bg-gray-800 border-gray-700">
+                              <SelectContent className="bg-slate-600 border-slate-500">
                                 {selectedCountry.states.map(state => (
                                   <SelectItem key={state} value={state} className="text-white hover:bg-gray-700 text-lg py-3">
                                     {state}
@@ -332,7 +332,7 @@ export default function Onboarding() {
                               value={formData.state_region}
                               onChange={handleInputChange}
                               placeholder="Enter your state/territory"
-                              className="h-14 rounded-xl bg-gray-800 border-gray-700 text-white text-lg placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
+                              className="h-14 rounded-xl bg-slate-600 border-slate-500 text-white text-lg placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
                               required
                             />
                           )}
@@ -348,7 +348,7 @@ export default function Onboarding() {
                             onChange={handleInputChange}
                             placeholder="e.g., 2000"
                             required
-                            className="h-14 rounded-xl bg-gray-800 border-gray-700 text-white text-lg placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
+                            className="h-14 rounded-xl bg-slate-600 border-slate-500 text-white text-lg placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
                           />
                           <p className="text-xs text-gray-500">Your postcode helps connect you with nearby users</p>
                         </div>
@@ -368,7 +368,7 @@ export default function Onboarding() {
                   
                   <div className="space-y-8">
                     {/* Terms of Service */}
-                    <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
+                    <div className="bg-slate-600/50 border border-slate-500 rounded-xl p-6">
                       <div className="flex items-start gap-4">
                         <Checkbox
                           id="terms_of_service"
@@ -394,7 +394,7 @@ export default function Onboarding() {
                     </div>
 
                     {/* Privacy Policy */}
-                    <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
+                    <div className="bg-slate-600/50 border border-slate-500 rounded-xl p-6">
                       <div className="flex items-start gap-4">
                         <Checkbox
                           id="privacy_policy"
@@ -420,7 +420,7 @@ export default function Onboarding() {
                     </div>
 
                     {/* Acceptable Use Policy */}
-                    <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
+                    <div className="bg-slate-600/50 border border-slate-500 rounded-xl p-6">
                       <div className="flex items-start gap-4">
                         <Checkbox
                           id="acceptable_use"
@@ -466,13 +466,13 @@ export default function Onboarding() {
               )}
 
               {/* Navigation Buttons */}
-              <div className="flex justify-between items-center mt-12 pt-8 border-t border-gray-700">
+              <div className="flex justify-between items-center mt-12 pt-8 border-t border-slate-500">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handlePrevStep}
                   disabled={currentStep === 1}
-                  className="h-12 px-6 rounded-xl bg-gray-800 border-gray-700 text-white hover:bg-gray-700 disabled:opacity-50"
+                  className="h-12 px-6 rounded-xl bg-slate-600 border-slate-500 text-white hover:bg-gray-700 disabled:opacity-50"
                 >
                   Previous
                 </Button>

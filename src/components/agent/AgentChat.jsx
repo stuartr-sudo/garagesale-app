@@ -128,8 +128,8 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
   };
 
   return (
-    <Card className="bg-gray-900/80 border-gray-800 shadow-xl">
-      <CardHeader className="border-b border-gray-800 bg-gradient-to-r from-purple-900/20 to-pink-900/20">
+    <Card className="bg-slate-700/80 border-slate-600 shadow-xl">
+      <CardHeader className="border-b border-slate-600 bg-gradient-to-r from-purple-900/20 to-pink-900/20">
         <CardTitle className="flex items-center justify-center">
           <div className="p-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl shadow-lg">
             <Bot className="w-6 h-6 text-white" />
@@ -156,7 +156,7 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
                       ? 'bg-gradient-to-r from-pink-600 to-fuchsia-600 text-white'
                       : msg.sender === 'system'
                       ? 'bg-green-900/30 border border-green-800 text-green-300'
-                      : 'bg-gray-800 text-gray-200 border border-gray-700'
+                      : 'bg-slate-600 text-gray-200 border border-slate-500'
                   }`}
                 >
                   {msg.sender === 'ai' && (
@@ -192,7 +192,7 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
           ))}
           {loading && (
             <div className="flex justify-start">
-              <div className="bg-gray-800 border border-gray-700 rounded-2xl px-4 py-2.5">
+              <div className="bg-slate-600 border border-slate-500 rounded-2xl px-4 py-2.5">
                 <div className="flex items-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
                   <span className="text-gray-400 text-sm">Thinking...</span>
@@ -204,7 +204,7 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
         </div>
 
         {/* Input */}
-        <div className="border-t border-gray-800 p-4 bg-gray-950/50">
+        <div className="border-t border-slate-600 p-4 bg-gray-950/50">
           {offerAccepted ? (
             <div className="text-center p-4 bg-green-900/20 border border-green-800 rounded-xl">
               <CheckCircle className="w-8 h-8 text-green-400 mx-auto mb-2" />
@@ -219,7 +219,7 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
                 onKeyPress={handleKeyPress}
                 placeholder="Ask about the item or make an offer..."
                 disabled={loading}
-                className="flex-1 bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-purple-500 focus:ring-purple-500"
+                className="flex-1 bg-slate-600 border-slate-500 text-white placeholder-gray-500 focus:border-purple-500 focus:ring-purple-500"
               />
               <Button
                 onClick={sendMessage}

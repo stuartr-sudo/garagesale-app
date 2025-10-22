@@ -15,7 +15,7 @@ const categoryColors = {
   charity_drive: "bg-purple-900/50 text-purple-300 border-purple-700",
   workshop: "bg-orange-900/50 text-orange-300 border-orange-700",
   festival: "bg-pink-900/50 text-pink-300 border-pink-700",
-  meeting: "bg-gray-900/50 text-gray-300 border-gray-700",
+  meeting: "bg-slate-700/50 text-gray-300 border-slate-500",
   other: "bg-amber-900/50 text-amber-300 border-amber-700"
 };
 
@@ -77,10 +77,10 @@ export default function Announcements() {
       <div className="p-6 md:p-8">
         <div className="max-w-6xl mx-auto">
           <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-gray-800 rounded w-64"></div>
+            <div className="h-8 bg-slate-600 rounded w-64"></div>
             <div className="grid gap-6">
               {Array(4).fill(0).map((_, i) => (
-                <div key={i} className="h-48 bg-gray-800 rounded-2xl"></div>
+                <div key={i} className="h-48 bg-slate-600 rounded-2xl"></div>
               ))}
             </div>
           </div>
@@ -90,7 +90,7 @@ export default function Announcements() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-gray-200">
+    <div className="min-h-screen bg-slate-800 text-gray-200">
       <div className="p-6 md:p-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
@@ -113,7 +113,7 @@ export default function Announcements() {
           {announcements.length > 0 ? (
             <div className="space-y-6">
               {announcements.map((announcement) => (
-                <Card key={announcement.id} className="bg-gray-900/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-800 rounded-2xl overflow-hidden">
+                <Card key={announcement.id} className="bg-slate-700/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-600 rounded-2xl overflow-hidden">
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row">
                       {/* Image Section */}
@@ -182,7 +182,7 @@ export default function Announcements() {
             </div>
           ) : (
             <div className="text-center py-16">
-              <div className="w-24 h-24 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-24 h-24 bg-slate-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Megaphone className="w-12 h-12 text-gray-600" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">No Active Announcements</h3>

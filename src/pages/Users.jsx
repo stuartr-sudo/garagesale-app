@@ -171,10 +171,10 @@ export default function UsersPage() {
       <div className="p-6 md:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-gray-800 rounded w-64"></div>
+            <div className="h-8 bg-slate-600 rounded w-64"></div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {Array(6).fill(0).map((_, i) => (
-                <div key={i} className="h-64 bg-gray-800 rounded-2xl"></div>
+                <div key={i} className="h-64 bg-slate-600 rounded-2xl"></div>
               ))}
             </div>
           </div>
@@ -185,14 +185,14 @@ export default function UsersPage() {
 
   if (selectedUser) {
     return (
-      <div className="min-h-screen bg-slate-950 text-gray-200">
+      <div className="min-h-screen bg-slate-800 text-gray-200">
         <div className="p-6 md:p-8">
           <div className="max-w-6xl mx-auto">
             <div className="flex items-center gap-4 mb-8">
               <Button
                 variant="outline"
                 onClick={() => setSelectedUser(null)}
-                className="rounded-xl bg-gray-800 border-gray-700 hover:bg-gray-700 text-white"
+                className="rounded-xl bg-slate-600 border-slate-500 hover:bg-gray-700 text-white"
               >
                 ← Back to Users
               </Button>
@@ -203,8 +203,8 @@ export default function UsersPage() {
             </div>
 
             {/* User Profile */}
-            <Card className="bg-gray-900/80 backdrop-blur-sm shadow-xl border border-gray-800 rounded-2xl mb-8">
-              <CardHeader className="bg-gradient-to-r from-pink-900/50 to-fuchsia-900/50 border-b border-gray-700">
+            <Card className="bg-slate-700/80 backdrop-blur-sm shadow-xl border border-slate-600 rounded-2xl mb-8">
+              <CardHeader className="bg-gradient-to-r from-pink-900/50 to-fuchsia-900/50 border-b border-slate-500">
                 <CardTitle className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-fuchsia-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
                     {selectedUser.full_name?.[0] || 'U'}
@@ -219,7 +219,7 @@ export default function UsersPage() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   <div>
                     <label className="text-sm font-medium text-gray-400">User ID</label>
-                    <p className="font-mono text-sm bg-gray-800 px-2 py-1 rounded text-gray-300">{selectedUser.id}</p>
+                    <p className="font-mono text-sm bg-slate-600 px-2 py-1 rounded text-gray-300">{selectedUser.id}</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-400">Role</label>
@@ -242,7 +242,7 @@ export default function UsersPage() {
             </Card>
 
             {/* User Items */}
-            <Card className="bg-gray-900/80 backdrop-blur-sm shadow-xl border border-gray-800 rounded-2xl mb-8">
+            <Card className="bg-slate-700/80 backdrop-blur-sm shadow-xl border border-slate-600 rounded-2xl mb-8">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-white">
                   <Package className="w-6 h-6 text-emerald-400" />
@@ -253,13 +253,13 @@ export default function UsersPage() {
                 {selectedUser.items?.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {selectedUser.items.map((item) => (
-                      <div key={item.id} className="bg-gray-800 rounded-xl p-4">
+                      <div key={item.id} className="bg-slate-600 rounded-xl p-4">
                         <div className="flex items-start justify-between mb-2">
                           <h4 className="font-semibold line-clamp-1 text-white">{item.title}</h4>
                           <Badge className={
                             item.status === 'active' ? 'bg-green-900/50 text-green-300 border-green-700' :
                             item.status === 'sold' ? 'bg-blue-900/50 text-blue-300 border-blue-700' :
-                            'bg-gray-900/50 text-gray-300 border-gray-700'
+                            'bg-slate-700/50 text-gray-300 border-slate-500'
                           }>
                             {item.status}
                           </Badge>
@@ -278,7 +278,7 @@ export default function UsersPage() {
             </Card>
 
             {/* User Transactions */}
-            <Card className="bg-gray-900/80 backdrop-blur-sm shadow-xl border border-gray-800 rounded-2xl">
+            <Card className="bg-slate-700/80 backdrop-blur-sm shadow-xl border border-slate-600 rounded-2xl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-white">
                   <DollarSign className="w-6 h-6 text-green-400" />
@@ -289,7 +289,7 @@ export default function UsersPage() {
                 {selectedUser.transactions?.length > 0 ? (
                   <div className="space-y-4">
                     {selectedUser.transactions.map((transaction) => (
-                      <div key={transaction.id} className="bg-gray-800 rounded-xl p-4 flex items-center justify-between">
+                      <div key={transaction.id} className="bg-slate-600 rounded-xl p-4 flex items-center justify-between">
                         <div>
                           <p className="font-semibold text-white">Transaction #{transaction.id.slice(-8)}</p>
                           <p className="text-sm text-gray-400">
@@ -321,7 +321,7 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-gray-200">
+    <div className="min-h-screen bg-slate-800 text-gray-200">
       <div className="p-6 md:p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
@@ -334,7 +334,7 @@ export default function UsersPage() {
               <Button
                 onClick={() => setShowAPIInfo(!showAPIInfo)}
                 variant="outline"
-                className="bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 hover:text-white"
+                className="bg-slate-600 border-slate-500 text-gray-300 hover:bg-gray-700 hover:text-white"
               >
                 <Code className="w-4 h-4 mr-2" />
                 {showAPIInfo ? 'Hide' : 'Show'} API Endpoints
@@ -354,7 +354,7 @@ export default function UsersPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 {apiEndpoints.map((api, index) => (
-                  <div key={index} className="bg-gray-900/80 rounded-xl p-4 border border-gray-800">
+                  <div key={index} className="bg-slate-700/80 rounded-xl p-4 border border-slate-600">
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <h4 className="font-semibold text-white mb-1">{api.name}</h4>
@@ -363,7 +363,7 @@ export default function UsersPage() {
                           <Badge className="bg-pink-900/50 text-pink-300 border-pink-700">
                             {api.method}
                           </Badge>
-                          <code className="bg-gray-800 px-2 py-1 rounded text-sm font-mono text-gray-300">
+                          <code className="bg-slate-600 px-2 py-1 rounded text-sm font-mono text-gray-300">
                             {typeof window !== 'undefined' ? window.location.origin : ''}{api.endpoint}{api.params || ''}
                           </code>
                         </div>
@@ -372,7 +372,7 @@ export default function UsersPage() {
                         size="sm"
                         variant="outline"
                         onClick={() => copyToClipboard(`${typeof window !== 'undefined' ? window.location.origin : ''}${api.endpoint}`, api.endpoint)}
-                        className="ml-4 bg-gray-800 border-gray-700 hover:bg-gray-700"
+                        className="ml-4 bg-slate-600 border-slate-500 hover:bg-gray-700"
                       >
                         {copiedEndpoint === api.endpoint ? (
                           <Check className="w-4 h-4 text-green-400" />
@@ -385,7 +385,7 @@ export default function UsersPage() {
                     {api.payload && (
                       <div className="mt-3">
                         <p className="text-xs font-medium text-gray-400 mb-2">Example Payload:</p>
-                        <pre className="bg-gray-800 p-3 rounded-lg text-xs overflow-x-auto text-gray-300">
+                        <pre className="bg-slate-600 p-3 rounded-lg text-xs overflow-x-auto text-gray-300">
                           {JSON.stringify(api.payload, null, 2)}
                         </pre>
                       </div>
@@ -408,7 +408,7 @@ export default function UsersPage() {
 
           {/* Stats Overview */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <Card className="bg-gray-900/80 backdrop-blur-sm shadow-lg border border-gray-800 rounded-2xl">
+            <Card className="bg-slate-700/80 backdrop-blur-sm shadow-lg border border-slate-600 rounded-2xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -420,7 +420,7 @@ export default function UsersPage() {
               </CardContent>
             </Card>
             
-            <Card className="bg-gray-900/80 backdrop-blur-sm shadow-lg border border-gray-800 rounded-2xl">
+            <Card className="bg-slate-700/80 backdrop-blur-sm shadow-lg border border-slate-600 rounded-2xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -434,7 +434,7 @@ export default function UsersPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gray-900/80 backdrop-blur-sm shadow-lg border border-gray-800 rounded-2xl">
+            <Card className="bg-slate-700/80 backdrop-blur-sm shadow-lg border border-slate-600 rounded-2xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -448,7 +448,7 @@ export default function UsersPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gray-900/80 backdrop-blur-sm shadow-lg border border-gray-800 rounded-2xl">
+            <Card className="bg-slate-700/80 backdrop-blur-sm shadow-lg border border-slate-600 rounded-2xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -464,7 +464,7 @@ export default function UsersPage() {
           </div>
 
           {/* Search and Filters */}
-          <Card className="bg-gray-900/80 backdrop-blur-sm shadow-lg border border-gray-800 rounded-2xl mb-8">
+          <Card className="bg-slate-700/80 backdrop-blur-sm shadow-lg border border-slate-600 rounded-2xl mb-8">
             <CardContent className="p-6">
               <div className="space-y-4">
                 {/* Main Search */}
@@ -474,7 +474,7 @@ export default function UsersPage() {
                     placeholder="Search users by name, email, or ID..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-12 h-12 bg-gray-800 border-gray-700 focus:border-pink-500 focus:ring-pink-500 rounded-xl text-lg text-white placeholder-gray-400"
+                    className="pl-12 h-12 bg-slate-600 border-slate-500 focus:border-pink-500 focus:ring-pink-500 rounded-xl text-lg text-white placeholder-gray-400"
                   />
                 </div>
                 
@@ -487,17 +487,17 @@ export default function UsersPage() {
                       placeholder="Enter postcode..."
                       value={postcodeFilter}
                       onChange={(e) => setPostcodeFilter(e.target.value)}
-                      className="h-10 rounded-xl border-gray-700 bg-gray-800 text-white placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
+                      className="h-10 rounded-xl border-slate-500 bg-slate-600 text-white placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
                     />
                   </div>
                   
                   <div className="flex-1">
                     <Label htmlFor="country-filter" className="text-sm font-medium text-gray-400 mb-2 block">Filter by Country</Label>
                     <Select value={countryFilter} onValueChange={setCountryFilter}>
-                      <SelectTrigger id="country-filter" className="h-10 rounded-xl border-gray-700 bg-gray-800 text-white">
+                      <SelectTrigger id="country-filter" className="h-10 rounded-xl border-slate-500 bg-slate-600 text-white">
                         <SelectValue placeholder="Select a country" />
                       </SelectTrigger>
-                      <SelectContent className="bg-gray-800 border-gray-700">
+                      <SelectContent className="bg-slate-600 border-slate-500">
                         <SelectItem value="all" className="text-white hover:bg-gray-700">All Countries</SelectItem>
                         {uniqueCountries.map(country => (
                           <SelectItem key={country} value={country} className="text-white hover:bg-gray-700">
@@ -522,7 +522,7 @@ export default function UsersPage() {
                         setPostcodeFilter("");
                         setCountryFilter("all");
                       }}
-                      className="h-10 px-4 rounded-xl bg-gray-800 border-gray-700 hover:bg-gray-700 text-white"
+                      className="h-10 px-4 rounded-xl bg-slate-600 border-slate-500 hover:bg-gray-700 text-white"
                     >
                       Clear Filters
                     </Button>
@@ -543,7 +543,7 @@ export default function UsersPage() {
                           className={`text-xs rounded-full ${
                             postcodeFilter === postcode 
                               ? 'bg-pink-900/50 text-pink-300 border-pink-700' 
-                              : 'hover:bg-gray-700 bg-gray-800 border-gray-700 text-gray-300'
+                              : 'hover:bg-gray-700 bg-slate-600 border-slate-500 text-gray-300'
                           }`}
                         >
                           {postcode}
@@ -612,8 +612,8 @@ export default function UsersPage() {
             {filteredUsers.map((user) => {
               const stats = userStats[user.id] || {};
               return (
-                <Card key={user.id} className="bg-gray-900/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-800 rounded-2xl overflow-hidden">
-                  <CardHeader className="bg-gray-800/50 border-b border-gray-700">
+                <Card key={user.id} className="bg-slate-700/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-600 rounded-2xl overflow-hidden">
+                  <CardHeader className="bg-slate-600/50 border-b border-slate-500">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3 flex-1">
                         <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-fuchsia-600 rounded-full flex items-center justify-center text-white font-bold">
@@ -637,7 +637,7 @@ export default function UsersPage() {
                   <CardContent className="p-6">
                     {/* Location Info */}
                     {(user.postcode || user.country || user.city) && (
-                      <div className="bg-gray-800 rounded-xl p-3 mb-4">
+                      <div className="bg-slate-600 rounded-xl p-3 mb-4">
                         <div className="flex items-start gap-2 text-sm text-gray-300">
                           <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
                           <div>
@@ -717,7 +717,7 @@ export default function UsersPage() {
                   setPostcodeFilter("");
                   setCountryFilter("all");
                 }}
-                className="bg-gray-800 hover:bg-gray-700 border-gray-700 text-white"
+                className="bg-slate-600 hover:bg-gray-700 border-slate-500 text-white"
               >
                 Clear All Filters
               </Button>

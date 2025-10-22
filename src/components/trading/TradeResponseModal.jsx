@@ -58,14 +58,14 @@ export default function TradeResponseModal({ offer, onClose, onUpdate }) {
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="modal-glow card-gradient max-w-2xl bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
+      <DialogContent className="modal-glow card-gradient max-w-2xl bg-slate-700/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
         <DialogHeader>
           <DialogTitle className="text-2xl text-white">Respond to Trade Offer</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* Trade Summary */}
-          <div className="bg-gray-800/50 rounded-xl p-4">
+          <div className="bg-slate-600/50 rounded-xl p-4">
             <h3 className="text-white font-semibold mb-2">Trade Summary:</h3>
             <p className="text-gray-300">
               <strong>{offer.proposer?.full_name}</strong> wants your <strong>{offer.targetItem?.title}</strong> 
@@ -87,7 +87,7 @@ export default function TradeResponseModal({ offer, onClose, onUpdate }) {
               value={response}
               onChange={(e) => setResponse(e.target.value)}
               placeholder="Add a message to your response..."
-              className="bg-gray-800 border-gray-700 text-white"
+              className="bg-slate-600 border-slate-500 text-white"
               rows={4}
             />
           </div>
@@ -97,7 +97,7 @@ export default function TradeResponseModal({ offer, onClose, onUpdate }) {
             <Button
               variant="outline"
               onClick={onClose}
-              className="flex-1 bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
+              className="flex-1 bg-slate-600 border-slate-500 text-gray-300 hover:bg-gray-700"
               disabled={isSubmitting}
             >
               Cancel

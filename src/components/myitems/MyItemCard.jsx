@@ -17,7 +17,7 @@ const statusConfig = {
     active: { text: "Active", color: "bg-lime-900/50 text-lime-300 border-lime-700" },
     sold: { text: "Sold", color: "bg-blue-900/50 text-blue-300 border-blue-700" },
     pending: { text: "Pending", color: "bg-yellow-900/50 text-yellow-300 border-yellow-700" },
-    inactive: { text: "Inactive", color: "bg-gray-700 text-gray-300 border-gray-600" }
+    inactive: { text: "Inactive", color: "bg-gray-700 text-gray-300 border-slate-500" }
 };
 
 const conditionColors = {
@@ -67,12 +67,12 @@ export default function MyItemCard({ item, onDelete, onStatusChange }) {
                 variant="secondary"
                 size="icon"
                 onClick={(e) => e.stopPropagation()}
-                className="bg-gray-800/90 hover:bg-gray-700 shadow-md text-white rounded-full h-8 w-8"
+                className="bg-slate-600/90 hover:bg-gray-700 shadow-md text-white rounded-full h-8 w-8"
               >
                 <MoreHorizontal className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 bg-gray-800 border-gray-700">
+            <DropdownMenuContent align="end" className="w-48 bg-slate-600 border-slate-500">
               {item.status === "active" && (
                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onStatusChange("inactive"); }} className="text-white hover:bg-gray-700">
                   <EyeOff className="w-4 h-4 mr-2" />
@@ -123,12 +123,12 @@ export default function MyItemCard({ item, onDelete, onStatusChange }) {
           {item.tags && item.tags.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {item.tags.slice(0, 3).map((tag, index) => (
-                <Badge key={index} variant="outline" className="text-xs bg-gray-800 text-gray-300 border-gray-700">
+                <Badge key={index} variant="outline" className="text-xs bg-slate-600 text-gray-300 border-slate-500">
                   #{tag}
                 </Badge>
               ))}
               {item.tags.length > 3 && (
-                <Badge variant="outline" className="text-xs bg-gray-800 text-gray-300 border-gray-700">
+                <Badge variant="outline" className="text-xs bg-slate-600 text-gray-300 border-slate-500">
                   +{item.tags.length - 3} more
                 </Badge>
               )}

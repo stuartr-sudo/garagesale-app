@@ -247,3 +247,94 @@ export const ingestListing = async ({ imageUrls, initialData = {} }) => {
     throw error;
   }
 };
+
+// Item Reservation Functions
+export const reserveItem = async (itemId, reservationType = 'cart', durationMinutes = 5) => {
+  try {
+    const { data, error } = await supabase.rpc('reserve_item', {
+      p_item_id: itemId,
+      p_user_id: (await supabase.auth.getUser()).data.user.id,
+      p_reservation_type: reservationType,
+      p_duration_minutes: durationMinutes
+    });
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error reserving item:', error);
+    throw error;
+  }
+};
+
+export const checkItemAvailability = async (itemId) => {
+  try {
+    const { data, error } = await supabase.rpc('is_item_available_for_reservation', {
+      p_item_id: itemId
+    });
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error checking item availability:', error);
+    throw error;
+  }
+};
+
+export const getItemReservation = async (itemId) => {
+  try {
+    const { data, error } = await supabase.rpc('get_item_reservation', {
+      p_item_id: itemId
+    });
+    
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error getting item reservation:', error);
+    throw error;
+  }
+};
+
+export const releaseItemReservation = async (itemId) => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { error } = await supabase
+      .from('item_reservations')
+      .delete()
+      .eq('item_id', itemId)
+      .eq('user_id', user.id);
+    
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error('Error releasing item reservation:', error);
+    throw error;
+  }
+};
+
+export const cleanupExpiredReservations = async () => {
+  try {
+    const { error } = await supabase.rpc('cleanup_expired_reservations');
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error('Error cleaning up expired reservations:', error);
+    throw error;
+  }
+};
+
+// Auto cleanup function to be called periodically
+export const startReservationCleanup = () => {
+  // Clean up every 5 minutes
+  const cleanupInterval = setInterval(async () => {
+    try {
+      await cleanupExpiredReservations();
+      console.log('Expired reservations cleaned up');
+    } catch (error) {
+      console.error('Error in automatic cleanup:', error);
+    }
+  }, 5 * 60 * 1000); // 5 minutes
+
+  return cleanupInterval;
+};

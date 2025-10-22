@@ -83,15 +83,15 @@ export default function RecentlySold({ limit = 10, showLocation = true }) {
       <Card className="card-gradient card-glow">
         <CardContent className="p-6">
           <div className="flex items-center gap-2 mb-4">
-            <div className="h-6 w-48 bg-gray-800 rounded animate-pulse"></div>
+            <div className="h-6 w-48 bg-slate-600 rounded animate-pulse"></div>
           </div>
           <div className="space-y-3">
             {Array(5).fill(0).map((_, i) => (
               <div key={i} className="flex gap-3 animate-pulse">
-                <div className="w-16 h-16 bg-gray-800 rounded-lg"></div>
+                <div className="w-16 h-16 bg-slate-600 rounded-lg"></div>
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-gray-800 rounded w-3/4"></div>
-                  <div className="h-3 bg-gray-800 rounded w-1/2"></div>
+                  <div className="h-4 bg-slate-600 rounded w-3/4"></div>
+                  <div className="h-3 bg-slate-600 rounded w-1/2"></div>
                 </div>
               </div>
             ))}
@@ -134,7 +134,7 @@ export default function RecentlySold({ limit = 10, showLocation = true }) {
             return (
               <div
                 key={sale.id}
-                className="flex gap-3 p-3 rounded-lg bg-gray-900/50 hover:bg-gray-900/70 transition-all border border-gray-800 hover:border-green-500/30 group"
+                className="flex gap-3 p-3 rounded-lg bg-slate-700/50 hover:bg-slate-700/70 transition-all border border-slate-600 hover:border-green-500/30 group"
                 style={{
                   animation: index < 3 ? `slideIn 0.5s ease-out ${index * 0.1}s both` : 'none'
                 }}
@@ -182,7 +182,7 @@ export default function RecentlySold({ limit = 10, showLocation = true }) {
                         Sold
                       </Badge>
                       {item?.category && (
-                        <Badge variant="outline" className="text-xs border-gray-700 text-gray-400">
+                        <Badge variant="outline" className="text-xs border-slate-500 text-gray-400">
                           {item.category.replace('_', ' ')}
                         </Badge>
                       )}
@@ -198,7 +198,7 @@ export default function RecentlySold({ limit = 10, showLocation = true }) {
         </div>
 
         {/* Footer Note */}
-        <div className="mt-4 pt-4 border-t border-gray-800">
+        <div className="mt-4 pt-4 border-t border-slate-600">
           <p className="text-xs text-gray-500 text-center">
             🔒 Seller identities are protected for privacy
           </p>

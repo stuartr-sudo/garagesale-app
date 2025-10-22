@@ -156,8 +156,8 @@ export default function CameraCapture({ onCapture, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
-        <CardHeader className="border-b border-gray-800">
+      <Card className="w-full max-w-2xl bg-slate-700/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
+        <CardHeader className="border-b border-slate-600">
           <div className="flex items-center justify-between">
             <CardTitle className="text-white flex items-center gap-2">
               <Camera className="w-5 h-5" />
@@ -275,7 +275,7 @@ export default function CameraCapture({ onCapture, onClose }) {
                 <Button
                   variant="outline"
                   onClick={retakePhoto}
-                  className="flex-1 border-gray-700 text-gray-300 hover:bg-gray-800"
+                  className="flex-1 border-slate-500 text-gray-300 hover:bg-slate-600"
                 >
                   <Camera className="w-4 h-4 mr-2" />
                   Retake

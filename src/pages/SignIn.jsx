@@ -57,7 +57,7 @@ export default function SignIn() {
           <h1 className="font-bold text-3xl text-white">GarageSale</h1>
         </div>
 
-        <Card className="bg-gray-900/80 backdrop-blur-sm border-gray-800 shadow-xl">
+        <Card className="bg-slate-700/80 backdrop-blur-sm border-slate-600 shadow-xl">
           <CardHeader>
             <CardTitle className="text-2xl text-white">
               {isForgotPassword ? 'Reset Password' : isSignUp ? 'Create Account' : 'Welcome Back'}
@@ -94,7 +94,7 @@ export default function SignIn() {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required={isSignUp}
-                    className="bg-gray-800 border-gray-700 text-white"
+                    className="bg-slate-600 border-slate-500 text-white"
                     placeholder="John Doe"
                   />
                 </div>
@@ -111,7 +111,7 @@ export default function SignIn() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="bg-gray-800 border-gray-700 text-white"
+                  className="bg-slate-600 border-slate-500 text-white"
                   placeholder="you@example.com"
                 />
               </div>
@@ -128,7 +128,7 @@ export default function SignIn() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="bg-gray-800 border-gray-700 text-white"
+                    className="bg-slate-600 border-slate-500 text-white"
                     placeholder="••••••••"
                     minLength={6}
                   />

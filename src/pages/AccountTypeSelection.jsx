@@ -8,15 +8,15 @@ import { User, Building, ArrowRight } from 'lucide-react';
 
 const SelectionCard = ({ icon: Icon, title, description, onSelect }) => (
   <Card 
-    className="bg-gray-900/80 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-800 rounded-2xl text-center p-8 flex flex-col items-center hover:border-pink-500 cursor-pointer group"
+    className="bg-slate-700/80 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-600 rounded-2xl text-center p-8 flex flex-col items-center hover:border-pink-500 cursor-pointer group"
     onClick={onSelect}
   >
-    <div className="w-20 h-20 bg-gradient-to-br from-pink-900/50 to-fuchsia-900/50 rounded-2xl flex items-center justify-center mb-6 border border-gray-700 group-hover:border-pink-700 transition-colors">
+    <div className="w-20 h-20 bg-gradient-to-br from-pink-900/50 to-fuchsia-900/50 rounded-2xl flex items-center justify-center mb-6 border border-slate-500 group-hover:border-pink-700 transition-colors">
       <Icon className="w-10 h-10 text-pink-400" />
     </div>
     <h3 className="text-2xl font-bold text-white mb-3">{title}</h3>
     <p className="text-gray-400 mb-6 flex-grow">{description}</p>
-    <Button variant="outline" className="w-full bg-gray-800 border-gray-700 group-hover:bg-pink-600 group-hover:text-white group-hover:border-pink-600 transition-all">
+    <Button variant="outline" className="w-full bg-slate-600 border-slate-500 group-hover:bg-pink-600 group-hover:text-white group-hover:border-pink-600 transition-all">
       Continue as {title}
       <ArrowRight className="w-4 h-4 ml-2" />
     </Button>
@@ -41,7 +41,7 @@ export default function AccountTypeSelection() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-gray-200 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-slate-800 text-gray-200 flex items-center justify-center p-6">
       <div className="max-w-4xl w-full">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-white mb-4">Welcome to GarageSale!</h1>

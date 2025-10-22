@@ -477,7 +477,7 @@ export default function AddItem() {
             {itemData.image_urls.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {itemData.image_urls.map((url, index) => (
-                  <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-gray-800">
+                  <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-slate-600">
                     <img src={url} alt={`Upload ${index + 1}`} className="w-full h-full object-cover" />
                     <button
                       onClick={() => removeImage(index)}
@@ -536,7 +536,7 @@ export default function AddItem() {
                 value={itemData.title}
                 onChange={(e) => setItemData(prev => ({ ...prev, title: e.target.value }))}
                 placeholder="e.g., iPhone 13 Pro 256GB - Like New"
-                className="bg-gray-800 border-gray-700 text-white"
+                className="bg-slate-600 border-slate-500 text-white"
               />
             </div>
 
@@ -548,7 +548,7 @@ export default function AddItem() {
                 onChange={(e) => setItemData(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Describe your item in detail..."
                 rows={6}
-                className="bg-gray-800 border-gray-700 text-white"
+                className="bg-slate-600 border-slate-500 text-white"
               />
             </div>
           </div>
@@ -571,7 +571,7 @@ export default function AddItem() {
                       value={itemData.price}
                 onChange={(e) => setItemData(prev => ({ ...prev, price: e.target.value }))}
                       placeholder="0.00"
-                className="bg-gray-800 border-gray-700 text-white text-2xl"
+                className="bg-slate-600 border-slate-500 text-white text-2xl"
                     />
                 </div>
 
@@ -586,7 +586,7 @@ export default function AddItem() {
                 value={itemData.minimum_price}
                 onChange={(e) => setItemData(prev => ({ ...prev, minimum_price: e.target.value }))}
                 placeholder="0.00"
-                className="bg-gray-800 border-gray-700 text-white"
+                className="bg-slate-600 border-slate-500 text-white"
               />
               <p className="text-xs text-gray-500">
                 The AI agent will automatically accept offers at or above this price
@@ -606,7 +606,7 @@ export default function AddItem() {
                   <div className="space-y-2">
               <Label htmlFor="category" className="text-gray-300">Category *</Label>
               <Select value={itemData.category} onValueChange={(value) => setItemData(prev => ({ ...prev, category: value }))}>
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                <SelectTrigger className="bg-slate-600 border-slate-500 text-white">
                         <SelectValue />
                       </SelectTrigger>
                 <SelectContent>
@@ -620,7 +620,7 @@ export default function AddItem() {
                   <div className="space-y-2">
               <Label htmlFor="condition" className="text-gray-300">Condition *</Label>
               <Select value={itemData.condition} onValueChange={(value) => setItemData(prev => ({ ...prev, condition: value }))}>
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                <SelectTrigger className="bg-slate-600 border-slate-500 text-white">
                         <SelectValue />
                       </SelectTrigger>
                 <SelectContent>
@@ -639,7 +639,7 @@ export default function AddItem() {
                 onChange={(e) => setItemData(prev => ({ ...prev, postcode: e.target.value.replace(/\D/g, '').slice(0, 4) }))}
                 placeholder="2000"
                 maxLength={4}
-                className="bg-gray-800 border-gray-700 text-white"
+                className="bg-slate-600 border-slate-500 text-white"
               />
             </div>
 
@@ -661,7 +661,7 @@ export default function AddItem() {
               <p className="text-gray-400">Check your listing before publishing</p>
             </div>
 
-            <Card className="bg-gray-800 border-gray-700">
+            <Card className="bg-slate-600 border-slate-500">
               <CardContent className="p-6 space-y-4">
                 {itemData.image_urls[0] && (
                   <img src={itemData.image_urls[0]} alt="Main" className="w-full h-48 object-cover rounded-lg" />
@@ -711,7 +711,7 @@ export default function AddItem() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-gray-200 p-4 md:p-8">
+    <div className="min-h-screen bg-slate-800 text-gray-200 p-4 md:p-8">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -737,7 +737,7 @@ export default function AddItem() {
         </div>
 
         {/* Content */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 md:p-8 mb-6">
+        <div className="bg-slate-700 border border-slate-600 rounded-2xl p-6 md:p-8 mb-6">
           {renderStep()}
         </div>
 
@@ -747,7 +747,7 @@ export default function AddItem() {
             onClick={handleBack}
             disabled={currentStep === 1}
                 variant="outline"
-            className="bg-gray-800 hover:bg-gray-700 text-white border-gray-700"
+            className="bg-slate-600 hover:bg-gray-700 text-white border-slate-500"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back

@@ -123,7 +123,7 @@ export default function Connect() {
   
   if (loading) {
     return (
-      <div className="flex h-[calc(100vh-100px)] w-full items-center justify-center bg-slate-950">
+      <div className="flex h-[calc(100vh-100px)] w-full items-center justify-center bg-slate-800">
         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-pink-500"></div>
       </div>
     );
@@ -132,7 +132,7 @@ export default function Connect() {
   const hasCompleteBankDetails = user?.bank_account_name && user?.bank_bsb && user?.bank_account_number;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-gray-200">
+    <div className="min-h-screen bg-slate-800 text-gray-200">
       <div className="p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
           <div className="mb-8 text-center">
@@ -140,9 +140,9 @@ export default function Connect() {
             <p className="text-base md:text-lg text-gray-400">Manage your payments and seller profile</p>
           </div>
           
-          <div className="bg-gray-900/80 backdrop-blur-sm shadow-xl border border-gray-800 rounded-2xl p-8">
+          <div className="bg-slate-700/80 backdrop-blur-sm shadow-xl border border-slate-600 rounded-2xl p-8">
             {hasCompleteBankDetails ? (
-              <Card className="bg-gray-800 border-gray-700">
+              <Card className="bg-slate-600 border-slate-500">
                 <CardHeader>
                   <div className="mx-auto w-16 h-16 bg-green-600/20 rounded-full flex items-center justify-center mb-4 border-2 border-green-500">
                     <CheckCircle className="w-8 h-8 text-green-400" />
@@ -153,7 +153,7 @@ export default function Connect() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="bg-gray-900/50 p-4 rounded-lg space-y-2">
+                  <div className="bg-slate-700/50 p-4 rounded-lg space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-400">Account Name:</span>
                       <span className="text-white font-medium">{user.bank_account_name}</span>
@@ -171,14 +171,14 @@ export default function Connect() {
                   <Button
                     onClick={() => window.location.reload()}
                     variant="outline"
-                    className="w-full bg-gray-700 hover:bg-gray-600 text-white border-gray-600"
+                    className="w-full bg-gray-700 hover:bg-gray-600 text-white border-slate-500"
                   >
                     Update Details
                   </Button>
                 </CardContent>
               </Card>
             ) : (
-              <Card className="bg-gray-800 border-gray-700">
+              <Card className="bg-slate-600 border-slate-500">
                 <CardHeader>
                   <div className="mx-auto w-16 h-16 bg-fuchsia-600/20 rounded-full flex items-center justify-center mb-4 border-2 border-fuchsia-500">
                     <Building2 className="w-8 h-8 text-fuchsia-400" />
@@ -198,7 +198,7 @@ export default function Connect() {
                       value={bankDetails.account_name}
                       onChange={(e) => handleInputChange('account_name', e.target.value)}
                       placeholder="John Smith"
-                      className="bg-gray-700 border-gray-600 text-white placeholder-gray-500"
+                      className="bg-gray-700 border-slate-500 text-white placeholder-gray-500"
                     />
                     <p className="text-xs text-gray-500">The name on your bank account</p>
                   </div>
@@ -212,7 +212,7 @@ export default function Connect() {
                       value={bankDetails.bsb}
                       onChange={(e) => handleInputChange('bsb', e.target.value)}
                       placeholder="062-000"
-                      className="bg-gray-700 border-gray-600 text-white placeholder-gray-500"
+                      className="bg-gray-700 border-slate-500 text-white placeholder-gray-500"
                     />
                     <p className="text-xs text-gray-500">6-digit Bank-State-Branch number (e.g., 062-000)</p>
                   </div>
@@ -226,7 +226,7 @@ export default function Connect() {
                       value={bankDetails.account_number}
                       onChange={(e) => handleInputChange('account_number', e.target.value)}
                       placeholder="12345678"
-                      className="bg-gray-700 border-gray-600 text-white placeholder-gray-500"
+                      className="bg-gray-700 border-slate-500 text-white placeholder-gray-500"
                     />
                     <p className="text-xs text-gray-500">6-9 digit account number</p>
                   </div>
@@ -248,7 +248,7 @@ export default function Connect() {
             )}
           </div>
 
-          <div className="mt-8 p-4 bg-gray-900 rounded-2xl border border-gray-800">
+          <div className="mt-8 p-4 bg-slate-700 rounded-2xl border border-slate-600">
             <div className="flex items-start gap-3">
               <div className="p-2 bg-blue-900/50 rounded-lg flex-shrink-0">
                 <Building2 className="w-5 h-5 text-blue-400" />

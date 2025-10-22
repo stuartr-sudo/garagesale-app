@@ -93,7 +93,7 @@ export default function RequestCard({ request, requester, onContact }) {
           </div>
 
           {requester && (
-            <div className="flex items-center justify-between pt-3 border-t border-gray-800">
+            <div className="flex items-center justify-between pt-3 border-t border-slate-600">
               <div className="flex items-center gap-2 text-sm">
                 <div className="w-6 h-6 bg-gradient-to-r from-pink-500 to-fuchsia-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
                   {requester.full_name?.[0] || 'U'}
@@ -106,12 +106,12 @@ export default function RequestCard({ request, requester, onContact }) {
           {request.tags && request.tags.length > 0 && (
             <div className="flex flex-wrap gap-1 pt-3">
               {request.tags.slice(0, 3).map((tag, index) => (
-                <Badge key={index} variant="outline" className="text-xs bg-gray-800 text-gray-300 border-gray-700">
+                <Badge key={index} variant="outline" className="text-xs bg-slate-600 text-gray-300 border-slate-500">
                   #{tag}
                 </Badge>
               ))}
               {request.tags.length > 3 && (
-                <Badge variant="outline" className="text-xs bg-gray-800 text-gray-300 border-gray-700">
+                <Badge variant="outline" className="text-xs bg-slate-600 text-gray-300 border-slate-500">
                   +{request.tags.length - 3} more
                 </Badge>
               )}

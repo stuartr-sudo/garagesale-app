@@ -109,7 +109,7 @@ export default function TradeModal({ targetItem, targetSeller, onClose }) {
   if (loading) {
     return (
       <Dialog open={true} onOpenChange={onClose}>
-        <DialogContent className="modal-glow card-gradient max-w-4xl max-h-[90vh] overflow-auto bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
+        <DialogContent className="modal-glow card-gradient max-w-4xl max-h-[90vh] overflow-auto bg-slate-700/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div>
           </div>
@@ -120,7 +120,7 @@ export default function TradeModal({ targetItem, targetSeller, onClose }) {
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="modal-glow card-gradient max-w-4xl max-h-[90vh] overflow-auto bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
+      <DialogContent className="modal-glow card-gradient max-w-4xl max-h-[90vh] overflow-auto bg-slate-700/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl text-white">
             <RefreshCw className="w-6 h-6 text-purple-400" />
@@ -130,7 +130,7 @@ export default function TradeModal({ targetItem, targetSeller, onClose }) {
 
         <div className="space-y-6">
           {/* Target Item */}
-          <div className="bg-gray-800/50 rounded-2xl p-6 border border-gray-700">
+          <div className="bg-slate-600/50 rounded-2xl p-6 border border-slate-500">
             <h3 className="text-lg font-semibold text-white mb-4">You want:</h3>
             <div className="flex gap-4 items-center">
               <img
@@ -150,7 +150,7 @@ export default function TradeModal({ targetItem, targetSeller, onClose }) {
           </div>
 
           {/* Your Offer */}
-          <div className="bg-gray-800/50 rounded-2xl p-6 border border-gray-700">
+          <div className="bg-slate-600/50 rounded-2xl p-6 border border-slate-500">
             <h3 className="text-lg font-semibold text-white mb-4">Your offer:</h3>
             
             {/* Selected Items */}
@@ -159,7 +159,7 @@ export default function TradeModal({ targetItem, targetSeller, onClose }) {
                 <h4 className="text-md font-medium text-gray-300 mb-3">Selected Items:</h4>
                 <div className="flex flex-wrap gap-3">
                   {selectedItems.map((item) => (
-                    <Card key={item.id} className="bg-gray-800 border-gray-700">
+                    <Card key={item.id} className="bg-slate-600 border-slate-500">
                       <CardContent className="p-3 flex items-center gap-3">
                         <img
                           src={item.image_urls?.[0] || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=100&h=100&fit=crop"}
@@ -197,14 +197,14 @@ export default function TradeModal({ targetItem, targetSeller, onClose }) {
                   step="0.01"
                   value={cashAmount}
                   onChange={(e) => setCashAmount(parseFloat(e.target.value) || 0)}
-                  className="pl-10 bg-gray-800 border-gray-700 text-white"
+                  className="pl-10 bg-slate-600 border-slate-500 text-white"
                   placeholder="0.00"
                 />
               </div>
             </div>
 
             {/* Trade Value Summary */}
-            <div className="bg-gray-900/50 rounded-xl p-4 mb-6">
+            <div className="bg-slate-700/50 rounded-xl p-4 mb-6">
               <div className="flex justify-between items-center">
                 <span className="text-gray-300">Total Offer Value:</span>
                 <span className="text-2xl font-bold text-purple-400">${calculateTotalValue().toFixed(2)}</span>
@@ -223,7 +223,7 @@ export default function TradeModal({ targetItem, targetSeller, onClose }) {
           </div>
 
           {/* Your Items to Select From */}
-          <div className="bg-gray-800/50 rounded-2xl p-6 border border-gray-700">
+          <div className="bg-slate-600/50 rounded-2xl p-6 border border-slate-500">
             <h3 className="text-lg font-semibold text-white mb-4">Select from your items:</h3>
             {userItems.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-64 overflow-y-auto">
@@ -235,7 +235,7 @@ export default function TradeModal({ targetItem, targetSeller, onClose }) {
                       className={`cursor-pointer transition-all duration-200 ${
                         isSelected 
                           ? 'bg-purple-900/50 border-purple-500' 
-                          : 'bg-gray-800 border-gray-700 hover:border-gray-600'
+                          : 'bg-slate-600 border-slate-500 hover:border-slate-500'
                       }`}
                       onClick={() => handleSelectItem(item)}
                     >
@@ -275,7 +275,7 @@ export default function TradeModal({ targetItem, targetSeller, onClose }) {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Add a personal message to explain why this trade makes sense..."
-              className="bg-gray-800 border-gray-700 text-white"
+              className="bg-slate-600 border-slate-500 text-white"
               rows={3}
             />
           </div>
@@ -285,7 +285,7 @@ export default function TradeModal({ targetItem, targetSeller, onClose }) {
             <Button
               variant="outline"
               onClick={onClose}
-              className="flex-1 bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
+              className="flex-1 bg-slate-600 border-slate-500 text-gray-300 hover:bg-gray-700"
               disabled={isSubmitting}
             >
               Cancel

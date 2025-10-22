@@ -197,7 +197,7 @@ export default function AdBanner({ placement = "top_banner", className = "", onA
   if (placement === "sidebar") {
     return (
       <AdContainer ad={currentAd}>
-        <div className="bg-gray-900 rounded-2xl p-4 shadow-lg border border-gray-800 cursor-pointer group hover:shadow-xl transition-all duration-300 relative">
+        <div className="bg-slate-700 rounded-2xl p-4 shadow-lg border border-slate-600 cursor-pointer group hover:shadow-xl transition-all duration-300 relative">
           <img src={currentAd.image_url} alt={currentAd.title} className="w-full h-32 object-cover rounded-xl mb-4" onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=300&h=200&fit=crop"; }} />
           <h4 className="font-bold text-white group-hover:text-pink-400 transition-colors">{currentAd.title}</h4>
           {currentAd.description && <p className="text-gray-400 text-sm line-clamp-2">{currentAd.description}</p>}
@@ -231,7 +231,7 @@ export default function AdBanner({ placement = "top_banner", className = "", onA
     const isLocalDeal = placement === 'local_deals';
     return (
       <AdContainer ad={currentAd}>
-        <div className={`bg-gray-900 rounded-2xl shadow-lg transition-all duration-300 border border-gray-800 overflow-hidden cursor-pointer group hover:scale-[1.02] flex flex-col h-full relative ${
+        <div className={`bg-slate-700 rounded-2xl shadow-lg transition-all duration-300 border border-slate-600 overflow-hidden cursor-pointer group hover:scale-[1.02] flex flex-col h-full relative ${
           isLocalDeal 
             ? 'shadow-orange-950/20 hover:shadow-orange-500/20' 
             : 'shadow-cyan-950/20 hover:shadow-cyan-500/20'

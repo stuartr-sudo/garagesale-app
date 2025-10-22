@@ -25,6 +25,7 @@ import {
 import { User as UserEntity } from "@/api/entities";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
+import { reserveItem, releaseItemReservation } from "@/api/functions";
 
 export default function PurchaseModal({ item, seller, onClose, onSuccess }) {
   const [step, setStep] = useState(1); // 1=confirm, 2=delivery, 3=payment, 4=waiting
@@ -36,11 +37,51 @@ export default function PurchaseModal({ item, seller, onClose, onSuccess }) {
   const [orderId, setOrderId] = useState(null);
   const [timeRemaining, setTimeRemaining] = useState(600); // 10 minutes in seconds
   const [timerActive, setTimerActive] = useState(false);
+  const [isReserved, setIsReserved] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     loadCurrentUser();
+    // Reserve the item when modal opens
+    reserveItemForPurchase();
   }, []);
+
+  const reserveItemForPurchase = async () => {
+    try {
+      const reserved = await reserveItem(item.id, 'buy_now', 10); // 10 minutes
+      if (reserved) {
+        setIsReserved(true);
+        toast({
+          title: "Item Reserved",
+          description: "This item has been reserved for you for 10 minutes."
+        });
+      } else {
+        toast({
+          title: "Item Not Available",
+          description: "This item is currently being processed by another user.",
+          variant: "destructive"
+        });
+        onClose();
+      }
+    } catch (error) {
+      console.error('Error reserving item:', error);
+      toast({
+        title: "Error",
+        description: "Failed to reserve item for purchase.",
+        variant: "destructive"
+      });
+      onClose();
+    }
+  };
+
+  // Cleanup reservation when modal closes
+  useEffect(() => {
+    return () => {
+      if (isReserved) {
+        releaseItemReservation(item.id).catch(console.error);
+      }
+    };
+  }, [isReserved, item.id]);
 
   // Timer countdown
   useEffect(() => {
@@ -75,6 +116,15 @@ export default function PurchaseModal({ item, seller, onClose, onSuccess }) {
       description: "Your payment window has expired. The item is available for sale again.",
       variant: "destructive"
     });
+    
+    // Release reservation
+    if (isReserved) {
+      try {
+        await releaseItemReservation(item.id);
+      } catch (error) {
+        console.error('Error releasing reservation:', error);
+      }
+    }
     
     // Update order status to expired
     if (orderId) {
@@ -219,7 +269,7 @@ export default function PurchaseModal({ item, seller, onClose, onSuccess }) {
           )}
 
           {/* Item Summary (always visible) */}
-          <div className="bg-gray-800/50 border border-cyan-500/20 rounded-xl p-4">
+          <div className="bg-slate-600/50 border border-cyan-500/20 rounded-xl p-4">
             <div className="flex gap-4">
               <img
                 src={primaryImage}
@@ -268,7 +318,7 @@ export default function PurchaseModal({ item, seller, onClose, onSuccess }) {
                 <Button
                   variant="outline"
                   onClick={onClose}
-                  className="flex-1 h-12 rounded-xl bg-gray-800 border-2 border-gray-600 text-white hover:bg-gray-700 hover:border-gray-500"
+                  className="flex-1 h-12 rounded-xl bg-slate-600 border-2 border-slate-500 text-white hover:bg-slate-500 hover:border-gray-500"
                 >
                   Cancel
                 </Button>
@@ -292,7 +342,7 @@ export default function PurchaseModal({ item, seller, onClose, onSuccess }) {
                     className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${
                       deliveryMethod === 'collect' 
                         ? 'border-cyan-500 bg-cyan-900/20' 
-                        : 'border-gray-700 bg-gray-800/30 hover:border-gray-600'
+                        : 'border-slate-600 bg-slate-600/30 hover:border-slate-500'
                     }`}
                     onClick={() => setDeliveryMethod('collect')}
                   >
@@ -323,7 +373,7 @@ export default function PurchaseModal({ item, seller, onClose, onSuccess }) {
                     className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${
                       deliveryMethod === 'ship' 
                         ? 'border-cyan-500 bg-cyan-900/20' 
-                        : 'border-gray-700 bg-gray-800/30 hover:border-gray-600'
+                        : 'border-slate-600 bg-slate-600/30 hover:border-slate-500'
                     }`}
                     onClick={() => setDeliveryMethod('ship')}
                   >
@@ -355,14 +405,14 @@ export default function PurchaseModal({ item, seller, onClose, onSuccess }) {
                     value={shippingAddress}
                     onChange={(e) => setShippingAddress(e.target.value)}
                     placeholder="Enter your full shipping address"
-                    className="h-12 rounded-xl bg-gray-900 border-gray-700 text-white"
+                    className="h-12 rounded-xl bg-slate-700 border-slate-600 text-white"
                     required
                   />
                 </div>
               )}
 
               {/* Price Summary */}
-              <div className="bg-gray-800/50 border border-cyan-500/20 rounded-xl p-4">
+              <div className="bg-slate-600/50 border border-cyan-500/20 rounded-xl p-4">
                 <div className="space-y-2">
                   <div className="flex justify-between text-gray-300">
                     <span>Item Price:</span>
@@ -374,7 +424,7 @@ export default function PurchaseModal({ item, seller, onClose, onSuccess }) {
                       {deliveryMethod === 'collect' ? 'FREE' : `$${shippingCost.toFixed(2)}`}
                     </span>
                   </div>
-                  <div className="border-t border-gray-700 pt-2 flex justify-between items-center">
+                  <div className="border-t border-slate-600 pt-2 flex justify-between items-center">
                     <span className="text-lg font-semibold text-white">Total:</span>
                     <span className="text-2xl font-bold text-cyan-400">${getTotalPrice().toFixed(2)}</span>
                   </div>
@@ -385,7 +435,7 @@ export default function PurchaseModal({ item, seller, onClose, onSuccess }) {
                 <Button
                   variant="outline"
                   onClick={() => setStep(1)}
-                  className="flex-1 h-12 rounded-xl bg-gray-800 border-2 border-gray-600 text-white hover:bg-gray-700 hover:border-gray-500"
+                  className="flex-1 h-12 rounded-xl bg-slate-600 border-2 border-slate-500 text-white hover:bg-slate-500 hover:border-gray-500"
                 >
                   Back
                 </Button>
@@ -425,25 +475,25 @@ export default function PurchaseModal({ item, seller, onClose, onSuccess }) {
                   Seller's Bank Details
                 </h4>
                 <div className="space-y-3">
-                  <div className="bg-gray-900/50 rounded-lg p-3">
+                  <div className="bg-slate-700/50 rounded-lg p-3">
                     <div className="text-sm text-gray-400">Account Name</div>
                     <div className="text-lg font-semibold text-white">{seller?.bank_account_name || 'Not provided'}</div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-gray-900/50 rounded-lg p-3">
+                    <div className="bg-slate-700/50 rounded-lg p-3">
                       <div className="text-sm text-gray-400">BSB</div>
                       <div className="text-lg font-mono font-semibold text-white">{seller?.bank_bsb || 'Not provided'}</div>
                     </div>
-                    <div className="bg-gray-900/50 rounded-lg p-3">
+                    <div className="bg-slate-700/50 rounded-lg p-3">
                       <div className="text-sm text-gray-400">Account Number</div>
                       <div className="text-lg font-mono font-semibold text-white">{seller?.bank_account_number || 'Not provided'}</div>
                     </div>
                   </div>
-                  <div className="bg-gray-900/50 rounded-lg p-3">
+                  <div className="bg-slate-700/50 rounded-lg p-3">
                     <div className="text-sm text-gray-400">Reference (IMPORTANT)</div>
                     <div className="text-lg font-mono font-bold text-cyan-400">ORDER-{orderId?.slice(0, 8).toUpperCase()}</div>
                   </div>
-                  <div className="bg-gray-900/50 rounded-lg p-3">
+                  <div className="bg-slate-700/50 rounded-lg p-3">
                     <div className="text-sm text-gray-400">Amount to Transfer</div>
                     <div className="text-3xl font-bold text-green-400">${getTotalPrice().toFixed(2)}</div>
                   </div>
@@ -480,7 +530,7 @@ export default function PurchaseModal({ item, seller, onClose, onSuccess }) {
                 <p className="text-gray-300 mb-6">
                   Waiting for <span className="font-semibold text-cyan-400">{seller?.full_name}</span> to confirm your payment...
                 </p>
-                <div className="bg-gray-900/50 rounded-lg p-4 inline-block">
+                <div className="bg-slate-700/50 rounded-lg p-4 inline-block">
                   <div className="text-sm text-gray-400">Order Reference</div>
                   <div className="text-xl font-mono font-bold text-cyan-400">ORDER-{orderId?.slice(0, 8).toUpperCase()}</div>
                 </div>

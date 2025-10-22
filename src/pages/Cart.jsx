@@ -288,7 +288,7 @@ export default function Cart() {
                                 size="icon"
                                 onClick={() => updateQuantity(cartItem.id, cartItem.quantity - 1)}
                                 disabled={cartItem.quantity <= 1}
-                                className="h-8 w-8 bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
+                                className="h-8 w-8 bg-slate-600 border-slate-500 text-white hover:bg-gray-700"
                               >
                                 <Minus className="w-4 h-4" />
                               </Button>
@@ -299,7 +299,7 @@ export default function Cart() {
                                 variant="outline"
                                 size="icon"
                                 onClick={() => updateQuantity(cartItem.id, cartItem.quantity + 1)}
-                                className="h-8 w-8 bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
+                                className="h-8 w-8 bg-slate-600 border-slate-500 text-white hover:bg-gray-700"
                               >
                                 <Plus className="w-4 h-4" />
                               </Button>
