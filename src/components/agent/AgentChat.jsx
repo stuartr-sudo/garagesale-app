@@ -44,7 +44,7 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
     const messageToSend = customMessage || input.trim();
     if (!messageToSend || loading) return;
 
-    const userMessage = messageToSend;
+    const userMessage = String(messageToSend);
     if (!customMessage) {
       setInput('');
     }
@@ -218,7 +218,12 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
                   <>
                     {msg.counter_offer && (
                       <Button
-                        onClick={() => sendMessage(`I accept your offer of $${msg.counter_offer}`)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const offerAmount = msg.counter_offer;
+                          sendMessage(`I accept your offer of $${offerAmount}`);
+                        }}
                         className="mt-2 w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold shadow-lg"
                         disabled={loading}
                       >
@@ -228,11 +233,15 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
                     )}
                     {msg.accepted_offer && (
                       <Button
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const acceptedAmount = msg.accepted_offer;
+                          const title = itemTitle;
                           setOfferAccepted(true);
                           setMessages(prev => [...prev, {
                             sender: 'system',
-                            content: `🎉 Congratulations! Your offer of $${msg.accepted_offer} has been accepted!\n\n💳 Payment Details:\n• Account Name: GarageSale Marketplace\n• BSB: 062-000\n• Account Number: 1234 5678\n• Reference: "${itemTitle}"\n\nOnce the payment is confirmed, the seller will arrange for collection or delivery.`,
+                            content: `🎉 Congratulations! Your offer of $${acceptedAmount} has been accepted!\n\n💳 Payment Details:\n• Account Name: GarageSale Marketplace\n• BSB: 062-000\n• Account Number: 1234 5678\n• Reference: "${title}"\n\nOnce the payment is confirmed, the seller will arrange for collection or delivery.`,
                             timestamp: new Date().toISOString()
                           }]);
                         }}
