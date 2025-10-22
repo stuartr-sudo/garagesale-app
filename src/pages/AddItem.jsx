@@ -11,9 +11,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowLeft, ArrowRight, Upload, Camera, Sparkles, CheckCircle, Loader2, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Upload, Camera, Sparkles, CheckCircle, Loader2, X, Mic } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ImageUpload from "../components/additem/ImageUpload";
+import VoiceInputField from "../components/additem/VoiceInputField";
 
 const categories = [
   { value: "electronics", label: "Electronics" },
@@ -59,6 +60,8 @@ export default function AddItem() {
   const [isGeneratingTags, setIsGeneratingTags] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [showVoiceInput, setShowVoiceInput] = useState(false);
+  const [voiceTargetField, setVoiceTargetField] = useState('description');
 
   useEffect(() => {
     loadUser();
@@ -74,6 +77,20 @@ export default function AddItem() {
     } catch (error) {
       console.error("Error loading user:", error);
     }
+  };
+
+  const handleVoiceTranscript = (transcript) => {
+    if (voiceTargetField === 'title') {
+      setItemData(prev => ({ ...prev, title: transcript }));
+    } else if (voiceTargetField === 'description') {
+      setItemData(prev => ({ ...prev, description: transcript }));
+    }
+    setShowVoiceInput(false);
+  };
+
+  const openVoiceInput = (field) => {
+    setVoiceTargetField(field);
+    setShowVoiceInput(true);
   };
 
   const handleImageUpload = async (files) => {
@@ -505,7 +522,38 @@ export default function AddItem() {
               <p className="text-gray-400">Tell buyers about your item</p>
             </div>
 
-            {/* Single AI Generation Button */}
+            {/* Image Preview */}
+            {itemData.image_urls.length > 0 && (
+              <div className="mb-6">
+                <Label className="text-gray-300 mb-3 block">Your Listing Preview</Label>
+                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                  <div className="flex gap-4">
+                    <div className="w-24 h-24 flex-shrink-0">
+                      <img
+                        src={itemData.image_urls[0]}
+                        alt="Item preview"
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-white font-semibold text-lg mb-2 line-clamp-2">
+                        {itemData.title || "Your item title will appear here"}
+                      </h3>
+                      <p className="text-gray-400 text-sm line-clamp-3">
+                        {itemData.description || "Your item description will appear here"}
+                      </p>
+                      <div className="mt-2">
+                        <span className="text-2xl font-bold text-green-400">
+                          ${itemData.price || "0.00"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* AI Generation Button */}
             <div className="flex justify-center mb-6">
               <Button
                 type="button"
@@ -530,7 +578,19 @@ export default function AddItem() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="title" className="text-gray-300">Title *</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="title" className="text-gray-300">Title *</Label>
+                <Button
+                  type="button"
+                  onClick={() => openVoiceInput('title')}
+                  variant="outline"
+                  size="sm"
+                  className="border-purple-500 text-purple-400 hover:bg-purple-500/10"
+                >
+                  <Mic className="w-4 h-4 mr-1" />
+                  Voice
+                </Button>
+              </div>
               <Input
                 id="title"
                 value={itemData.title}
@@ -541,7 +601,19 @@ export default function AddItem() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description" className="text-gray-300">Description *</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="description" className="text-gray-300">Description *</Label>
+                <Button
+                  type="button"
+                  onClick={() => openVoiceInput('description')}
+                  variant="outline"
+                  size="sm"
+                  className="border-purple-500 text-purple-400 hover:bg-purple-500/10"
+                >
+                  <Mic className="w-4 h-4 mr-1" />
+                  Voice
+                </Button>
+              </div>
               <Textarea
                 id="description"
                 value={itemData.description}
@@ -783,6 +855,15 @@ export default function AddItem() {
           )}
         </div>
       </div>
+
+      {/* Voice Input Modal */}
+      {showVoiceInput && (
+        <VoiceInputField
+          onTranscript={handleVoiceTranscript}
+          onClose={() => setShowVoiceInput(false)}
+          targetField={voiceTargetField}
+        />
+      )}
     </div>
   );
 }
