@@ -241,8 +241,9 @@ export default function Layout({ children, currentPageName }) {
     );
   }
 
-  // Show suspension/ban screen if user is suspended or banned
-  if (currentUser && userStatus && (userStatus.isSuspended || userStatus.isBanned)) {
+  // Show suspension/ban screen if user is suspended or banned (exclude admin and super_admin)
+  if (currentUser && userStatus && (userStatus.isSuspended || userStatus.isBanned) && 
+      currentUser.role !== 'admin' && currentUser.role !== 'super_admin') {
     return <SuspensionBanner userStatus={userStatus} onLogout={handleLogout} />;
   }
 

@@ -18,13 +18,24 @@ export async function checkUserStatus(userId) {
     // Get the current user status
     const { data: profile, error } = await supabase
       .from('profiles')
-      .select('is_suspended, suspension_end_date, is_banned, ban_reason, incomplete_transaction_count')
+      .select('is_suspended, suspension_end_date, is_banned, ban_reason, incomplete_transaction_count, role')
       .eq('id', userId)
       .single();
 
     if (error) {
       console.error('Error fetching user status:', error);
       return { isSuspended: false, isBanned: false, suspensionEndDate: null, banReason: null };
+    }
+
+    // Admin and super_admin users are exempt from suspensions and bans
+    if (profile.role === 'admin' || profile.role === 'super_admin') {
+      return {
+        isSuspended: false,
+        isBanned: false,
+        suspensionEndDate: null,
+        banReason: null,
+        incompleteTransactionCount: profile.incomplete_transaction_count
+      };
     }
 
     return {
@@ -66,10 +77,10 @@ export async function markOrderIncomplete(orderId, buyerId, reason = 'Payment no
       return { success: true, alreadyMarked: true };
     }
 
-    // Get the buyer's current penalty count
+    // Get the buyer's current penalty count and role
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('incomplete_transaction_count, is_banned')
+      .select('incomplete_transaction_count, is_banned, role')
       .eq('id', buyerId)
       .single();
 
@@ -82,6 +93,46 @@ export async function markOrderIncomplete(orderId, buyerId, reason = 'Payment no
     if (profile.is_banned) {
       console.log('User is already banned');
       return { success: true, alreadyBanned: true };
+    }
+
+    // Skip penalties for admin and super_admin users
+    if (profile.role === 'admin' || profile.role === 'super_admin') {
+      console.log(`Admin user ${buyerId} exempted from penalties`);
+      // Still mark the order as incomplete but don't apply penalties
+      const { error: orderUpdateError } = await supabase
+        .from('orders')
+        .update({
+          marked_incomplete: true,
+          incomplete_reason: reason,
+          status: 'expired'
+        })
+        .eq('id', orderId);
+
+      if (orderUpdateError) {
+        console.error('Error marking order incomplete:', orderUpdateError);
+        return { success: false, error: orderUpdateError };
+      }
+
+      // Return the item to active status
+      const { data: orderData } = await supabase
+        .from('orders')
+        .select('item_id')
+        .eq('id', orderId)
+        .single();
+
+      if (orderData?.item_id) {
+        await supabase
+          .from('items')
+          .update({ status: 'active' })
+          .eq('id', orderData.item_id);
+      }
+
+      return {
+        success: true,
+        penaltyApplied: 'none',
+        newCount: profile.incomplete_transaction_count || 0,
+        adminExempted: true
+      };
     }
 
     const currentCount = profile.incomplete_transaction_count || 0;
