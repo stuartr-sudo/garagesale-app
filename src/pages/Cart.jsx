@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,33 +9,65 @@ import {
   Tag,
   Sparkles,
   ArrowRight,
-  Package
+  Clock,
+  AlertTriangle
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { User as UserEntity } from '@/api/entities';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { 
+  removeFromCart, 
+  checkCartItemAvailability, 
+  getTimeRemaining,
+  markItemSold 
+} from '@/utils/cart';
+
+const RESERVATION_DURATION_MINUTES = 10;
 
 export default function Cart() {
   const [cartItems, setCartItems] = useState([]);
   const [appliedOffers, setAppliedOffers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [unavailableItems, setUnavailableItems] = useState(new Set());
   const { toast } = useToast();
   const navigate = useNavigate();
+  const expirationIntervalRef = useRef(null);
+  const realtimeSubscriptionRef = useRef(null);
 
   useEffect(() => {
     loadCart();
+    
+    // Set up periodic expiration check
+    expirationIntervalRef.current = setInterval(() => {
+      checkExpiredReservations();
+    }, 30000); // Check every 30 seconds
+    
+    return () => {
+      if (expirationIntervalRef.current) {
+        clearInterval(expirationIntervalRef.current);
+      }
+      if (realtimeSubscriptionRef.current) {
+        realtimeSubscriptionRef.current.unsubscribe();
+      }
+    };
   }, []);
 
+  // ============================================
+  // LOAD CART WITH RESERVATION VALIDATION
+  // ============================================
   const loadCart = async () => {
     setIsLoading(true);
     try {
       const user = await UserEntity.me();
       setCurrentUser(user);
 
-      // Load cart items with item details, including negotiated prices
+      // First, expire old reservations in database
+      await supabase.rpc('expire_cart_reservations');
+
+      // Load cart items with item details and check availability
       const { data: items, error } = await supabase
         .from('cart_items')
         .select(`
@@ -44,6 +76,8 @@ export default function Cart() {
           added_at,
           negotiated_price,
           price_source,
+          reserved_until,
+          reservation_status,
           item:items(
             id,
             title,
@@ -52,7 +86,9 @@ export default function Cart() {
             image_urls,
             condition,
             category,
-            seller_id
+            seller_id,
+            is_sold,
+            sold_at
           )
         `)
         .eq('buyer_id', user.id)
@@ -60,10 +96,45 @@ export default function Cart() {
 
       if (error) throw error;
 
-      setCartItems(items || []);
+      // Filter out sold items and expired reservations
+      const availableItems = (items || []).filter(cartItem => {
+        const item = cartItem.item;
+        const isExpired = cartItem.reserved_until && new Date(cartItem.reserved_until) < new Date();
+        const isSold = item.is_sold;
+        
+        if (isSold || isExpired) {
+          setUnavailableItems(prev => new Set([...prev, item.id]));
+          return false;
+        }
+        return true;
+      });
+
+      setCartItems(availableItems);
+      
+      // Remove unavailable items from database
+      if (availableItems.length < (items?.length || 0)) {
+        const unavailableIds = (items || [])
+          .filter(ci => !availableItems.find(ai => ai.id === ci.id))
+          .map(ci => ci.id);
+        
+        await supabase
+          .from('cart_items')
+          .delete()
+          .in('id', unavailableIds);
+        
+        toast({
+          title: "Items Removed",
+          description: `${unavailableIds.length} unavailable item(s) removed from cart`,
+          variant: "destructive"
+        });
+      }
       
       // Check for applicable offers
-      await checkApplicableOffers(items || [], user.id);
+      await checkApplicableOffers(availableItems, user.id);
+      
+      // Set up real-time subscription for item availability
+      setupRealtimeSubscription(user.id);
+      
     } catch (error) {
       console.error('Error loading cart:', error);
       toast({
@@ -74,6 +145,53 @@ export default function Cart() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // ============================================
+  // REAL-TIME SUBSCRIPTION FOR ITEM CHANGES
+  // ============================================
+  const setupRealtimeSubscription = (userId) => {
+    // Subscribe to changes in items table (sold status changes)
+    realtimeSubscriptionRef.current = supabase
+      .channel('cart-items-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'items',
+          filter: `id=in.(${cartItems.map(ci => ci.item.id).join(',')})`
+        },
+        (payload) => {
+          console.log('🔄 Item updated:', payload);
+          // Reload cart to check availability
+          loadCart();
+        }
+      )
+      .subscribe();
+  };
+
+  // ============================================
+  // CHECK EXPIRED RESERVATIONS
+  // ============================================
+  const checkExpiredReservations = () => {
+    const now = new Date();
+    const expiredItems = cartItems.filter(ci => {
+      if (!ci.reserved_until) return false;
+      return new Date(ci.reserved_until) < now;
+    });
+
+    if (expiredItems.length > 0) {
+      console.log('⏰ Found expired reservations:', expiredItems.length);
+      loadCart(); // Reload to remove expired items
+    }
+  };
+
+  // ============================================
+  // GET TIME REMAINING FOR RESERVATION
+  // ============================================
+  const getTimeRemainingForItem = (reservedUntil) => {
+    return getTimeRemaining(reservedUntil);
   };
 
   const checkApplicableOffers = async (items, userId) => {
@@ -119,14 +237,16 @@ export default function Cart() {
     }
   };
 
+  // ============================================
+  // REMOVE ITEM FROM CART
+  // ============================================
   const removeItem = async (cartItemId) => {
     try {
-      const { error } = await supabase
-        .from('cart_items')
-        .delete()
-        .eq('id', cartItemId);
-
-      if (error) throw error;
+      const result = await removeFromCart(cartItemId, currentUser.id);
+      
+      if (!result.success) {
+        throw new Error(result.error);
+      }
 
       setCartItems(prev => prev.filter(item => item.id !== cartItemId));
       
@@ -271,12 +391,47 @@ export default function Cart() {
     };
   };
 
-  const handleCheckout = () => {
-    // For now, navigate to a checkout page (to be implemented)
-    toast({
-      title: "Coming Soon",
-      description: "Cart checkout integration coming soon!"
-    });
+  // ============================================
+  // CHECKOUT WITH VALIDATION
+  // ============================================
+  const handleCheckout = async () => {
+    try {
+      // Step 1: Verify all items are still available
+      for (const cartItem of cartItems) {
+        const { data: available, error } = await supabase
+          .rpc('check_item_availability', {
+            p_item_id: cartItem.item.id,
+            p_buyer_id: currentUser.id
+          });
+
+        if (error) throw error;
+
+        if (!available) {
+          toast({
+            title: "Item Unavailable",
+            description: `${cartItem.item.title} is no longer available`,
+            variant: "destructive"
+          });
+          loadCart(); // Reload to remove unavailable items
+          return;
+        }
+      }
+
+      // Step 2: Proceed to checkout
+      // TODO: Implement actual checkout flow
+      toast({
+        title: "Coming Soon",
+        description: "Secure checkout integration coming soon!"
+      });
+      
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast({
+        title: "Checkout Error",
+        description: "Failed to process checkout",
+        variant: "destructive"
+      });
+    }
   };
 
   const pricing = calculatePricing();
@@ -323,10 +478,21 @@ export default function Cart() {
                 const item = cartItem.item;
                 const primaryImage = item.image_urls?.[0] || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop";
                 const isDiscounted = pricing.discountedItems.has(item.id);
+                const timeRemaining = getTimeRemainingForItem(cartItem.reserved_until);
 
                 return (
                   <Card key={cartItem.id} className="card-gradient card-glow rounded-xl overflow-hidden">
                     <CardContent className="p-4">
+                      {/* Reservation Timer */}
+                      {timeRemaining && !timeRemaining.expired && (
+                        <div className="mb-3 flex items-center gap-2 text-sm">
+                          <Clock className="w-4 h-4 text-amber-400" />
+                          <span className={`font-medium ${timeRemaining.minutes < 2 ? 'text-red-400' : 'text-amber-400'}`}>
+                            Reserved for {timeRemaining.minutes}m {timeRemaining.seconds}s
+                          </span>
+                        </div>
+                      )}
+
                       <div className="flex gap-4">
                         {/* Image */}
                         <img
@@ -475,7 +641,7 @@ export default function Cart() {
                   </Button>
 
                   <p className="text-xs text-gray-400 text-center mt-4">
-                    Shipping calculated at checkout
+                    Items reserved for 10 minutes
                   </p>
                 </CardContent>
               </Card>
