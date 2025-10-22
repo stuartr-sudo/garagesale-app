@@ -42,7 +42,7 @@ export default function AddItem() {
   const { toast } = useToast();
   const [currentUser, setCurrentUser] = useState(null);
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 5;
+  const totalSteps = 6;
   
   const [itemData, setItemData] = useState({
     title: "",
@@ -64,6 +64,7 @@ export default function AddItem() {
   const [voiceTargetField, setVoiceTargetField] = useState('description');
   const [voiceTranscription, setVoiceTranscription] = useState('');
   const [hasVoiceInput, setHasVoiceInput] = useState(false);
+  const [ownershipConfirmed, setOwnershipConfirmed] = useState(false);
 
   useEffect(() => {
     loadUser();
@@ -595,6 +596,7 @@ Return only the description, nothing else.`
       case 3: return itemData.price;
       case 4: return itemData.category && itemData.condition && itemData.postcode;
       case 5: return true;
+      case 6: return ownershipConfirmed;
       default: return false;
     }
   };
@@ -1032,6 +1034,80 @@ Return only the description, nothing else.`
                     </div>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </div>
+        );
+
+      case 6:
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-white mb-2">Ownership Confirmation</h2>
+              <p className="text-gray-400">Please confirm that you are the legal owner of this item</p>
+            </div>
+
+            <Card className="bg-gray-800 border-gray-700">
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                      <span className="text-white text-sm font-bold">1</span>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-1">Legal Ownership</h3>
+                      <p className="text-gray-400 text-sm">You must be the legal owner of this item to list it for sale.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                      <span className="text-white text-sm font-bold">2</span>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-1">Authentic Item</h3>
+                      <p className="text-gray-400 text-sm">The item must be authentic and not counterfeit or stolen.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                      <span className="text-white text-sm font-bold">3</span>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-1">Right to Sell</h3>
+                      <p className="text-gray-400 text-sm">You have the legal right to sell this item and transfer ownership.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 p-4 bg-yellow-900/20 border border-yellow-500/30 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5">⚠️</div>
+                    <div>
+                      <h4 className="text-yellow-200 font-semibold mb-1">Important Notice</h4>
+                      <p className="text-yellow-100 text-sm">
+                        By confirming ownership, you declare that you are the legal owner of this item and have the right to sell it. 
+                        Listing stolen or counterfeit items is prohibited and may result in account suspension.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={ownershipConfirmed}
+                      onChange={(e) => setOwnershipConfirmed(e.target.checked)}
+                      className="w-5 h-5 text-green-500 bg-gray-700 border-gray-600 rounded focus:ring-green-500 focus:ring-2"
+                    />
+                    <span className="text-white font-medium">
+                      I confirm that I am the legal owner of this item and have the right to sell it
+                    </span>
+                  </label>
+                </div>
               </CardContent>
             </Card>
           </div>
