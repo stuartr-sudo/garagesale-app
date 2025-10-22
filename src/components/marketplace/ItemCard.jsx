@@ -116,8 +116,16 @@ export default function ItemCard({ item, seller, isSold = false, currentUser = n
               {item.title}
             </h3>
           </Link>
+          
+          {/* Product Description */}
+          {item.description && (
+            <p className="text-gray-400 text-sm mt-2 line-clamp-2 leading-relaxed">
+              {item.description}
+            </p>
+          )}
+          
           {currentUser && seller && (
-            <div className="flex items-center gap-2 text-sm text-gray-400 mt-1">
+            <div className="flex items-center gap-2 text-sm text-gray-400 mt-2">
               <span>by {seller.full_name}</span>
               {seller.rating_count > 0 && (
                 <div className="flex items-center gap-1">
