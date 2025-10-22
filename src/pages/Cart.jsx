@@ -64,8 +64,7 @@ export default function Cart() {
       const user = await UserEntity.me();
       setCurrentUser(user);
 
-      // First, expire old reservations in database
-      await supabase.rpc('expire_cart_reservations');
+      // Note: Manual expiration is handled by frontend, not database trigger
 
       // Load cart items with item details and check availability
       const { data: items, error } = await supabase
