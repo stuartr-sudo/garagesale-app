@@ -38,10 +38,21 @@ export default function ItemCard({ item, seller, isSold = false, currentUser = n
 
   // Load special offers for this item
   const [specialOffers, setSpecialOffers] = useState([]);
+  const [offersLoading, setOffersLoading] = useState(true);
+  
   useEffect(() => {
     async function loadOffers() {
-      const offers = await getItemSpecialOffers(item.id);
-      setSpecialOffers(offers);
+      try {
+        setOffersLoading(true);
+        const offers = await getItemSpecialOffers(item.id);
+        console.log('📦 ItemCard received offers:', offers);
+        setSpecialOffers(offers || []);
+      } catch (error) {
+        console.error('❌ Error loading offers in ItemCard:', error);
+        setSpecialOffers([]);
+      } finally {
+        setOffersLoading(false);
+      }
     }
     loadOffers();
   }, [item.id]);
