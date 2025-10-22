@@ -2,17 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Check } from "lucide-react";
+import { Plus, Check, Gift } from "lucide-react";
 import { supabase } from '@/lib/supabase';
 import { User as UserEntity } from '@/api/entities';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { getItemSpecialOffers, formatOfferText, getOfferBadgeColor } from '@/api/offers';
 
 export default function MoreFromSeller({ sellerId, currentItemId }) {
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [addedItems, setAddedItems] = useState(new Set());
+  const [itemOffers, setItemOffers] = useState({});
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -32,6 +34,20 @@ export default function MoreFromSeller({ sellerId, currentItemId }) {
 
       if (!error && data) {
         setItems(data);
+        
+        // Load special offers for each item
+        const offersData = {};
+        for (const item of data) {
+          try {
+            const offers = await getItemSpecialOffers(item.id);
+            if (offers && offers.length > 0) {
+              offersData[item.id] = offers;
+            }
+          } catch (error) {
+            console.error(`Error loading offers for item ${item.id}:`, error);
+          }
+        }
+        setItemOffers(offersData);
       }
     } catch (error) {
       console.error('Error loading seller items:', error);
@@ -80,14 +96,6 @@ export default function MoreFromSeller({ sellerId, currentItemId }) {
         title: "Added to Cart!",
         description: `${item.title} has been added to your cart`
       });
-
-      setTimeout(() => {
-        setAddedItems(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(item.id);
-          return newSet;
-        });
-      }, 2000);
     } catch (error) {
       console.error('Error adding to cart:', error);
       toast({
@@ -132,6 +140,7 @@ export default function MoreFromSeller({ sellerId, currentItemId }) {
         {items.map(item => {
           const primaryImage = item.image_urls?.[0] || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop";
           const isAdded = addedItems.has(item.id);
+          const offers = itemOffers[item.id] || [];
 
           return (
             <Card 
@@ -152,6 +161,17 @@ export default function MoreFromSeller({ sellerId, currentItemId }) {
                   <Badge className="absolute top-2 right-2 bg-lime-500 text-black font-bold">
                     Free
                   </Badge>
+                )}
+                {/* Special Offer Badge */}
+                {offers.length > 0 && (
+                  <div className="absolute top-2 left-2 z-10">
+                    <Badge 
+                      className={`${getOfferBadgeColor(offers[0].offer_type)} text-white font-bold shadow-lg animate-pulse flex items-center gap-1`}
+                    >
+                      <Gift className="w-3 h-3" />
+                      {formatOfferText(offers[0])}
+                    </Badge>
+                  </div>
                 )}
               </div>
               <CardContent className="p-3 space-y-2">

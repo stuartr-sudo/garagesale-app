@@ -139,6 +139,12 @@ function _getCurrentPage(url) {
     if (url.endsWith('/')) {
         url = url.slice(0, -1);
     }
+    
+    // Handle ItemDetail pages - they should show cart and navigation
+    if (url.includes('/ItemDetail/')) {
+        return 'ItemDetail';
+    }
+    
     let urlLastPart = url.split('/').pop();
     if (urlLastPart.includes('?')) {
         urlLastPart = urlLastPart.split('?')[0];
