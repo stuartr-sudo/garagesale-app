@@ -41,13 +41,15 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
   }, [itemTitle]);
 
   const sendMessage = async (customMessage = null) => {
-    const messageToSend = customMessage || input.trim();
+    // Handle case where event object is passed instead of string
+    const isCustomMessage = customMessage && typeof customMessage === 'string';
+    const messageToSend = isCustomMessage ? customMessage : input.trim();
     if (!messageToSend || loading) return;
 
     const userMessage = String(messageToSend);
-    if (!customMessage) {
-      setInput('');
-    }
+    
+    // Always clear input after sending
+    setInput('');
     setLoading(true);
 
     // Add user message to UI
@@ -300,7 +302,7 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
                 className="flex-1 bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-purple-500 focus:ring-purple-500"
               />
               <Button
-                onClick={sendMessage}
+                onClick={() => sendMessage()}
                 disabled={loading || !input.trim()}
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6"
               >
