@@ -65,6 +65,7 @@ import SpecialOffers from "./SpecialOffers";
 import ThemeSettings from "./ThemeSettings";
 
 import PaymentConfirmations from "./PaymentConfirmations";
+import EmailTestPage from "./EmailTestPage";
 
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
@@ -242,6 +243,7 @@ function PagesContent() {
                 <Route path="/ThemeSettings" element={<ThemeSettings />} />
                 
                 <Route path="/PaymentConfirmations" element={<PaymentConfirmations />} />
+                <Route path="/EmailTest" element={<EmailTestPage />} />
             </Routes>
         </Layout>
     );
