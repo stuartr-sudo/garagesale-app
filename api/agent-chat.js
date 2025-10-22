@@ -6,9 +6,9 @@
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL?.trim();
-const supabaseServiceKey = process.env.NEW_SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
-const openaiApiKey = process.env.VITE_OPENAI_API_KEY;
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEW_SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_KEY;
+const openaiApiKey = process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY;
 
 // Debug environment variables
 console.log('Environment check:', {
