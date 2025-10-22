@@ -5,18 +5,32 @@ import { supabase } from '@/lib/supabase';
  */
 export async function getItemSpecialOffers(itemId) {
   try {
-    const { data, error } = await supabase
+    console.log('🔍 Fetching offers for item:', itemId);
+    
+    // First, get all active offers
+    const { data: allOffers, error } = await supabase
       .from('special_offers')
       .select('*')
       .eq('is_active', true)
-      .contains('item_ids', [itemId])
       .gte('ends_at', new Date().toISOString())
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return data || [];
+    if (error) {
+      console.error('❌ Error fetching special offers:', error);
+      throw error;
+    }
+    
+    console.log('📦 All active offers:', allOffers?.length || 0);
+    
+    // Filter offers that include this item
+    const itemOffers = (allOffers || []).filter(offer => 
+      offer.item_ids && Array.isArray(offer.item_ids) && offer.item_ids.includes(itemId)
+    );
+    
+    console.log('✅ Found offers for item:', itemOffers.length, itemOffers);
+    return itemOffers;
   } catch (error) {
-    console.error('Error fetching item special offers:', error);
+    console.error('❌ Exception in getItemSpecialOffers:', error);
     return [];
   }
 }
