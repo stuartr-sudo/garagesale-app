@@ -75,7 +75,14 @@ export default function EditItem() {
         .eq('id', id)
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
+      
+      if (!item) {
+        throw new Error("Item not found");
+      }
       
       // Verify ownership - only seller can edit their own items
       if (item.seller_id !== user.id) {
@@ -88,26 +95,44 @@ export default function EditItem() {
         return;
       }
       
-      // Populate form with existing data
-      setItemData({
-        title: item.title || "",
-        description: item.description || "",
-        price: item.price ? item.price.toString() : "",
-        minimum_price: item.minimum_price ? item.minimum_price.toString() : "",
+      // Filter out invalid/blob URLs and ensure we have valid image URLs
+      let validImageUrls = [];
+      if (Array.isArray(item.image_urls)) {
+        validImageUrls = item.image_urls.filter(url => {
+          if (!url || typeof url !== 'string') return false;
+          // Filter out blob URLs and ensure we have proper URLs
+          return url.startsWith('http://') || url.startsWith('https://');
+        });
+      }
+      
+      console.log("Loaded item data:", {
+        title: item.title,
+        imageCount: validImageUrls.length,
+        tags: item.tags
+      });
+      
+      // Populate form with existing data - with extensive validation
+      const newItemData = {
+        title: String(item.title || ""),
+        description: String(item.description || ""),
+        price: item.price ? String(item.price) : "",
+        minimum_price: item.minimum_price ? String(item.minimum_price) : "",
         condition: item.condition || "good",
         category: item.category || "other",
         postcode: item.postcode || user.postcode || "",
         tags: Array.isArray(item.tags) ? item.tags : [],
-        image_urls: Array.isArray(item.image_urls) ? item.image_urls : []
-      });
+        image_urls: validImageUrls
+      };
       
+      console.log("Setting item data:", newItemData);
+      setItemData(newItemData);
       setItemLoaded(true);
       
     } catch (error) {
       console.error("Error loading item:", error);
       toast({
         title: "Error",
-        description: "Failed to load item details",
+        description: error.message || "Failed to load item details",
         variant: "destructive"
       });
       navigate(createPageUrl('MyItems'));
@@ -446,14 +471,20 @@ export default function EditItem() {
                 />
               )}
 
-              {itemData.image_urls && itemData.image_urls.length > 0 && (
+              {itemData.image_urls && Array.isArray(itemData.image_urls) && itemData.image_urls.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-                  {itemData.image_urls.map((url, index) => (
-                    <div key={index} className="relative group">
+                  {itemData.image_urls
+                    .filter(url => url && typeof url === 'string')
+                    .map((url, index) => (
+                    <div key={`${url}-${index}`} className="relative group">
                       <img 
                         src={url} 
                         alt={`Item ${index + 1}`} 
                         className="w-full h-48 object-cover rounded-lg border-2 border-gray-700"
+                        onError={(e) => {
+                          console.error('Image load error:', url);
+                          e.target.src = 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop';
+                        }}
                       />
                       <button
                         onClick={() => removeImage(index)}
