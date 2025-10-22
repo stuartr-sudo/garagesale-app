@@ -772,7 +772,7 @@ Return only the description, nothing else.`
                       }}
                       variant="outline"
                       size="sm"
-                      className="border-purple-500 text-purple-400 hover:bg-purple-500/10"
+                      className="border-purple-500 text-purple-400 hover:bg-purple-500/20 hover:text-purple-300 hover:border-purple-400 hover:shadow-md hover:shadow-purple-500/20 transition-all duration-200"
                     >
                       <Mic className="w-3 h-3 mr-1" />
                       Yes, describe my item
@@ -818,7 +818,7 @@ Return only the description, nothing else.`
                 disabled={isGeneratingContent}
                 variant="outline"
                 size="sm"
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-purple-500"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 hover:shadow-lg hover:shadow-purple-500/25 text-white border-purple-500 hover:border-purple-400 transition-all duration-200"
               >
                 {isGeneratingContent ? (
                   <>
@@ -842,7 +842,7 @@ Return only the description, nothing else.`
                   onClick={() => openVoiceInput('title')}
                   variant="outline"
                   size="sm"
-                  className="border-purple-500 text-purple-400 hover:bg-purple-500/10"
+                  className="border-purple-500 text-purple-400 hover:bg-purple-500/20 hover:text-purple-300 hover:border-purple-400 hover:shadow-md hover:shadow-purple-500/20 transition-all duration-200"
                 >
                   <Mic className="w-4 h-4 mr-1" />
                   Voice
@@ -865,7 +865,7 @@ Return only the description, nothing else.`
                   onClick={() => openVoiceInput('description')}
                   variant="outline"
                   size="sm"
-                  className="border-purple-500 text-purple-400 hover:bg-purple-500/10"
+                  className="border-purple-500 text-purple-400 hover:bg-purple-500/20 hover:text-purple-300 hover:border-purple-400 hover:shadow-md hover:shadow-purple-500/20 transition-all duration-200"
                 >
                   <Mic className="w-4 h-4 mr-1" />
                   Voice
