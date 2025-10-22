@@ -252,7 +252,7 @@ export default function ItemDetail() {
                 <img
                   src={primaryImage}
                   alt={item.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                   onError={(e) => {
                     e.target.src = "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800";
                   }}
@@ -281,7 +281,7 @@ export default function ItemDetail() {
                         <img
                           src={img}
                           alt={`${item.title} ${idx + 1}`}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-contain"
                         />
                       </button>
                     ))}
