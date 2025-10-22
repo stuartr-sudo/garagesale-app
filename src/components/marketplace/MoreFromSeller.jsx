@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { getItemSpecialOffers, formatOfferText, getOfferBadgeColor } from '@/api/offers';
+import { reserveItem } from '@/api/functions';
 
 export default function MoreFromSeller({ sellerId, currentItemId }) {
   const [items, setItems] = useState([]);
@@ -62,6 +63,18 @@ export default function MoreFromSeller({ sellerId, currentItemId }) {
     try {
       const user = await UserEntity.me();
       
+      // Try to reserve the item first
+      const reserved = await reserveItem(item.id, 'cart', 10);
+      
+      if (!reserved) {
+        toast({
+          title: "Item Not Available",
+          description: "This item is currently reserved by another user. Please try again in a few minutes.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       // Check if already in cart
       const { data: existing } = await supabase
         .from('cart_items')
@@ -94,7 +107,7 @@ export default function MoreFromSeller({ sellerId, currentItemId }) {
       setAddedItems(prev => new Set([...prev, item.id]));
       toast({
         title: "Added to Cart!",
-        description: `${item.title} has been added to your cart`
+        description: `${item.title} has been reserved for 10 minutes`
       });
     } catch (error) {
       console.error('Error adding to cart:', error);

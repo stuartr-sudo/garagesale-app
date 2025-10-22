@@ -169,6 +169,19 @@ export default function ItemDetail() {
     try {
       const user = await UserEntity.me();
       
+      // Try to reserve the item first
+      const { reserveItem } = await import('@/api/functions');
+      const reserved = await reserveItem(item.id, 'cart', 10);
+      
+      if (!reserved) {
+        toast({
+          title: "Item Not Available",
+          description: "This item is currently reserved by another user. Please try again in a few minutes.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       // Check if already in cart
       const { data: existing } = await supabase
         .from('cart_items')
@@ -201,7 +214,7 @@ export default function ItemDetail() {
       setIsInCart(true);
       toast({
         title: "Added to Cart!",
-        description: `${item.title} has been added to your cart`
+        description: `${item.title} has been reserved for 10 minutes`
       });
 
       setTimeout(() => setIsInCart(false), 2000);

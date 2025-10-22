@@ -249,7 +249,7 @@ export const ingestListing = async ({ imageUrls, initialData = {} }) => {
 };
 
 // Item Reservation Functions
-export const reserveItem = async (itemId, reservationType = 'cart', durationMinutes = 5) => {
+export const reserveItem = async (itemId, reservationType = 'cart', durationMinutes = 10) => {
   try {
     const { data, error } = await supabase.rpc('reserve_item', {
       p_item_id: itemId,

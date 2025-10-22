@@ -4,9 +4,10 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tag, Star, Eye, Gift, TrendingDown } from "lucide-react";
+import { Tag, Star, Eye, Gift, TrendingDown, Clock, ShoppingCart } from "lucide-react";
 import { formatDistanceToNow } from 'date-fns';
 import { getItemSpecialOffers, formatOfferText, getOfferBadgeColor } from '@/api/offers';
+import { getItemReservation } from '@/api/functions';
 
 export default function ItemCard({ item, seller, isSold = false, currentUser = null }) {
   const primaryImage = item.image_urls?.[0] || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop";
@@ -40,6 +41,10 @@ export default function ItemCard({ item, seller, isSold = false, currentUser = n
   const [specialOffers, setSpecialOffers] = useState([]);
   const [offersLoading, setOffersLoading] = useState(true);
   
+  // Load reservation status
+  const [reservationInfo, setReservationInfo] = useState(null);
+  const [timeRemaining, setTimeRemaining] = useState(null);
+  
   useEffect(() => {
     async function loadOffers() {
       try {
@@ -56,6 +61,60 @@ export default function ItemCard({ item, seller, isSold = false, currentUser = n
     }
     loadOffers();
   }, [item.id]);
+
+  // Load and monitor reservation status
+  useEffect(() => {
+    let interval;
+    
+    async function checkReservation() {
+      try {
+        const reservation = await getItemReservation(item.id);
+        if (reservation && reservation.is_reserved && !reservation.reserved_by_current_user) {
+          setReservationInfo(reservation);
+          
+          // Calculate time remaining
+          const expiresAt = new Date(reservation.reserved_until);
+          const now = new Date();
+          const remaining = Math.max(0, Math.floor((expiresAt - now) / 1000));
+          setTimeRemaining(remaining);
+        } else {
+          setReservationInfo(null);
+          setTimeRemaining(null);
+        }
+      } catch (error) {
+        console.error('Error checking reservation:', error);
+      }
+    }
+    
+    checkReservation();
+    interval = setInterval(checkReservation, 5000); // Check every 5 seconds
+    
+    return () => clearInterval(interval);
+  }, [item.id]);
+
+  // Countdown timer
+  useEffect(() => {
+    if (timeRemaining === null || timeRemaining === 0) return;
+    
+    const timer = setInterval(() => {
+      setTimeRemaining(prev => {
+        if (prev <= 1) {
+          setReservationInfo(null);
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, [timeRemaining]);
+
+  const formatTimeRemaining = (seconds) => {
+    if (!seconds) return '';
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
     <Card 
@@ -151,7 +210,21 @@ export default function ItemCard({ item, seller, isSold = false, currentUser = n
         </div>
 
         {!isSold ? (
-          <div className="mt-4">
+          <div className="mt-4 space-y-2">
+            {/* Reservation Indicator */}
+            {reservationInfo && timeRemaining > 0 && (
+              <div className="w-full p-3 bg-orange-900/30 border border-orange-500/50 rounded-lg">
+                <div className="flex items-center gap-2 text-orange-300 text-sm font-semibold mb-1">
+                  <ShoppingCart className="w-4 h-4" />
+                  <span>In Someone's Cart</span>
+                </div>
+                <div className="flex items-center gap-2 text-orange-400 text-xs">
+                  <Clock className="w-3 h-3" />
+                  <span>Available in {formatTimeRemaining(timeRemaining)}</span>
+                </div>
+              </div>
+            )}
+            
             <Link to={`/ItemDetail/${item.id}`}>
               <Button
                 className="w-full h-10 hover:opacity-90"
