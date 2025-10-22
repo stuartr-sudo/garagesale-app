@@ -37,13 +37,15 @@ export default function Cart() {
       const user = await UserEntity.me();
       setCurrentUser(user);
 
-      // Load cart items with item details
+      // Load cart items with item details, including negotiated prices
       const { data: items, error } = await supabase
         .from('cart_items')
         .select(`
           id,
           quantity,
           added_at,
+          negotiated_price,
+          price_source,
           item:items(
             id,
             title,
@@ -174,29 +176,33 @@ export default function Cart() {
     const discountedItems = new Set();
     const appliedOffersList = [];
 
-    // Calculate subtotal - ONLY use item.price (not negotiated prices)
+    // Calculate subtotal using effective price (negotiated if available, otherwise original)
     cartItems.forEach(ci => {
-      const itemPrice = parseFloat(ci.item.price);
-      subtotal += itemPrice * ci.quantity;
+      // Use negotiated_price if set, otherwise use item.price
+      const effectivePrice = ci.negotiated_price ? parseFloat(ci.negotiated_price) : parseFloat(ci.item.price);
+      subtotal += effectivePrice * ci.quantity;
     });
 
     console.log('💰 Cart subtotal:', subtotal);
     console.log('🎁 Applying', appliedOffers.length, 'offers');
 
-    // Apply special offers (discounts DO NOT apply to negotiated rates)
+    // Apply special offers (discounts ONLY apply to 'original' price_source)
     appliedOffers.forEach(offer => {
       const config = offer.config || {};
       
       // Get percentage from config (support both field names)
       const percentage = config.percentage || config.discount_percentage || 0;
       
+      // Only apply to items with 'original' price source (not negotiated or agent rates)
       const applicableItems = cartItems.filter(ci => 
-        offer.item_ids && offer.item_ids.includes(ci.item.id)
+        offer.item_ids && 
+        offer.item_ids.includes(ci.item.id) &&
+        (!ci.price_source || ci.price_source === 'original') // Skip negotiated/agent prices
       );
 
       if (!applicableItems.length) return;
 
-      console.log(`📊 Processing ${offer.offer_type} offer for ${applicableItems.length} items`);
+      console.log(`📊 Processing ${offer.offer_type} offer for ${applicableItems.length} items (${cartItems.length - applicableItems.length} items excluded due to negotiated pricing)`);
 
       if (offer.offer_type === 'bogo') {
         // Buy One Get One Free
@@ -402,13 +408,38 @@ export default function Cart() {
 
                             {/* Price */}
                             <div className="text-right">
+                              {/* Show negotiated price badge if applicable */}
+                              {cartItem.negotiated_price && cartItem.price_source !== 'original' && (
+                                <div className="mb-1">
+                                  <Badge className="bg-amber-900/50 text-amber-300 border-amber-700 text-xs">
+                                    {cartItem.price_source === 'negotiated' ? '🤝 Negotiated Price' : '👤 Agent Rate'}
+                                  </Badge>
+                                </div>
+                              )}
+                              
                               <div className="text-2xl font-bold text-cyan-400">
-                                ${(parseFloat(item.price) * cartItem.quantity).toFixed(2)}
+                                ${((cartItem.negotiated_price ? parseFloat(cartItem.negotiated_price) : parseFloat(item.price)) * cartItem.quantity).toFixed(2)}
                               </div>
-                              {isDiscounted && (
+                              
+                              {/* Show original price if negotiated */}
+                              {cartItem.negotiated_price && cartItem.price_source !== 'original' && (
+                                <div className="text-sm text-gray-500 line-through">
+                                  Was: ${(parseFloat(item.price) * cartItem.quantity).toFixed(2)}
+                                </div>
+                              )}
+                              
+                              {/* Show discount badge only for original prices */}
+                              {isDiscounted && (!cartItem.price_source || cartItem.price_source === 'original') && (
                                 <div className="flex items-center gap-1 text-green-400 text-sm">
                                   <Tag className="w-3 h-3" />
                                   <span>Offer applied</span>
+                                </div>
+                              )}
+                              
+                              {/* Show note if discount not applicable */}
+                              {cartItem.price_source && cartItem.price_source !== 'original' && (
+                                <div className="text-xs text-gray-500 mt-1">
+                                  Special offers not applicable
                                 </div>
                               )}
                             </div>
