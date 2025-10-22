@@ -207,7 +207,10 @@ export default function VoiceInputField({
           </div>
           <h3 className="text-white font-semibold text-lg mb-2">Voice Input</h3>
           <p className="text-gray-400 text-sm">
-            Describe your item details. The text will be added to your {targetField}.
+            {targetField === 'intelligent' 
+              ? "Describe your item - AI will intelligently extract title and description"
+              : `Describe your item details. The text will be added to your ${targetField}.`
+            }
           </p>
         </div>
 
@@ -254,6 +257,9 @@ export default function VoiceInputField({
               ? (isMobile ? "Recording... speak clearly into your device" : "Recording... speak clearly and describe your item")
               : (isMobile ? "Tap the button to start recording" : "Tap 'Start Recording' to begin speaking")
             }
+            {targetField === 'intelligent' && !isRecording && (
+              <><br />You can mention the item name, features, condition, or any details you want to highlight.</>
+            )}
           </p>
         </div>
       </div>

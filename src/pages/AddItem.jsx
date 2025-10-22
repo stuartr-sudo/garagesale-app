@@ -81,19 +81,46 @@ export default function AddItem() {
     }
   };
 
-  const handleVoiceTranscript = (transcript) => {
+  const handleVoiceTranscript = async (transcript) => {
     // Store the voice transcription for AI optimization
     setVoiceTranscription(transcript);
     setHasVoiceInput(true);
     
+    // If user specifically chose a field, use that
     if (voiceTargetField === 'title') {
-      setItemData(prev => ({ ...prev, title: transcript }));
+      setItemData(prev => ({ 
+        ...prev, 
+        title: prev.title ? `${prev.title} - ${transcript}` : transcript 
+      }));
     } else if (voiceTargetField === 'description') {
       // For description, append to existing content or replace if empty
       setItemData(prev => ({ 
         ...prev, 
         description: prev.description ? `${prev.description}\n\n${transcript}` : transcript 
       }));
+    } else {
+      // If no specific field chosen, intelligently parse the voice input
+      try {
+        const parsed = await parseVoiceInputIntelligently(transcript);
+        
+        setItemData(prev => ({
+          ...prev,
+          title: parsed.title ? (prev.title ? `${prev.title} - ${parsed.title}` : parsed.title) : prev.title,
+          description: parsed.description ? (prev.description ? `${prev.description}\n\n${parsed.description}` : parsed.description) : prev.description
+        }));
+        
+        toast({
+          title: "Voice Input Processed!",
+          description: `Intelligently extracted ${parsed.title ? 'title and ' : ''}description from your voice input.`,
+        });
+      } catch (error) {
+        console.error('Error parsing voice input:', error);
+        // Fallback to description field
+        setItemData(prev => ({ 
+          ...prev, 
+          description: prev.description ? `${prev.description}\n\n${transcript}` : transcript 
+        }));
+      }
     }
     setShowVoiceInput(false);
   };
@@ -101,6 +128,66 @@ export default function AddItem() {
   const openVoiceInput = (field) => {
     setVoiceTargetField(field);
     setShowVoiceInput(true);
+  };
+
+  const parseVoiceInputIntelligently = async (voiceText) => {
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'user',
+              content: `Analyze this voice input from a seller describing their item: "${voiceText}"
+
+Intelligently extract and structure the information:
+
+1. TITLE: If the seller mentions a specific name, title, or product name, extract it. If not, create a concise title based on what they're describing.
+
+2. DESCRIPTION: Extract all the descriptive details, features, condition, benefits, and selling points mentioned.
+
+Rules:
+- If the voice input is primarily about naming the item, focus on extracting/creating a good title
+- If the voice input is primarily descriptive, focus on extracting details for description
+- If the voice input contains both, extract both appropriately
+- Keep titles under 60 characters
+- Keep descriptions under 200 words
+- Be natural and conversational in the description
+
+Return in JSON format: {"title": "...", "description": "...", "confidence": "high/medium/low"}`
+            }
+          ],
+          max_tokens: 300,
+          response_format: { type: "json_object" }
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error.message || 'Failed to parse voice input');
+      }
+      
+      const result = JSON.parse(data.choices[0].message.content);
+      return {
+        title: result.title?.trim() || '',
+        description: result.description?.trim() || '',
+        confidence: result.confidence || 'medium'
+      };
+    } catch (error) {
+      console.error('Error parsing voice input:', error);
+      // Fallback: just use the voice text as description
+      return {
+        title: '',
+        description: voiceText,
+        confidence: 'low'
+      };
+    }
   };
 
   const handleImageUpload = async (files) => {
@@ -203,7 +290,7 @@ export default function AddItem() {
         let promptText = 'Analyze this image and generate:\n1. A short, catchy marketplace listing title (max 60 characters)\n2. A detailed, compelling product description (max 200 words) that includes key features, condition, and benefits.';
         
         if (hasVoiceInput && voiceTranscription) {
-          promptText += `\n\nIMPORTANT: The seller has provided additional context via voice input: "${voiceTranscription}"\n\nUse this voice context to enhance and personalize the title and description. The voice input contains the seller's own description of the item, so incorporate this information to make the listing more accurate and compelling.`;
+          promptText += `\n\nIMPORTANT: The seller has provided additional context via voice input: "${voiceTranscription}"\n\nAnalyze the voice input to intelligently extract:\n- If the seller mentions a title or name for the item, use that as the basis for the title\n- Extract key details, features, condition, and selling points for the description\n- The voice input contains the seller's own description of the item, so incorporate this information to make the listing more accurate and compelling\n- If the voice input is primarily about the title, focus the title on that and use image analysis for description\n- If the voice input is primarily descriptive, use it to enhance the description and let image analysis guide the title`;
         }
         
         promptText += '\n\nReturn in JSON format: {"title": "...", "description": "..."}';
@@ -252,8 +339,10 @@ export default function AddItem() {
         
         setItemData(prev => ({ 
           ...prev, 
-          title: generatedTitle,
-          description: generatedDescription 
+          // Append to existing title if it exists, otherwise use generated title
+          title: prev.title ? `${prev.title} - ${generatedTitle}` : generatedTitle,
+          // Append to existing description if it exists, otherwise use generated description
+          description: prev.description ? `${prev.description}\n\n${generatedDescription}` : generatedDescription
         }));
         toast({ 
           title: "Success!", 
@@ -310,7 +399,10 @@ export default function AddItem() {
         
         const generatedTitle = data.choices[0].message.content.trim().replace(/^["']|["']$/g, '');
         
-        setItemData(prev => ({ ...prev, title: generatedTitle }));
+        setItemData(prev => ({ 
+          ...prev, 
+          title: prev.title ? `${prev.title} - ${generatedTitle}` : generatedTitle 
+        }));
         toast({ title: "Success!", description: "Title generated from image with AI." });
       } catch (error) {
         console.error("Error generating title:", error);
@@ -363,7 +455,10 @@ export default function AddItem() {
         
         const generatedDescription = data.choices[0].message.content.trim();
         
-        setItemData(prev => ({ ...prev, description: generatedDescription }));
+        setItemData(prev => ({ 
+          ...prev, 
+          description: prev.description ? `${prev.description}\n\n${generatedDescription}` : generatedDescription 
+        }));
         toast({ title: "Success!", description: "Description generated from image with AI." });
       } catch (error) {
         console.error("Error generating description:", error);
@@ -583,27 +678,32 @@ export default function AddItem() {
                   <p className="text-gray-300 mb-4">
                     Can you speak to describe your item? This will help AI generate better, more personalized content.
                   </p>
-                  <div className="flex gap-3 justify-center">
-                    <Button
-                      type="button"
-                      onClick={() => {
-                        setVoiceTargetField('description');
-                        openVoiceInput('description');
-                      }}
-                      variant="outline"
-                      className="border-purple-500 text-purple-400 hover:bg-purple-500/10"
-                    >
-                      <Mic className="w-4 h-4 mr-2" />
-                      Yes, I can speak
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => setHasVoiceInput(false)}
-                      variant="ghost"
-                      className="text-gray-400 hover:text-white"
-                    >
-                      Skip voice input
-                    </Button>
+                  <div className="flex flex-col gap-3 justify-center">
+                    <div className="flex gap-3 justify-center">
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          setVoiceTargetField('intelligent');
+                          openVoiceInput('intelligent');
+                        }}
+                        variant="outline"
+                        className="border-purple-500 text-purple-400 hover:bg-purple-500/10"
+                      >
+                        <Mic className="w-4 h-4 mr-2" />
+                        Yes, describe my item
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={() => setHasVoiceInput(false)}
+                        variant="ghost"
+                        className="text-gray-400 hover:text-white"
+                      >
+                        Skip voice input
+                      </Button>
+                    </div>
+                    <p className="text-gray-400 text-xs text-center">
+                      AI will intelligently extract title and description from your voice
+                    </p>
                   </div>
                 </div>
               </div>
