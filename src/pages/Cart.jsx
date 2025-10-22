@@ -79,19 +79,43 @@ export default function Cart() {
   const checkApplicableOffers = async (items, userId) => {
     if (!items.length) return;
 
-    // Get all item IDs
-    const itemIds = items.map(ci => ci.item.id);
+    try {
+      // Get all item IDs from cart
+      const itemIds = items.map(ci => ci.item.id);
+      console.log('🛒 Checking offers for cart items:', itemIds);
 
-    // Find applicable special offers
-    const { data: offers, error } = await supabase
-      .from('special_offers')
-      .select('*')
-      .is_active(true)
-      .or(`ends_at.is.null,ends_at.gte.${new Date().toISOString()}`)
-      .overlaps('item_ids', itemIds);
+      // Get all active special offers
+      const { data: allOffers, error } = await supabase
+        .from('special_offers')
+        .select('*')
+        .eq('is_active', true);
 
-    if (!error && offers) {
-      setAppliedOffers(offers);
+      if (error) {
+        console.error('❌ Error fetching offers:', error);
+        return;
+      }
+
+      console.log('📦 All active offers:', allOffers?.length || 0);
+
+      // Filter offers that apply to items in cart
+      // AND check expiration
+      const now = new Date();
+      const applicableOffers = (allOffers || []).filter(offer => {
+        // Check if offer hasn't expired
+        const notExpired = !offer.ends_at || new Date(offer.ends_at) > now;
+        
+        // Check if any cart item is in this offer
+        const hasMatchingItems = offer.item_ids && itemIds.some(itemId => 
+          offer.item_ids.includes(itemId)
+        );
+        
+        return notExpired && hasMatchingItems;
+      });
+
+      console.log('✅ Applicable offers:', applicableOffers.length, applicableOffers);
+      setAppliedOffers(applicableOffers);
+    } catch (error) {
+      console.error('❌ Error checking offers:', error);
     }
   };
 
@@ -148,51 +172,122 @@ export default function Cart() {
     let subtotal = 0;
     let discountAmount = 0;
     const discountedItems = new Set();
+    const appliedOffersList = [];
 
-    // Calculate subtotal
+    // Calculate subtotal - ONLY use item.price (not negotiated prices)
     cartItems.forEach(ci => {
-      subtotal += parseFloat(ci.item.price) * ci.quantity;
+      const itemPrice = parseFloat(ci.item.price);
+      subtotal += itemPrice * ci.quantity;
     });
 
-    // Apply special offers
+    console.log('💰 Cart subtotal:', subtotal);
+    console.log('🎁 Applying', appliedOffers.length, 'offers');
+
+    // Apply special offers (discounts DO NOT apply to negotiated rates)
     appliedOffers.forEach(offer => {
+      const config = offer.config || {};
+      
+      // Get percentage from config (support both field names)
+      const percentage = config.percentage || config.discount_percentage || 0;
+      
       const applicableItems = cartItems.filter(ci => 
-        offer.item_ids.includes(ci.item.id)
+        offer.item_ids && offer.item_ids.includes(ci.item.id)
       );
 
+      if (!applicableItems.length) return;
+
+      console.log(`📊 Processing ${offer.offer_type} offer for ${applicableItems.length} items`);
+
       if (offer.offer_type === 'bogo') {
-        // Buy One Get One Free - lowest priced item free for each pair
+        // Buy One Get One Free
+        const buyQty = config.buy_quantity || 1;
+        const getQty = config.get_quantity || 1;
+        
         applicableItems.forEach(ci => {
-          const pairs = Math.floor(ci.quantity / 2);
-          discountAmount += parseFloat(ci.item.price) * pairs;
+          const sets = Math.floor(ci.quantity / (buyQty + getQty));
+          const freeItems = sets * getQty;
+          const itemDiscount = parseFloat(ci.item.price) * freeItems;
+          discountAmount += itemDiscount;
           discountedItems.add(ci.item.id);
+          
+          if (itemDiscount > 0) {
+            appliedOffersList.push({
+              title: offer.title,
+              description: `Buy ${buyQty}, Get ${getQty} Free on ${ci.item.title}`,
+              discount: itemDiscount
+            });
+          }
         });
       } else if (offer.offer_type === 'percentage_off') {
         // Percentage discount
-        const percentage = offer.config?.percentage || 0;
         applicableItems.forEach(ci => {
           const itemTotal = parseFloat(ci.item.price) * ci.quantity;
-          discountAmount += itemTotal * (percentage / 100);
+          const itemDiscount = itemTotal * (percentage / 100);
+          discountAmount += itemDiscount;
           discountedItems.add(ci.item.id);
-        });
-      } else if (offer.offer_type === 'bulk_discount') {
-        // Bulk discount - requires minimum quantity
-        const minQty = offer.config?.min_quantity || 1;
-        const discount = offer.config?.discount_amount || 0;
-        applicableItems.forEach(ci => {
-          if (ci.quantity >= minQty) {
-            discountAmount += discount;
-            discountedItems.add(ci.item.id);
+          
+          if (itemDiscount > 0) {
+            appliedOffersList.push({
+              title: offer.title,
+              description: `${percentage}% off ${ci.item.title}`,
+              discount: itemDiscount
+            });
           }
         });
+      } else if (offer.offer_type === 'bulk_discount') {
+        // Bulk discount - percentage off when minimum quantity met
+        const minQty = config.min_quantity || 2;
+        
+        applicableItems.forEach(ci => {
+          if (ci.quantity >= minQty) {
+            const itemTotal = parseFloat(ci.item.price) * ci.quantity;
+            const itemDiscount = itemTotal * (percentage / 100);
+            discountAmount += itemDiscount;
+            discountedItems.add(ci.item.id);
+            
+            if (itemDiscount > 0) {
+              appliedOffersList.push({
+                title: offer.title,
+                description: `${percentage}% off ${ci.item.title} (${ci.quantity} items)`,
+                discount: itemDiscount
+              });
+            }
+          }
+        });
+      } else if (offer.offer_type === 'bundle') {
+        // Bundle discount - all items in bundle must be in cart
+        const allItemsInCart = offer.item_ids.every(itemId =>
+          cartItems.some(ci => ci.item.id === itemId)
+        );
+        
+        if (allItemsInCart) {
+          applicableItems.forEach(ci => {
+            const itemTotal = parseFloat(ci.item.price) * ci.quantity;
+            const itemDiscount = itemTotal * (percentage / 100);
+            discountAmount += itemDiscount;
+            discountedItems.add(ci.item.id);
+            
+            if (itemDiscount > 0) {
+              appliedOffersList.push({
+                title: offer.title,
+                description: `Bundle: ${percentage}% off ${ci.item.title}`,
+                discount: itemDiscount
+              });
+            }
+          });
+        }
       }
     });
+
+    console.log('💸 Total discount:', discountAmount);
+    console.log('✅ Discounted items:', Array.from(discountedItems));
 
     return {
       subtotal: subtotal.toFixed(2),
       discount: discountAmount.toFixed(2),
       total: (subtotal - discountAmount).toFixed(2),
-      discountedItems
+      discountedItems,
+      appliedOffersList
     };
   };
 
@@ -356,11 +451,27 @@ export default function Cart() {
                       <span>${pricing.subtotal}</span>
                     </div>
 
+                    {/* Applied Offers - Show detailed breakdown */}
+                    {pricing.appliedOffersList && pricing.appliedOffersList.length > 0 && (
+                      <div className="space-y-2 bg-green-900/20 border border-green-500/30 rounded-lg p-3">
+                        <div className="flex items-center gap-2 text-green-400 font-semibold">
+                          <Sparkles className="w-4 h-4" />
+                          <span>Special Offers Applied:</span>
+                        </div>
+                        {pricing.appliedOffersList.map((offer, index) => (
+                          <div key={index} className="flex justify-between text-sm text-gray-300 pl-6">
+                            <span className="flex-1">{offer.description}</span>
+                            <span className="text-green-400 font-medium">-${offer.discount.toFixed(2)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
                     {parseFloat(pricing.discount) > 0 && (
-                      <div className="flex justify-between text-green-400">
+                      <div className="flex justify-between text-green-400 font-semibold">
                         <span className="flex items-center gap-1">
                           <Tag className="w-4 h-4" />
-                          Discounts:
+                          Total Savings:
                         </span>
                         <span>-${pricing.discount}</span>
                       </div>
