@@ -37,6 +37,7 @@ export default function ItemDetail() {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [isImageFullscreen, setIsImageFullscreen] = useState(false);
   const [negotiatedPrice, setNegotiatedPrice] = useState(null);
+  const [offerAccepted, setOfferAccepted] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -162,6 +163,7 @@ export default function ItemDetail() {
   const handleAcceptOffer = (acceptedAmount) => {
     // Set the negotiated price and open the purchase modal
     setNegotiatedPrice(acceptedAmount);
+    setOfferAccepted(true);
     setShowPurchaseModal(true);
   };
 
@@ -257,6 +259,43 @@ export default function ItemDetail() {
                     e.target.src = "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800";
                   }}
                 />
+                
+                {/* Navigation Controls - Only show if multiple images */}
+                {validImages.length > 1 && (
+                  <>
+                    {/* Previous Image Button */}
+                    {selectedImage > 0 && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedImage(selectedImage - 1);
+                        }}
+                        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-gray-800/80 hover:bg-gray-800 text-white rounded-full p-2 transition-all"
+                      >
+                        <ChevronLeft className="w-5 h-5" />
+                      </button>
+                    )}
+
+                    {/* Next Image Button */}
+                    {selectedImage < validImages.length - 1 && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedImage(selectedImage + 1);
+                        }}
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-gray-800/80 hover:bg-gray-800 text-white rounded-full p-2 transition-all"
+                      >
+                        <ChevronRight className="w-5 h-5" />
+                      </button>
+                    )}
+
+                    {/* Image Counter */}
+                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800/80 text-white px-3 py-1 rounded-full text-sm">
+                      {selectedImage + 1} / {validImages.length}
+                    </div>
+                  </>
+                )}
+
                 {item.price === 0 && (
                   <Badge className="absolute top-4 right-4 bg-lime-500 text-black font-bold text-lg px-4 py-2">
                     Free
@@ -465,41 +504,58 @@ export default function ItemDetail() {
             </Card>
           )}
 
-          {/* Action Buttons - Below AI Agent */}
-          <div className="space-y-2">
-            <Button
-              onClick={handleAddToCart}
-              disabled={isAddingToCart || isInCart}
-              className={`w-full h-10 md:h-12 text-white font-semibold text-sm md:text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] ${
-                isInCart
-                  ? 'bg-green-600 hover:bg-green-600'
-                  : 'bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700'
-              }`}
-            >
-              {isInCart ? (
-                <>
-                  <Check className="w-4 h-4 mr-1" />
-                  Added
-                </>
-              ) : (
-                <>
-                  <Plus className="w-4 h-4 mr-1" />
-                  Add to Cart
-                </>
-              )}
-            </Button>
+          {/* Action Buttons - Below AI Agent - Hide when offer is accepted */}
+          {!offerAccepted && (
+            <div className="space-y-2">
+              <Button
+                onClick={handleAddToCart}
+                disabled={isAddingToCart || isInCart}
+                className={`w-full h-10 md:h-12 text-white font-semibold text-sm md:text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] ${
+                  isInCart
+                    ? 'bg-green-600 hover:bg-green-600'
+                    : 'bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700'
+                }`}
+              >
+                {isInCart ? (
+                  <>
+                    <Check className="w-4 h-4 mr-1" />
+                    Added
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add to Cart
+                  </>
+                )}
+              </Button>
 
-            <Button
-              onClick={() => setShowPurchaseModal(true)}
-              className="w-full h-10 md:h-12 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold text-sm md:text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
-              style={{
-                animation: 'subtle-pulse 3s ease-in-out infinite'
-              }}
-            >
-              <ShoppingCart className="w-4 h-4 mr-1" />
-              {item.price === 0 ? 'Claim' : 'Buy Now'}
-            </Button>
-          </div>
+              <Button
+                onClick={() => setShowPurchaseModal(true)}
+                className="w-full h-10 md:h-12 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold text-sm md:text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+                style={{
+                  animation: 'subtle-pulse 3s ease-in-out infinite'
+                }}
+              >
+                <ShoppingCart className="w-4 h-4 mr-1" />
+                {item.price === 0 ? 'Claim' : 'Buy Now'}
+              </Button>
+            </div>
+          )}
+
+          {/* Offer Accepted Message */}
+          {offerAccepted && (
+            <Card className="bg-green-900/20 border-2 border-green-500/30 shadow-lg">
+              <CardContent className="p-4 text-center">
+                <div className="flex items-center justify-center gap-2 text-green-400 mb-2">
+                  <Check className="w-5 h-5" />
+                  <span className="font-semibold">Offer Accepted!</span>
+                </div>
+                <p className="text-green-300 text-sm">
+                  Your offer of ${negotiatedPrice} has been accepted. Please proceed with the purchase.
+                </p>
+              </CardContent>
+            </Card>
+          )}
           <style jsx>{`
             @keyframes subtle-pulse {
               0%, 100% {
