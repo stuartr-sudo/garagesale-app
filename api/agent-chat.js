@@ -24,23 +24,34 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 const openai = new OpenAI({ apiKey: openaiApiKey });
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  // Check environment variables
-  if (!supabaseUrl || !supabaseServiceKey || !openaiApiKey) {
-    console.error('Missing environment variables:', {
-      supabaseUrl: !!supabaseUrl,
-      supabaseServiceKey: !!supabaseServiceKey,
-      openaiApiKey: !!openaiApiKey
-    });
-    return res.status(500).json({ 
-      error: 'Server configuration error - missing environment variables' 
-    });
-  }
-
+  console.log('=== AGENT CHAT REQUEST START ===');
+  console.log('Method:', req.method);
+  console.log('URL:', req.url);
+  
   try {
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method not allowed' });
+    }
+
+    // Check environment variables
+    console.log('Checking environment variables...');
+    console.log('supabaseUrl exists:', !!supabaseUrl);
+    console.log('supabaseServiceKey exists:', !!supabaseServiceKey);
+    console.log('openaiApiKey exists:', !!openaiApiKey);
+    
+    if (!supabaseUrl || !supabaseServiceKey || !openaiApiKey) {
+      console.error('MISSING ENVIRONMENT VARIABLES!');
+      return res.status(500).json({ 
+        error: 'Server configuration error - missing environment variables',
+        debug: {
+          supabaseUrl: !!supabaseUrl,
+          supabaseServiceKey: !!supabaseServiceKey,
+          openaiApiKey: !!openaiApiKey
+        }
+      });
+    }
+
+    console.log('Environment variables OK, processing request...');
     const { item_id, message, conversation_id, buyer_email } = req.body;
 
     if (!item_id || !message) {
@@ -287,8 +298,11 @@ Respond naturally as a sales assistant would.`;
     });
 
   } catch (error) {
-    console.error('Agent chat error:', error);
+    console.error('=== AGENT CHAT ERROR ===');
+    console.error('Error:', error);
+    console.error('Error message:', error.message);
     console.error('Error stack:', error.stack);
+    console.error('Error name:', error.name);
     console.error('Environment check:', {
       supabaseUrl: !!supabaseUrl,
       supabaseServiceKey: !!supabaseServiceKey,
@@ -296,9 +310,14 @@ Respond naturally as a sales assistant would.`;
     });
     return res.status(500).json({ 
       error: 'Internal server error',
-      details: error.message,
+      message: error.message,
       type: error.name,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      stack: error.stack,
+      env: {
+        supabaseUrl: !!supabaseUrl,
+        supabaseServiceKey: !!supabaseServiceKey,
+        openaiApiKey: !!openaiApiKey
+      }
     });
   }
 }
