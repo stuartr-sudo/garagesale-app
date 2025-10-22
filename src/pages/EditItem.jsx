@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Item } from "@/api/entities";
 import { User } from "@/api/entities";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
@@ -271,7 +270,7 @@ export default function EditItem() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || !itemData.title) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="text-center">
@@ -418,15 +417,15 @@ export default function EditItem() {
               <Label className="text-white text-lg">Photos *</Label>
               <p className="text-sm text-gray-400 mb-3">Upload images of your item (max 5)</p>
               
-              {itemData.image_urls.length < 5 && (
+              {(!itemData.image_urls || itemData.image_urls.length < 5) && (
                 <ImageUpload 
                   onUpload={handleImageUpload}
-                  maxImages={5 - itemData.image_urls.length}
+                  maxImages={5 - (itemData.image_urls?.length || 0)}
                   isUploading={isUploading}
                 />
               )}
 
-              {itemData.image_urls.length > 0 && (
+              {itemData.image_urls && itemData.image_urls.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
                   {itemData.image_urls.map((url, index) => (
                     <div key={index} className="relative group">
