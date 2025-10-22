@@ -237,15 +237,15 @@ export default function SmartRecommendations({
     return (
       <div className="my-8">
         <div className="flex items-center gap-2 mb-4">
-          <div className="h-6 w-48 bg-slate-600 rounded animate-pulse"></div>
+          <div className="h-6 w-48 bg-gray-800 rounded animate-pulse"></div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {Array(4).fill(0).map((_, i) => (
-            <div key={i} className="bg-slate-700 rounded-xl overflow-hidden animate-pulse">
-              <div className="aspect-square bg-slate-600"></div>
+            <div key={i} className="bg-gray-900 rounded-xl overflow-hidden animate-pulse">
+              <div className="aspect-square bg-gray-800"></div>
               <div className="p-3 space-y-2">
-                <div className="h-3 bg-slate-600 rounded"></div>
-                <div className="h-2 bg-slate-600 rounded w-2/3"></div>
+                <div className="h-3 bg-gray-800 rounded"></div>
+                <div className="h-2 bg-gray-800 rounded w-2/3"></div>
               </div>
             </div>
           ))}

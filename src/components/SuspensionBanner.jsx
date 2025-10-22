@@ -26,7 +26,7 @@ export default function SuspensionBanner({ userStatus, onLogout }) {
 
   if (isBanned) {
     return (
-      <div className="min-h-screen bg-slate-800 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
         <Card className="max-w-2xl w-full bg-red-950/30 border-red-800">
           <div className="p-8">
             <div className="flex items-center gap-4 mb-6">
@@ -49,7 +49,7 @@ export default function SuspensionBanner({ userStatus, onLogout }) {
               </p>
             </div>
 
-            <div className="bg-slate-600/50 border border-slate-500 rounded-xl p-6 mb-6">
+            <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 mb-6">
               <h3 className="font-semibold text-white mb-3">What happened?</h3>
               <ul className="space-y-2 text-gray-300">
                 <li className="flex items-start gap-2">
@@ -78,7 +78,7 @@ export default function SuspensionBanner({ userStatus, onLogout }) {
               <Button
                 onClick={onLogout}
                 variant="outline"
-                className="bg-slate-600 border-slate-500 text-white hover:bg-gray-700"
+                className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
               >
                 Log Out
               </Button>
@@ -97,7 +97,7 @@ export default function SuspensionBanner({ userStatus, onLogout }) {
     const timeRemaining = getTimeRemaining();
 
     return (
-      <div className="min-h-screen bg-slate-800 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
         <Card className="max-w-2xl w-full bg-orange-950/30 border-orange-800">
           <div className="p-8">
             <div className="flex items-center gap-4 mb-6">
@@ -124,7 +124,7 @@ export default function SuspensionBanner({ userStatus, onLogout }) {
               </div>
             </div>
 
-            <div className="bg-slate-600/50 border border-slate-500 rounded-xl p-6 mb-6">
+            <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 mb-6">
               <h3 className="font-semibold text-white mb-3">What does this mean?</h3>
               <ul className="space-y-2 text-gray-300">
                 <li className="flex items-start gap-2">
@@ -163,7 +163,7 @@ export default function SuspensionBanner({ userStatus, onLogout }) {
               <Button
                 onClick={onLogout}
                 variant="outline"
-                className="bg-slate-600 border-slate-500 text-white hover:bg-gray-700"
+                className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
               >
                 Log Out
               </Button>

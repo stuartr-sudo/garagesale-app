@@ -153,7 +153,7 @@ const OnboardingTour = ({ onComplete }) => {
         left: '50%',
         transform: 'translate(-50%, -50%)'
       }}>
-        <Card className="bg-slate-700 border-2 border-pink-500 shadow-2xl max-w-md w-full mx-4">
+        <Card className="bg-gray-900 border-2 border-pink-500 shadow-2xl max-w-md w-full mx-4">
           <CardContent className="p-6">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-2">
@@ -185,7 +185,7 @@ const OnboardingTour = ({ onComplete }) => {
                 variant="outline"
                 onClick={prevStep}
                 disabled={currentStep === 0}
-                className="bg-slate-600 border-slate-500 text-white hover:bg-gray-700"
+                className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back

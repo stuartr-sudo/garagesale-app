@@ -49,7 +49,7 @@ export default function ContactRequestModal({ request, requester, onClose }) {
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="modal-glow card-gradient max-w-2xl max-h-[90vh] overflow-auto bg-slate-700/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10 text-gray-200">
+      <DialogContent className="modal-glow card-gradient max-w-2xl max-h-[90vh] overflow-auto bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10 text-gray-200">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl text-white">
             <User className="w-6 h-6 text-pink-500" />
@@ -59,7 +59,7 @@ export default function ContactRequestModal({ request, requester, onClose }) {
 
         <div className="space-y-6">
           {/* Request Summary */}
-          <div className="bg-slate-600/50 rounded-2xl p-6">
+          <div className="bg-gray-800/50 rounded-2xl p-6">
             <div className="flex gap-4">
               {primaryImage && (
                 <img
@@ -102,7 +102,7 @@ export default function ContactRequestModal({ request, requester, onClose }) {
 
           {/* Requester Info */}
           {requester && (
-            <div className="bg-slate-600/50 rounded-2xl p-6">
+            <div className="bg-gray-800/50 rounded-2xl p-6">
               <h4 className="font-semibold text-lg mb-3 flex items-center gap-2 text-white">
                 <User className="w-5 h-5 text-pink-500" />
                 Posted By
@@ -133,7 +133,7 @@ export default function ContactRequestModal({ request, requester, onClose }) {
                   value={contactInfo.name}
                   onChange={(e) => setContactInfo(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="Your full name"
-                  className="h-12 rounded-xl bg-slate-600 border-slate-500 text-white placeholder-gray-500"
+                  className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white placeholder-gray-500"
                   required
                 />
               </div>
@@ -145,7 +145,7 @@ export default function ContactRequestModal({ request, requester, onClose }) {
                   value={contactInfo.email}
                   onChange={(e) => setContactInfo(prev => ({ ...prev, email: e.target.value }))}
                   placeholder="your.email@example.com"
-                  className="h-12 rounded-xl bg-slate-600 border-slate-500 text-white placeholder-gray-500"
+                  className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white placeholder-gray-500"
                   required
                 />
               </div>
@@ -158,7 +158,7 @@ export default function ContactRequestModal({ request, requester, onClose }) {
                 value={contactInfo.phone}
                 onChange={(e) => setContactInfo(prev => ({ ...prev, phone: e.target.value }))}
                 placeholder="(555) 123-4567"
-                className="h-12 rounded-xl bg-slate-600 border-slate-500 text-white placeholder-gray-500"
+                className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white placeholder-gray-500"
               />
             </div>
             <div className="space-y-2">
@@ -168,7 +168,7 @@ export default function ContactRequestModal({ request, requester, onClose }) {
                 value={contactInfo.message}
                 onChange={(e) => setContactInfo(prev => ({ ...prev, message: e.target.value }))}
                 placeholder="Introduce yourself and explain how you can help with this request..."
-                className="min-h-32 rounded-xl bg-slate-600 border-slate-500 text-white placeholder-gray-500"
+                className="min-h-32 rounded-xl bg-gray-800 border-gray-700 text-white placeholder-gray-500"
                 required
               />
             </div>
@@ -179,7 +179,7 @@ export default function ContactRequestModal({ request, requester, onClose }) {
             <Button
               variant="outline"
               onClick={onClose}
-              className="flex-1 h-12 rounded-xl text-gray-300 border-slate-500 hover:bg-slate-600 hover:text-white"
+              className="flex-1 h-12 rounded-xl text-gray-300 border-gray-700 hover:bg-gray-800 hover:text-white"
               disabled={isSending}
             >
               Cancel

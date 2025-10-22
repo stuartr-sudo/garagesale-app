@@ -48,15 +48,15 @@ export default function StorePage() {
       <div className="p-6 md:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="animate-pulse">
-            <div className="h-8 bg-slate-700 rounded w-64 mb-6"></div>
+            <div className="h-8 bg-gray-900 rounded w-64 mb-6"></div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {Array(8).fill(0).map((_, i) => (
-                <div key={i} className="bg-slate-700 rounded-2xl shadow-sm border border-slate-600 overflow-hidden">
-                  <div className="aspect-square bg-slate-600"></div>
+                <div key={i} className="bg-gray-900 rounded-2xl shadow-sm border border-gray-800 overflow-hidden">
+                  <div className="aspect-square bg-gray-800"></div>
                   <div className="p-4 space-y-3">
-                    <div className="h-4 bg-slate-600 rounded w-3/4"></div>
-                    <div className="h-3 bg-slate-600 rounded w-1/2"></div>
-                    <div className="h-8 bg-slate-600 rounded"></div>
+                    <div className="h-4 bg-gray-800 rounded w-3/4"></div>
+                    <div className="h-3 bg-gray-800 rounded w-1/2"></div>
+                    <div className="h-8 bg-gray-800 rounded"></div>
                   </div>
                 </div>
               ))}
@@ -68,7 +68,7 @@ export default function StorePage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-800 text-white">
+    <div className="min-h-screen bg-slate-950 text-white">
       <div className="p-6 md:p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
@@ -79,7 +79,7 @@ export default function StorePage() {
 
           {items.length === 0 ? (
             <div className="text-center py-16">
-              <div className="w-24 h-24 bg-slate-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-24 h-24 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Frown className="w-12 h-12 text-gray-600" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">The Store is Empty</h3>

@@ -8,7 +8,7 @@ import { Store, ArrowRight, Camera, DollarSign, Users, Sparkles, ShoppingCart, S
 
 const FeatureCard = ({ icon: Icon, title, description, highlight = false, benefits = [] }) => (
   <div className={`p-8 rounded-2xl shadow-lg border text-left transform hover:-translate-y-2 transition-transform duration-300 ${
-    highlight ? 'bg-gradient-to-br from-pink-900/50 to-fuchsia-900/50 border-pink-700' : 'bg-slate-600/80 border-slate-500'
+    highlight ? 'bg-gradient-to-br from-pink-900/50 to-fuchsia-900/50 border-pink-700' : 'bg-gray-800/80 border-gray-700'
   }`}>
     <div className={`inline-block p-4 rounded-2xl mb-6 ${
       highlight ? 'bg-gradient-to-r from-pink-600 to-fuchsia-600' : 'bg-gradient-to-r from-pink-900 to-fuchsia-900'
@@ -32,7 +32,7 @@ const FeatureCard = ({ icon: Icon, title, description, highlight = false, benefi
 
 const StepCard = ({ number, icon: Icon, title, description, details }) => (
   <div className="relative">
-    <div className="bg-slate-600/80 border border-slate-500 rounded-2xl p-8 text-center hover:border-pink-700 transition-colors duration-300">
+    <div className="bg-gray-800/80 border border-gray-700 rounded-2xl p-8 text-center hover:border-pink-700 transition-colors duration-300">
       <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
         <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-fuchsia-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
           {number}
@@ -56,7 +56,7 @@ const StepCard = ({ number, icon: Icon, title, description, details }) => (
 );
 
 const TestimonialCard = ({ name, role, content, rating = 5 }) => (
-  <div className="bg-slate-600/80 border border-slate-500 rounded-2xl p-6">
+  <div className="bg-gray-800/80 border border-gray-700 rounded-2xl p-6">
     <div className="flex items-center gap-1 mb-4">
       {[...Array(rating)].map((_, i) => (
         <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
@@ -126,7 +126,7 @@ export default function HomePage() {
                 <Button
                   variant="ghost"
                   onClick={() => handleAuthAction('SignIn')}
-                  className="text-gray-400 hover:bg-slate-600 hover:text-white"
+                  className="text-gray-400 hover:bg-gray-800 hover:text-white"
                 >
                   Log In
                 </Button>
@@ -186,7 +186,7 @@ export default function HomePage() {
               size="lg"
               variant="outline"
               onClick={() => handleAuthAction('Marketplace')}
-              className="h-16 px-10 bg-slate-600/50 border-slate-500 hover:bg-gray-700 text-white rounded-2xl text-xl"
+              className="h-16 px-10 bg-gray-800/50 border-gray-700 hover:bg-gray-700 text-white rounded-2xl text-xl"
             >
               Browse Marketplace
               <Search className="w-6 h-6 ml-3" />
@@ -363,7 +363,7 @@ export default function HomePage() {
       {/* Business CTA */}
       <section className="py-20 bg-gradient-to-r from-pink-900/20 via-fuchsia-900/20 to-pink-900/20">
         <div className="max-w-4xl mx-auto text-center px-4 md:px-6">
-          <div className="bg-slate-600/50 rounded-3xl p-8 md:p-12 border border-slate-500">
+          <div className="bg-gray-800/50 rounded-3xl p-8 md:p-12 border border-gray-700">
             <h3 className="text-3xl md:text-4xl font-bold text-white mb-6">Are You a Local Business?</h3>
             <p className="text-lg text-gray-400 mb-8 leading-relaxed">
               Join hundreds of local businesses using GarageSale to reach more customers. 
@@ -386,7 +386,7 @@ export default function HomePage() {
                 size="lg"
                 variant="outline"
                 asChild
-                className="h-14 px-8 bg-slate-600/50 border-slate-500 hover:bg-gray-700 text-white rounded-2xl text-lg"
+                className="h-14 px-8 bg-gray-800/50 border-gray-700 hover:bg-gray-700 text-white rounded-2xl text-lg"
               >
                 <Link to={createPageUrl("Contact")}>
                   Learn More About Business Features
@@ -426,7 +426,7 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 bg-black text-white border-t border-slate-600">
+      <footer className="py-12 bg-black text-white border-t border-gray-800">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
             <div>
@@ -470,7 +470,7 @@ export default function HomePage() {
             </div>
           </div>
           
-          <div className="border-t border-slate-600 pt-8 text-center">
+          <div className="border-t border-gray-800 pt-8 text-center">
             <p className="text-gray-400">&copy; {new Date().getFullYear()} GarageSale. All rights reserved. Made with ❤️ for local communities.</p>
           </div>
         </div>

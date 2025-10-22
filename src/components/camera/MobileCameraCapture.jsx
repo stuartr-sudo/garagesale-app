@@ -319,7 +319,7 @@ export default function MobileCameraCapture({ onCapture, onClose }) {
                 <Button
                   variant="outline"
                   onClick={retakePhoto}
-                  className="flex-1 border-slate-500 text-gray-300 hover:bg-slate-600"
+                  className="flex-1 border-gray-700 text-gray-300 hover:bg-gray-800"
                 >
                   <Camera className="w-4 h-4 mr-2" />
                   Retake

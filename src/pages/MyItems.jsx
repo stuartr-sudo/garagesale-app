@@ -98,15 +98,15 @@ export default function MyItems() {
       <div className="p-6 md:p-8">
         <div className="max-w-6xl mx-auto">
           <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-slate-600 rounded w-64"></div>
+            <div className="h-8 bg-gray-800 rounded w-64"></div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {Array(4).fill(0).map((_, i) => (
-                <div key={i} className="h-32 bg-slate-600 rounded-2xl"></div>
+                <div key={i} className="h-32 bg-gray-800 rounded-2xl"></div>
               ))}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {Array(6).fill(0).map((_, i) => (
-                <div key={i} className="h-80 bg-slate-600 rounded-2xl"></div>
+                <div key={i} className="h-80 bg-gray-800 rounded-2xl"></div>
               ))}
             </div>
           </div>
@@ -116,7 +116,7 @@ export default function MyItems() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-800 text-gray-200">
+    <div className="min-h-screen bg-slate-950 text-gray-200">
       <div className="p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
@@ -166,10 +166,10 @@ export default function MyItems() {
           </div>
 
           {/* Items Tabs */}
-          <Card className="bg-slate-700/80 backdrop-blur-sm shadow-xl border border-slate-600 rounded-2xl overflow-hidden">
-            <CardHeader className="bg-slate-600/50 border-b border-slate-500">
+          <Card className="bg-gray-900/80 backdrop-blur-sm shadow-xl border border-gray-800 rounded-2xl overflow-hidden">
+            <CardHeader className="bg-gray-800/50 border-b border-gray-700">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-4 bg-slate-600 rounded-xl p-1 text-xs sm:text-sm">
+                <TabsList className="grid w-full grid-cols-4 bg-gray-800 rounded-xl p-1 text-xs sm:text-sm">
                   <TabsTrigger value="all" className="rounded-lg text-white data-[state=active]:bg-pink-600">All</TabsTrigger>
                   <TabsTrigger value="active" className="rounded-lg text-white data-[state=active]:bg-pink-600">Active</TabsTrigger>
                   <TabsTrigger value="sold" className="rounded-lg text-white data-[state=active]:bg-pink-600">Sold</TabsTrigger>
@@ -194,12 +194,12 @@ export default function MyItems() {
                             {item.status === 'sold' && itemRatings[item.id] && (
                               <div className="mt-2">
                                 {itemRatings[item.id].hasRated ? (
-                                  <Button variant="outline" disabled className="w-full bg-slate-600 border-slate-500 text-gray-400">
+                                  <Button variant="outline" disabled className="w-full bg-gray-800 border-gray-700 text-gray-400">
                                     <Star className="w-4 h-4 mr-2 text-yellow-500" />
                                     Buyer Rated
                                   </Button>
                                 ) : (
-                                  <Button variant="secondary" className="w-full bg-slate-600 hover:bg-gray-700 text-white" onClick={() => setRatingTransaction(itemRatings[item.id].transaction)}>
+                                  <Button variant="secondary" className="w-full bg-gray-800 hover:bg-gray-700 text-white" onClick={() => setRatingTransaction(itemRatings[item.id].transaction)}>
                                     <Star className="w-4 h-4 mr-2" />
                                     Rate Buyer
                                   </Button>
@@ -211,7 +211,7 @@ export default function MyItems() {
                       </div>
                     ) : (
                       <div className="text-center py-12 md:py-16">
-                        <div className="w-20 h-20 md:w-24 md:h-24 bg-slate-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <div className="w-20 h-20 md:w-24 md:h-24 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6">
                           <Package className="w-10 h-10 md:w-12 md:h-12 text-gray-600" />
                         </div>
                         <h3 className="text-lg md:text-xl font-semibold text-white mb-2">

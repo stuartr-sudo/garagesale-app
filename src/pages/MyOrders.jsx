@@ -207,7 +207,7 @@ export default function MyOrders() {
       delivered: { color: 'bg-cyan-900/50 text-cyan-300 border-cyan-700', icon: CheckCircle, text: 'Delivered' },
       collected: { color: 'bg-purple-900/50 text-purple-300 border-purple-700', icon: MapPin, text: 'Collected' },
       expired: { color: 'bg-red-900/50 text-red-300 border-red-700', icon: AlertCircle, text: 'Expired' },
-      cancelled: { color: 'bg-gray-700 text-gray-300 border-slate-500', icon: AlertCircle, text: 'Cancelled' },
+      cancelled: { color: 'bg-gray-700 text-gray-300 border-gray-700', icon: AlertCircle, text: 'Cancelled' },
     };
 
     const { color, icon: Icon, text } = config[status] || config.awaiting_payment;
@@ -305,7 +305,7 @@ export default function MyOrders() {
                           [order.id]: { ...prev[order.id], address: e.target.value }
                         }))}
                         placeholder="Enter pickup address"
-                        className="bg-slate-700 border-slate-500 text-white"
+                        className="bg-gray-900 border-gray-700 text-white"
                       />
                     </div>
                     <div className="grid grid-cols-3 gap-2">
@@ -318,7 +318,7 @@ export default function MyOrders() {
                             ...prev,
                             [order.id]: { ...prev[order.id], date: e.target.value }
                           }))}
-                          className="bg-slate-700 border-slate-500 text-white"
+                          className="bg-gray-900 border-gray-700 text-white"
                         />
                       </div>
                       <div>
@@ -330,7 +330,7 @@ export default function MyOrders() {
                             ...prev,
                             [order.id]: { ...prev[order.id], timeStart: e.target.value }
                           }))}
-                          className="bg-slate-700 border-slate-500 text-white"
+                          className="bg-gray-900 border-gray-700 text-white"
                         />
                       </div>
                       <div>
@@ -342,7 +342,7 @@ export default function MyOrders() {
                             ...prev,
                             [order.id]: { ...prev[order.id], timeEnd: e.target.value }
                           }))}
-                          className="bg-slate-700 border-slate-500 text-white"
+                          className="bg-gray-900 border-gray-700 text-white"
                         />
                       </div>
                     </div>
@@ -369,7 +369,7 @@ export default function MyOrders() {
                         [order.id]: e.target.value
                       }))}
                       placeholder="Enter tracking number"
-                      className="flex-1 bg-slate-700 border-slate-500 text-white"
+                      className="flex-1 bg-gray-900 border-gray-700 text-white"
                     />
                     <Button
                       onClick={() => handleAddTracking(order.id)}
@@ -446,7 +446,7 @@ export default function MyOrders() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 bg-slate-700/50 border border-cyan-500/20">
+          <TabsList className="grid w-full grid-cols-2 bg-gray-900/50 border border-cyan-500/20">
             <TabsTrigger value="buying" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400">
               <Package className="w-4 h-4 mr-2" />
               I'm Buying ({buyingOrders.length})

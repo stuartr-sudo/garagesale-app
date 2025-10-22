@@ -139,14 +139,14 @@ export default function VoiceInput({ onTranscript, onClose }) {
 
   if (!isSupported) {
     return (
-      <Card className="bg-slate-700/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
+      <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
         <CardContent className="p-6 text-center">
           <VolumeX className="w-12 h-12 text-gray-500 mx-auto mb-4" />
           <h3 className="text-white font-semibold mb-2">Voice Input Not Supported</h3>
           <p className="text-gray-400 text-sm mb-4">
             Your browser doesn't support voice input. Please use the text fields instead.
           </p>
-          <Button onClick={onClose} variant="outline" className="border-slate-500 text-gray-300">
+          <Button onClick={onClose} variant="outline" className="border-gray-700 text-gray-300">
             Continue with Text
           </Button>
         </CardContent>
@@ -155,7 +155,7 @@ export default function VoiceInput({ onTranscript, onClose }) {
   }
 
   return (
-    <Card className="bg-slate-700/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
+    <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
       <CardContent className="p-6">
         <div className="text-center mb-6">
           <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -172,7 +172,7 @@ export default function VoiceInput({ onTranscript, onClose }) {
           <label className="text-white text-sm font-medium mb-2 block">
             What you said:
           </label>
-          <div className="bg-slate-600 border border-slate-500 rounded-lg p-4 min-h-[100px] max-h-[200px] overflow-y-auto">
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 min-h-[100px] max-h-[200px] overflow-y-auto">
             {transcript ? (
               <p className="text-gray-300 text-sm leading-relaxed">{transcript}</p>
             ) : (
@@ -208,7 +208,7 @@ export default function VoiceInput({ onTranscript, onClose }) {
             <Button
               onClick={clearTranscript}
               variant="outline"
-              className="border-slate-500 text-gray-300 hover:bg-slate-600"
+              className="border-gray-700 text-gray-300 hover:bg-gray-800"
             >
               Clear
             </Button>

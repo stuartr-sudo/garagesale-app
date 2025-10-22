@@ -113,17 +113,17 @@ export default function SearchFilters({ onFilterChange, itemCount }) {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search items..."
-                className="pl-10 bg-slate-700 border-slate-500 text-white placeholder-gray-500 h-12"
+                className="pl-10 bg-gray-900 border-gray-700 text-white placeholder-gray-500 h-12"
               />
             </div>
 
             {/* Sort Dropdown */}
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-full md:w-48 bg-slate-700 border-slate-500 text-white h-12">
+              <SelectTrigger className="w-full md:w-48 bg-gray-900 border-gray-700 text-white h-12">
                 <TrendingUp className="w-4 h-4 mr-2" />
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-slate-700 border-slate-500 text-white">
+              <SelectContent className="bg-gray-900 border-gray-700 text-white">
                 {sortOptions.map(option => (
                   <SelectItem 
                     key={option.value} 
@@ -140,7 +140,7 @@ export default function SearchFilters({ onFilterChange, itemCount }) {
             <Button
               variant="outline"
               onClick={() => setShowFilters(!showFilters)}
-              className="bg-slate-700 border-slate-500 text-white hover:bg-slate-600 h-12 relative"
+              className="bg-gray-900 border-gray-700 text-white hover:bg-gray-800 h-12 relative"
             >
               <SlidersHorizontal className="w-4 h-4 mr-2" />
               Filters
@@ -184,10 +184,10 @@ export default function SearchFilters({ onFilterChange, itemCount }) {
                   Category
                 </label>
                 <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger className="bg-slate-700 border-slate-500 text-white">
+                  <SelectTrigger className="bg-gray-900 border-gray-700 text-white">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-700 border-slate-500 text-white">
+                  <SelectContent className="bg-gray-900 border-gray-700 text-white">
                     {categories.map(cat => (
                       <SelectItem 
                         key={cat.value} 
@@ -208,10 +208,10 @@ export default function SearchFilters({ onFilterChange, itemCount }) {
                   Condition
                 </label>
                 <Select value={condition} onValueChange={setCondition}>
-                  <SelectTrigger className="bg-slate-700 border-slate-500 text-white">
+                  <SelectTrigger className="bg-gray-900 border-gray-700 text-white">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-700 border-slate-500 text-white">
+                  <SelectContent className="bg-gray-900 border-gray-700 text-white">
                     {conditions.map(cond => (
                       <SelectItem 
                         key={cond.value} 
@@ -235,7 +235,7 @@ export default function SearchFilters({ onFilterChange, itemCount }) {
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   placeholder="City, State, or Postcode"
-                  className="bg-slate-700 border-slate-500 text-white placeholder-gray-500"
+                  className="bg-gray-900 border-gray-700 text-white placeholder-gray-500"
                 />
               </div>
             </div>

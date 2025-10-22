@@ -223,7 +223,7 @@ export default function Layout({ children, currentPageName }) {
 
   if (loading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-slate-800">
+      <div className="flex h-screen w-full items-center justify-center bg-slate-950">
         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-pink-500"></div>
       </div>
     );
@@ -272,18 +272,18 @@ function LayoutContent({ currentUser, currentPageName, visibleNavItems, handleLo
   const { open } = useSidebar();
 
   return (
-    <div className="relative min-h-screen flex w-full bg-slate-800 text-gray-200 overflow-hidden">
+    <div className="relative min-h-screen flex w-full bg-slate-950 text-gray-200 overflow-hidden">
       <NerdBackground count={75} />
       {currentUser && currentPageName !== 'Home' && <FloatingCameraButton />}
 
       {/* Only show sidebar if user is logged in */}
       {currentUser && (
         <Sidebar 
-          className="border-r-0 bg-slate-700/90 backdrop-blur-lg shadow-2xl border-r border-slate-600 z-10" 
+          className="border-r-0 bg-gray-900/90 backdrop-blur-lg shadow-2xl border-r border-gray-800 z-10" 
           collapsible="offcanvas"
           variant="sidebar"
         >
-          <SidebarHeader className="border-b border-slate-600 shrink-0">
+          <SidebarHeader className="border-b border-gray-800 shrink-0">
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton size="lg" asChild tooltip="GarageSale">
@@ -310,7 +310,7 @@ function LayoutContent({ currentUser, currentPageName, visibleNavItems, handleLo
                       <SidebarMenuButton
                         asChild
                         tooltip={item.title}
-                        className={`group hover:bg-slate-600 transition-all duration-300 rounded-lg p-2.5 justify-start text-sm ${
+                        className={`group hover:bg-gray-800 transition-all duration-300 rounded-lg p-2.5 justify-start text-sm ${
                           location.pathname === item.url
                             ? 'bg-pink-500/10 text-pink-400'
                             : 'text-gray-400 hover:text-white'
@@ -340,7 +340,7 @@ function LayoutContent({ currentUser, currentPageName, visibleNavItems, handleLo
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       asChild
-                      className={`group hover:bg-slate-600 transition-all duration-300 rounded-lg p-2.5 justify-start text-sm ${
+                      className={`group hover:bg-gray-800 transition-all duration-300 rounded-lg p-2.5 justify-start text-sm ${
                         location.pathname === createPageUrl("Contact")
                           ? 'bg-pink-500/10 text-pink-400'
                           : 'text-gray-400 hover:text-white'
@@ -355,7 +355,7 @@ function LayoutContent({ currentUser, currentPageName, visibleNavItems, handleLo
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       asChild
-                      className={`group hover:bg-slate-600 transition-all duration-300 rounded-lg p-2.5 justify-start text-sm ${
+                      className={`group hover:bg-gray-800 transition-all duration-300 rounded-lg p-2.5 justify-start text-sm ${
                         location.pathname === createPageUrl("Privacy")
                           ? 'bg-pink-500/10 text-pink-400'
                           : 'text-gray-400 hover:text-white'
@@ -370,7 +370,7 @@ function LayoutContent({ currentUser, currentPageName, visibleNavItems, handleLo
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       asChild
-                      className={`group hover:bg-slate-600 transition-all duration-300 rounded-lg p-2.5 justify-start text-sm ${
+                      className={`group hover:bg-gray-800 transition-all duration-300 rounded-lg p-2.5 justify-start text-sm ${
                         location.pathname === createPageUrl("Terms")
                           ? 'bg-pink-500/10 text-pink-400'
                           : 'text-gray-400 hover:text-white'

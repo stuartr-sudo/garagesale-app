@@ -227,13 +227,13 @@ export default function ItemDetail() {
   const primaryImage = validImages[selectedImage] || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-800 to-slate-700 px-4 pb-4 md:px-8 md:pb-8 overflow-x-hidden" style={{ scrollBehavior: 'auto' }}>
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 to-gray-900 px-4 pb-4 md:px-8 md:pb-8 overflow-x-hidden" style={{ scrollBehavior: 'auto' }}>
       {/* Back Button */}
       <div className="max-w-7xl mx-auto py-2">
         <Button
           variant="ghost"
           onClick={() => navigate(createPageUrl('Marketplace'))}
-          className="text-gray-400 hover:text-white hover:bg-slate-600"
+          className="text-gray-400 hover:text-white hover:bg-gray-800"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Marketplace
@@ -246,7 +246,7 @@ export default function ItemDetail() {
           {/* Left Column - Image, Title, Price, Description */}
           <div className="lg:col-span-2 space-y-4">
             {/* Image Carousel Card */}
-            <Card className="bg-slate-700/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10 overflow-hidden">
+            <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10 overflow-hidden">
               <div 
                 className="relative h-80 md:h-96 lg:h-[500px] cursor-pointer"
                 onClick={() => setIsImageFullscreen(true)}
@@ -268,7 +268,7 @@ export default function ItemDetail() {
             
               {/* Thumbnail Gallery */}
               {validImages.length > 1 && (
-                <div className="p-3 bg-slate-600/50 border-t border-slate-500">
+                <div className="p-3 bg-gray-800/50 border-t border-gray-700">
                   <div className="flex gap-2 overflow-x-auto">
                     {validImages.map((img, idx) => (
                       <button
@@ -277,7 +277,7 @@ export default function ItemDetail() {
                         className={`flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all ${
                           selectedImage === idx
                             ? 'border-pink-500 scale-105'
-                            : 'border-slate-500 hover:border-slate-500'
+                            : 'border-gray-700 hover:border-gray-700'
                         }`}
                       >
                         <img
@@ -293,7 +293,7 @@ export default function ItemDetail() {
             </Card>
 
             {/* Title Card */}
-            <Card className="bg-slate-700/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
+            <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <h1 className="text-xl md:text-2xl font-bold text-white">{item.title}</h1>
@@ -324,7 +324,7 @@ export default function ItemDetail() {
             {/* Price, Condition, Category Row */}
             <div className="grid grid-cols-3 gap-4">
               {/* Price Card */}
-              <Card className="bg-slate-700/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
+              <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
                 <CardContent className="p-4 text-center">
                   <div className="text-xs text-gray-400 mb-1">Price</div>
                   <div className="text-xl md:text-2xl font-bold text-cyan-400">
@@ -334,7 +334,7 @@ export default function ItemDetail() {
               </Card>
 
               {/* Condition Card */}
-              <Card className="bg-slate-700/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
+              <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
                 <CardContent className="p-4 text-center">
                   <div className="text-xs text-gray-400 mb-1">Condition</div>
                   <Badge variant="secondary" className="capitalize bg-blue-900/50 text-blue-300 border-blue-700">
@@ -344,7 +344,7 @@ export default function ItemDetail() {
               </Card>
 
               {/* Category Card */}
-              <Card className="bg-slate-700/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
+              <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
                 <CardContent className="p-4 text-center">
                   <div className="text-xs text-gray-400 mb-1">Category</div>
                   <Badge variant="outline" className="capitalize bg-purple-900/50 text-purple-300 border-purple-700">
@@ -355,7 +355,7 @@ export default function ItemDetail() {
             </div>
 
             {/* Description Card */}
-            <Card className="bg-slate-700/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
+            <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
               <CardContent className="p-4">
                 <h3 className="text-sm font-semibold text-gray-400 mb-2">Description</h3>
                 <div>
@@ -399,7 +399,7 @@ export default function ItemDetail() {
               itemPrice={item.price}
             />
           ) : isOwner ? (
-            <Card className="bg-slate-600/50 border-slate-600">
+            <Card className="bg-gray-800/50 border-gray-800">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-white">
                   <Bot className="w-5 h-5 text-pink-400" />
@@ -420,7 +420,7 @@ export default function ItemDetail() {
                         value={minimumPrice}
                         onChange={(e) => setMinimumPrice(e.target.value)}
                         placeholder="e.g., 100.00"
-                        className="bg-slate-600 border-slate-500 text-white"
+                        className="bg-gray-800 border-gray-700 text-white"
                       />
                       <p className="text-xs text-gray-400 mt-1">
                         The AI agent will automatically accept offers at or above this price
@@ -436,7 +436,7 @@ export default function ItemDetail() {
                       <Button
                         variant="outline"
                         onClick={() => setShowAgentSettings(false)}
-                        className="bg-slate-600 border-slate-500 text-white hover:bg-gray-700"
+                        className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
                       >
                         Cancel
                       </Button>
@@ -459,7 +459,7 @@ export default function ItemDetail() {
               </CardContent>
             </Card>
           ) : (
-            <Card className="bg-slate-600/50 border-slate-600 p-6 text-center">
+            <Card className="bg-gray-800/50 border-gray-800 p-6 text-center">
               <p className="text-gray-400">
                 AI Assistant not available for this item
               </p>
@@ -514,7 +514,7 @@ export default function ItemDetail() {
 
           {/* Seller Info - Compact */}
           {seller && (
-            <Card className="bg-slate-700/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
+            <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
               <CardContent className="p-3">
                 <div className="flex items-center justify-between">
                   <div>
@@ -581,7 +581,7 @@ export default function ItemDetail() {
           {/* Close Button */}
           <button
             onClick={() => setIsImageFullscreen(false)}
-            className="absolute top-4 right-4 z-10 bg-slate-600/80 hover:bg-slate-600 text-white rounded-full p-3 transition-all"
+            className="absolute top-4 right-4 z-10 bg-gray-800/80 hover:bg-gray-800 text-white rounded-full p-3 transition-all"
           >
             <X className="w-6 h-6" />
           </button>
@@ -593,7 +593,7 @@ export default function ItemDetail() {
                 e.stopPropagation();
                 setSelectedImage(selectedImage - 1);
               }}
-              className="absolute left-4 z-10 bg-slate-600/80 hover:bg-slate-600 text-white rounded-full p-3 transition-all"
+              className="absolute left-4 z-10 bg-gray-800/80 hover:bg-gray-800 text-white rounded-full p-3 transition-all"
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
@@ -606,7 +606,7 @@ export default function ItemDetail() {
                 e.stopPropagation();
                 setSelectedImage(selectedImage + 1);
               }}
-              className="absolute right-4 z-10 bg-slate-600/80 hover:bg-slate-600 text-white rounded-full p-3 transition-all"
+              className="absolute right-4 z-10 bg-gray-800/80 hover:bg-gray-800 text-white rounded-full p-3 transition-all"
             >
               <ChevronRight className="w-6 h-6" />
             </button>
@@ -629,7 +629,7 @@ export default function ItemDetail() {
 
           {/* Image Counter */}
           {validImages.length > 1 && (
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-slate-600/80 text-white px-4 py-2 rounded-full text-sm">
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800/80 text-white px-4 py-2 rounded-full text-sm">
               {selectedImage + 1} / {validImages.length}
             </div>
           )}

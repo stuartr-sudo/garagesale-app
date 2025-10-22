@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 
 export default function SuccessPage() {
   return (
-    <div className="min-h-screen bg-slate-800 text-white flex items-center justify-center p-4">
-      <div className="text-center bg-slate-700 border border-slate-600 p-8 rounded-lg shadow-lg max-w-md">
+    <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-4">
+      <div className="text-center bg-gray-900 border border-gray-800 p-8 rounded-lg shadow-lg max-w-md">
         <CheckCircle className="w-16 h-16 text-lime-400 mx-auto mb-4" />
         <h1 className="text-3xl font-bold mb-2">Payment Successful!</h1>
         <p className="text-gray-400 mb-6">

@@ -8,7 +8,7 @@ import { Store, ArrowRight, Building, CheckCircle, Users, Shield, Sparkles, Glob
 
 const FeatureCard = ({ icon: Icon, title, description, highlight = false }) => (
   <div className={`p-8 rounded-2xl shadow-lg border text-center transform hover:-translate-y-2 transition-transform duration-300 ${
-    highlight ? 'bg-gradient-to-br from-pink-900/50 to-fuchsia-900/50 border-pink-700' : 'bg-slate-600/80 border-slate-500'
+    highlight ? 'bg-gradient-to-br from-pink-900/50 to-fuchsia-900/50 border-pink-700' : 'bg-gray-800/80 border-gray-700'
   }`}>
     <div className={`inline-block p-4 rounded-2xl mb-6 ${
       highlight ? 'bg-gradient-to-r from-pink-600 to-fuchsia-600' : 'bg-gradient-to-r from-pink-900 to-fuchsia-900'
@@ -24,7 +24,7 @@ const PricingCard = ({ title, price, features, popular = false, ctaText, onActio
   <div className={`relative p-8 rounded-2xl shadow-xl border transition-all duration-300 hover:shadow-2xl ${
     popular 
       ? 'bg-gradient-to-br from-pink-900/50 to-fuchsia-900/50 border-pink-600 transform scale-105' 
-      : 'bg-slate-700/80 border-slate-500'
+      : 'bg-gray-900/80 border-gray-700'
   }`}>
     {popular && (
       <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -55,7 +55,7 @@ const PricingCard = ({ title, price, features, popular = false, ctaText, onActio
       className={`w-full h-12 rounded-xl font-semibold transition-all duration-300 ${
         popular
           ? 'bg-gradient-to-r from-pink-500 to-fuchsia-600 hover:from-pink-600 hover:to-fuchsia-700 shadow-lg hover:shadow-xl'
-          : 'bg-slate-600 hover:bg-gray-700 border border-slate-500'
+          : 'bg-gray-800 hover:bg-gray-700 border border-gray-700'
       }`}
     >
       {ctaText}
@@ -129,7 +129,7 @@ export default function BusinessSignup() {
                 <Button
                   variant="ghost"
                   onClick={handleLogin}
-                  className="text-gray-400 hover:bg-slate-600 hover:text-white"
+                  className="text-gray-400 hover:bg-gray-800 hover:text-white"
                 >
                   Log In
                 </Button>
@@ -352,7 +352,7 @@ export default function BusinessSignup() {
             </div>
           </div>
           
-          <div className="border-t border-slate-600 pt-8 text-center">
+          <div className="border-t border-gray-800 pt-8 text-center">
             <p>&copy; {new Date().getFullYear()} GarageSale Business. All rights reserved.</p>
           </div>
         </div>

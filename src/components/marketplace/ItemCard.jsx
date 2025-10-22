@@ -156,7 +156,7 @@ export default function ItemCard({ item, seller, isSold = false, currentUser = n
   };
 
   return (
-    <Card className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-2xl shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 border-2 border-cyan-500/30 hover:border-cyan-400/60 overflow-hidden group hover:scale-[1.02] flex flex-col h-full ring-1 ring-cyan-400/20 hover:ring-cyan-400/40">
+    <Card className="bg-gradient-to-br from-slate-700 to-slate-600 rounded-2xl shadow-2xl shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 border-2 border-cyan-500/30 hover:border-cyan-400/60 overflow-hidden group hover:scale-[1.02] flex flex-col h-full ring-1 ring-cyan-400/20 hover:ring-cyan-400/40">
       {/* EDIT: Use 4:3 aspect ratio to avoid squashed image */}
       <div className="relative overflow-hidden aspect-[4/3]">
         <img
@@ -187,7 +187,7 @@ export default function ItemCard({ item, seller, isSold = false, currentUser = n
             <Badge className="bg-lime-500 text-black font-bold">Free</Badge>
           )}
           {item.condition && (
-            <Badge variant="secondary" className="capitalize bg-slate-600/80 text-gray-300 border-slate-500">
+            <Badge variant="secondary" className="capitalize bg-gray-800/80 text-gray-300 border-gray-700">
               {item.condition.replace('_', ' ')}
             </Badge>
           )}
@@ -265,7 +265,7 @@ export default function ItemCard({ item, seller, isSold = false, currentUser = n
             )}
           </div>
         ) : (
-          <div className="w-full mt-4 h-10 px-4 bg-slate-600/50 rounded-lg border border-slate-500 text-center text-gray-400 text-sm font-medium flex items-center justify-center">
+          <div className="w-full mt-4 h-10 px-4 bg-gray-800/50 rounded-lg border border-gray-700 text-center text-gray-400 text-sm font-medium flex items-center justify-center">
             This item has been sold
           </div>
         )}

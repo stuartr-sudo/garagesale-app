@@ -162,7 +162,7 @@ export default function AddRequest() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-800 text-gray-200">
+    <div className="min-h-screen bg-slate-950 text-gray-200">
       <div className="p-6 md:p-8">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
@@ -171,7 +171,7 @@ export default function AddRequest() {
               variant="outline"
               size="icon"
               onClick={() => navigate(createPageUrl("Requests"))}
-              className="rounded-xl bg-slate-600 border-slate-500 hover:bg-gray-700"
+              className="rounded-xl bg-gray-800 border-gray-700 hover:bg-gray-700"
             >
               <ArrowLeft className="w-4 h-4" />
             </Button>
@@ -183,8 +183,8 @@ export default function AddRequest() {
 
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Optional Images */}
-            <Card className="bg-slate-700/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10 shadow-xl rounded-2xl overflow-hidden">
-              <CardHeader className="bg-slate-600/50 border-b border-slate-500">
+            <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10 shadow-xl rounded-2xl overflow-hidden">
+              <CardHeader className="bg-gray-800/50 border-b border-gray-700">
                 <CardTitle className="flex items-center gap-2 text-white">
                   <Upload className="w-6 h-6 text-pink-500" />
                   Photos (Optional)
@@ -203,8 +203,8 @@ export default function AddRequest() {
             </Card>
 
             {/* Request Details */}
-            <Card className="bg-slate-700/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10 shadow-xl rounded-2xl overflow-hidden">
-              <CardHeader className="bg-slate-600/50 border-b border-slate-500">
+            <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10 shadow-xl rounded-2xl overflow-hidden">
+              <CardHeader className="bg-gray-800/50 border-b border-gray-700">
                 <CardTitle className="flex items-center gap-2 text-white">
                   <Briefcase className="w-6 h-6 text-pink-500" />
                   Request Details
@@ -218,7 +218,7 @@ export default function AddRequest() {
                     value={requestData.title}
                     onChange={(e) => handleInputChange('title', e.target.value)}
                     placeholder="What do you need help with?"
-                    className="h-12 rounded-xl bg-slate-600 border-slate-500 text-white"
+                    className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white"
                   />
                 </div>
 
@@ -229,7 +229,7 @@ export default function AddRequest() {
                     value={requestData.description}
                     onChange={(e) => handleInputChange('description', e.target.value)}
                     placeholder="Describe the work or task in detail..."
-                    className="min-h-32 rounded-xl bg-slate-600 border-slate-500 text-white"
+                    className="min-h-32 rounded-xl bg-gray-800 border-gray-700 text-white"
                   />
                 </div>
 
@@ -244,7 +244,7 @@ export default function AddRequest() {
                       value={requestData.budget}
                       onChange={(e) => handleInputChange('budget', e.target.value)}
                       placeholder="0.00"
-                      className="h-12 rounded-xl bg-slate-600 border-slate-500 text-white"
+                      className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white"
                     />
                   </div>
                   <div className="space-y-2">
@@ -254,7 +254,7 @@ export default function AddRequest() {
                       value={requestData.timeline}
                       onChange={(e) => handleInputChange('timeline', e.target.value)}
                       placeholder="e.g., Within 2 weeks, ASAP"
-                      className="h-12 rounded-xl bg-slate-600 border-slate-500 text-white"
+                      className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white"
                     />
                   </div>
                 </div>
@@ -266,10 +266,10 @@ export default function AddRequest() {
                       value={requestData.category}
                       onValueChange={(value) => handleInputChange('category', value)}
                     >
-                      <SelectTrigger className="h-12 rounded-xl bg-slate-600 border-slate-500 text-white">
+                      <SelectTrigger className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-600 border-slate-500 text-white">
+                      <SelectContent className="bg-gray-800 border-gray-700 text-white">
                         {categories.map(cat => (
                           <SelectItem key={cat.value} value={cat.value}>
                             {cat.label}
@@ -284,10 +284,10 @@ export default function AddRequest() {
                       value={requestData.urgency}
                       onValueChange={(value) => handleInputChange('urgency', value)}
                     >
-                      <SelectTrigger className="h-12 rounded-xl bg-slate-600 border-slate-500 text-white">
+                      <SelectTrigger className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-600 border-slate-500 text-white">
+                      <SelectContent className="bg-gray-800 border-gray-700 text-white">
                         {urgencyLevels.map(level => (
                           <SelectItem key={level.value} value={level.value}>
                             {level.label}
@@ -302,10 +302,10 @@ export default function AddRequest() {
                       value={requestData.contact_preference}
                       onValueChange={(value) => handleInputChange('contact_preference', value)}
                     >
-                      <SelectTrigger className="h-12 rounded-xl bg-slate-600 border-slate-500 text-white">
+                      <SelectTrigger className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-600 border-slate-500 text-white">
+                      <SelectContent className="bg-gray-800 border-gray-700 text-white">
                         {contactPreferences.map(pref => (
                           <SelectItem key={pref.value} value={pref.value}>
                             {pref.label}
@@ -323,7 +323,7 @@ export default function AddRequest() {
                     value={requestData.location}
                     onChange={(e) => handleInputChange('location', e.target.value)}
                     placeholder="Where does this work need to be done?"
-                    className="h-12 rounded-xl bg-slate-600 border-slate-500 text-white"
+                    className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white"
                   />
                 </div>
 
@@ -350,13 +350,13 @@ export default function AddRequest() {
                       value={newTag}
                       onChange={(e) => setNewTag(e.target.value)}
                       placeholder="Add a tag..."
-                      className="flex-1 h-10 rounded-xl bg-slate-600 border-slate-500 text-white"
+                      className="flex-1 h-10 rounded-xl bg-gray-800 border-gray-700 text-white"
                     />
                     <Button
                       type="submit"
                       size="sm"
                       variant="outline"
-                      className="px-4 rounded-xl bg-slate-600 border-slate-500 hover:bg-gray-700"
+                      className="px-4 rounded-xl bg-gray-800 border-gray-700 hover:bg-gray-700"
                     >
                       <Plus className="w-4 h-4" />
                     </Button>
@@ -371,7 +371,7 @@ export default function AddRequest() {
                 type="button"
                 variant="outline"
                 onClick={() => navigate(createPageUrl("Requests"))}
-                className="h-12 px-6 rounded-xl border-slate-500 hover:bg-slate-600"
+                className="h-12 px-6 rounded-xl border-gray-700 hover:bg-gray-800"
               >
                 Cancel
               </Button>

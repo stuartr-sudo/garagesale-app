@@ -293,10 +293,10 @@ export default function SpecialOffers() {
                 <div className="space-y-2">
                   <Label className="text-gray-300">Offer Type *</Label>
                   <Select value={formData.offer_type} onValueChange={(value) => setFormData(prev => ({ ...prev, offer_type: value }))}>
-                    <SelectTrigger className="bg-slate-700 border-slate-500 text-white">
+                    <SelectTrigger className="bg-gray-900 border-gray-700 text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-700 border-slate-500 text-white">
+                    <SelectContent className="bg-gray-900 border-gray-700 text-white">
                       <SelectItem value="bogo" className="text-white hover:bg-cyan-600 hover:text-white focus:bg-cyan-600 focus:text-white cursor-pointer">Buy One Get One Free (BOGO)</SelectItem>
                       <SelectItem value="percentage_off" className="text-white hover:bg-cyan-600 hover:text-white focus:bg-cyan-600 focus:text-white cursor-pointer">Percentage Off</SelectItem>
                       <SelectItem value="bulk_discount" className="text-white hover:bg-cyan-600 hover:text-white focus:bg-cyan-600 focus:text-white cursor-pointer">Bulk Discount</SelectItem>
@@ -311,7 +311,7 @@ export default function SpecialOffers() {
                     value={formData.title}
                     onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                     placeholder="e.g., Buy One Get One Free!"
-                    className="bg-slate-700 border-slate-500 text-white"
+                    className="bg-gray-900 border-gray-700 text-white"
                     required
                   />
                 </div>
@@ -323,7 +323,7 @@ export default function SpecialOffers() {
                     value={formData.description}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                     placeholder="Describe your offer..."
-                    className="bg-slate-700 border-slate-500 text-white"
+                    className="bg-gray-900 border-gray-700 text-white"
                     rows={3}
                   />
                 </div>
@@ -342,7 +342,7 @@ export default function SpecialOffers() {
                         config: { ...prev.config, percentage: parseInt(e.target.value) }
                       }))}
                       placeholder="e.g., 20"
-                      className="bg-slate-700 border-slate-500 text-white"
+                      className="bg-gray-900 border-gray-700 text-white"
                       required
                     />
                   </div>
@@ -361,7 +361,7 @@ export default function SpecialOffers() {
                           config: { ...prev.config, min_quantity: parseInt(e.target.value) }
                         }))}
                         placeholder="e.g., 3"
-                        className="bg-slate-700 border-slate-500 text-white"
+                        className="bg-gray-900 border-gray-700 text-white"
                         required
                       />
                     </div>
@@ -377,7 +377,7 @@ export default function SpecialOffers() {
                           config: { ...prev.config, discount_amount: parseFloat(e.target.value) }
                         }))}
                         placeholder="e.g., 10.00"
-                        className="bg-slate-700 border-slate-500 text-white"
+                        className="bg-gray-900 border-gray-700 text-white"
                         required
                       />
                     </div>
@@ -387,9 +387,9 @@ export default function SpecialOffers() {
                 {/* Select Items */}
                 <div className="space-y-2">
                   <Label className="text-gray-300">Select Items *</Label>
-                  <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-700 border border-slate-500 rounded-lg">
+                  <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto p-2 bg-gray-900 border border-gray-700 rounded-lg">
                     {myItems.map(item => (
-                      <label key={item.id} className="flex items-center gap-2 p-2 hover:bg-slate-600 rounded cursor-pointer">
+                      <label key={item.id} className="flex items-center gap-2 p-2 hover:bg-gray-800 rounded cursor-pointer">
                         <input
                           type="checkbox"
                           checked={formData.item_ids.includes(item.id)}
@@ -424,7 +424,7 @@ export default function SpecialOffers() {
                       type="datetime-local"
                       value={formData.starts_at}
                       onChange={(e) => setFormData(prev => ({ ...prev, starts_at: e.target.value }))}
-                      className="bg-slate-700 border-slate-500 text-white"
+                      className="bg-gray-900 border-gray-700 text-white"
                     />
                   </div>
                   <div className="space-y-2">
@@ -433,7 +433,7 @@ export default function SpecialOffers() {
                       type="datetime-local"
                       value={formData.ends_at}
                       onChange={(e) => setFormData(prev => ({ ...prev, ends_at: e.target.value }))}
-                      className="bg-slate-700 border-slate-500 text-white"
+                      className="bg-gray-900 border-gray-700 text-white"
                     />
                   </div>
                 </div>
@@ -444,7 +444,7 @@ export default function SpecialOffers() {
                     type="button"
                     variant="outline"
                     onClick={() => setIsModalOpen(false)}
-                    className="flex-1 bg-slate-600 border-slate-500 text-white hover:bg-gray-700"
+                    className="flex-1 bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
                   >
                     Cancel
                   </Button>

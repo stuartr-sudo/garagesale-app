@@ -213,8 +213,8 @@ export default function QuickListing({ onClose, onSuccess }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl bg-slate-700/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10 max-h-[90vh] overflow-y-auto">
-        <CardHeader className="border-b border-slate-600">
+      <Card className="w-full max-w-2xl bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10 max-h-[90vh] overflow-y-auto">
+        <CardHeader className="border-b border-gray-800">
           <div className="flex items-center justify-between">
             <CardTitle className="text-white flex items-center gap-2">
               <Camera className="w-5 h-5" />
@@ -268,7 +268,7 @@ export default function QuickListing({ onClose, onSuccess }) {
                 <Button
                   onClick={() => setShowCamera(true)}
                   disabled={isUploading}
-                  className="w-full h-48 border-2 border-dashed border-slate-500 hover:border-pink-500 bg-slate-600 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full h-48 border-2 border-dashed border-gray-700 hover:border-pink-500 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <div className="text-center">
                     {isUploading ? (
@@ -292,7 +292,7 @@ export default function QuickListing({ onClose, onSuccess }) {
                 <Button
                   onClick={() => setShowVoiceInput(true)}
                   disabled={isUploading}
-                  className="w-full h-48 border-2 border-dashed border-slate-500 hover:border-purple-500 bg-slate-600 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full h-48 border-2 border-dashed border-gray-700 hover:border-purple-500 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <div className="text-center">
                     {isUploading ? (
@@ -324,7 +324,7 @@ export default function QuickListing({ onClose, onSuccess }) {
                   value={formData.title}
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                   required
-                  className="bg-slate-600 border-slate-500 text-white"
+                  className="bg-gray-800 border-gray-700 text-white"
                   placeholder="Item title"
                 />
               </div>
@@ -338,7 +338,7 @@ export default function QuickListing({ onClose, onSuccess }) {
                   value={formData.price}
                   onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
                   required
-                  className="bg-slate-600 border-slate-500 text-white"
+                  className="bg-gray-800 border-gray-700 text-white"
                   placeholder="0.00"
                 />
               </div>
@@ -352,7 +352,7 @@ export default function QuickListing({ onClose, onSuccess }) {
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 required
                 rows={3}
-                className="bg-slate-600 border-slate-500 text-white"
+                className="bg-gray-800 border-gray-700 text-white"
                 placeholder="Describe your item..."
               />
             </div>
@@ -364,10 +364,10 @@ export default function QuickListing({ onClose, onSuccess }) {
                   value={formData.category}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
                 >
-                  <SelectTrigger className="bg-slate-600 border-slate-500 text-white">
+                  <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-600 border-slate-500">
+                  <SelectContent className="bg-gray-800 border-gray-700">
                     {categories.map(cat => (
                       <SelectItem key={cat.value} value={cat.value} className="text-white">
                         {cat.label}
@@ -383,10 +383,10 @@ export default function QuickListing({ onClose, onSuccess }) {
                   value={formData.condition}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, condition: value }))}
                 >
-                  <SelectTrigger className="bg-slate-600 border-slate-500 text-white">
+                  <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-600 border-slate-500">
+                  <SelectContent className="bg-gray-800 border-gray-700">
                     {conditions.map(cond => (
                       <SelectItem key={cond.value} value={cond.value} className="text-white">
                         {cond.label}
@@ -405,7 +405,7 @@ export default function QuickListing({ onClose, onSuccess }) {
                 step="0.01"
                 value={formData.minimum_price}
                 onChange={(e) => setFormData(prev => ({ ...prev, minimum_price: e.target.value }))}
-                className="bg-slate-600 border-slate-500 text-white"
+                className="bg-gray-800 border-gray-700 text-white"
                 placeholder="Lowest price you'll accept"
               />
               <p className="text-xs text-gray-400 mt-1">
@@ -420,10 +420,10 @@ export default function QuickListing({ onClose, onSuccess }) {
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                  className="bg-slate-600 border-slate-500 text-white"
+                  className="bg-gray-800 border-gray-700 text-white"
                   placeholder="Add tag"
                 />
-                <Button type="button" onClick={addTag} variant="outline" className="border-slate-500 text-gray-300">
+                <Button type="button" onClick={addTag} variant="outline" className="border-gray-700 text-gray-300">
                   Add
                 </Button>
               </div>
@@ -449,7 +449,7 @@ export default function QuickListing({ onClose, onSuccess }) {
                 id="location"
                 value={formData.location}
                 onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                className="bg-slate-600 border-slate-500 text-white"
+                className="bg-gray-800 border-gray-700 text-white"
                 placeholder="City, State"
               />
             </div>
@@ -459,7 +459,7 @@ export default function QuickListing({ onClose, onSuccess }) {
                 type="button"
                 variant="outline"
                 onClick={onClose}
-                className="flex-1 border-slate-500 text-gray-300 hover:bg-slate-600"
+                className="flex-1 border-gray-700 text-gray-300 hover:bg-gray-800"
               >
                 Cancel
               </Button>
