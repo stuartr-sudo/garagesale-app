@@ -595,10 +595,10 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
     switch (currentStep) {
       case 1:
   return (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-white mb-2">Add Photos</h2>
-              <p className="text-gray-400">Upload images of your item (first image will be the main photo)</p>
+          <div className="space-y-4">
+            <div className="text-center mb-4">
+              <h2 className="text-xl font-bold text-white mb-1">Add Photos</h2>
+              <p className="text-gray-400 text-sm">Upload images of your item (first image will be the main photo)</p>
           </div>
 
                 <ImageUpload
@@ -633,19 +633,19 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
 
       case 2:
         return (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-white mb-2">Title & Description</h2>
-              <p className="text-gray-400">Tell buyers about your item</p>
+          <div className="space-y-4">
+            <div className="text-center mb-4">
+              <h2 className="text-xl font-bold text-white mb-1">Title & Description</h2>
+              <p className="text-gray-400 text-sm">Tell buyers about your item</p>
             </div>
 
             {/* Image Preview */}
             {itemData.image_urls.length > 0 && (
-              <div className="mb-6">
-                <Label className="text-gray-300 mb-3 block">Your Listing Preview</Label>
-                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                  <div className="flex gap-4">
-                    <div className="w-24 h-24 flex-shrink-0">
+              <div className="mb-4">
+                <Label className="text-gray-300 mb-2 block text-sm">Your Listing Preview</Label>
+                <div className="bg-gray-800 rounded-lg p-3 border border-gray-700">
+                  <div className="flex gap-3">
+                    <div className="w-16 h-16 flex-shrink-0">
                       <img
                         src={itemData.image_urls[0]}
                         alt="Item preview"
@@ -653,14 +653,14 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-white font-semibold text-lg mb-2 line-clamp-2">
+                      <h3 className="text-white font-semibold text-sm mb-1 line-clamp-2">
                         {itemData.title || "Your item title will appear here"}
                       </h3>
-                      <p className="text-gray-400 text-sm line-clamp-3">
+                      <p className="text-gray-400 text-xs line-clamp-2">
                         {itemData.description || "Your item description will appear here"}
                       </p>
-                      <div className="mt-2">
-                        <span className="text-2xl font-bold text-green-400">
+                      <div className="mt-1">
+                        <span className="text-lg font-bold text-green-400">
                           ${itemData.price || "0.00"}
                         </span>
                       </div>
@@ -672,78 +672,78 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
 
             {/* Voice-to-Text Capability Question */}
             {!hasVoiceInput && (
-              <div className="mb-6 p-4 bg-gradient-to-r from-purple-900/20 to-pink-900/20 border border-purple-500/30 rounded-lg">
+              <div className="mb-4 p-3 bg-gradient-to-r from-purple-900/20 to-pink-900/20 border border-purple-500/30 rounded-lg">
                 <div className="text-center">
-                  <h3 className="text-lg font-semibold text-white mb-2">🎤 Voice-to-Text Available!</h3>
-                  <p className="text-gray-300 mb-4">
-                    Can you speak to describe your item? This will help AI generate better, more personalized content.
+                  <h3 className="text-base font-semibold text-white mb-1">🎤 Voice-to-Text Available!</h3>
+                  <p className="text-gray-300 text-sm mb-3">
+                    Can you speak to describe your item? This will help AI generate better content.
                   </p>
-                  <div className="flex flex-col gap-3 justify-center">
-                    <div className="flex gap-3 justify-center">
-                      <Button
-                        type="button"
-                        onClick={() => {
-                          setVoiceTargetField('intelligent');
-                          openVoiceInput('intelligent');
-                        }}
-                        variant="outline"
-                        className="border-purple-500 text-purple-400 hover:bg-purple-500/10"
-                      >
-                        <Mic className="w-4 h-4 mr-2" />
-                        Yes, describe my item
-                      </Button>
-                      <Button
-                        type="button"
-                        onClick={() => setHasVoiceInput(false)}
-                        variant="ghost"
-                        className="text-gray-400 hover:text-white"
-                      >
-                        Skip voice input
-                      </Button>
-                    </div>
-                    <p className="text-gray-400 text-xs text-center">
-                      AI will intelligently extract title and description from your voice
-                    </p>
+                  <div className="flex gap-2 justify-center">
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        setVoiceTargetField('intelligent');
+                        openVoiceInput('intelligent');
+                      }}
+                      variant="outline"
+                      size="sm"
+                      className="border-purple-500 text-purple-400 hover:bg-purple-500/10"
+                    >
+                      <Mic className="w-3 h-3 mr-1" />
+                      Yes, describe my item
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => setHasVoiceInput(false)}
+                      variant="ghost"
+                      size="sm"
+                      className="text-gray-400 hover:text-white"
+                    >
+                      Skip
+                    </Button>
                   </div>
+                  <p className="text-gray-400 text-xs text-center mt-2">
+                    AI will intelligently extract title and description from your voice
+                  </p>
                 </div>
               </div>
             )}
 
             {/* Voice Input Status */}
             {hasVoiceInput && voiceTranscription && (
-              <div className="mb-6 p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <CheckCircle className="w-5 h-5 text-green-400" />
-                  <span className="text-green-400 font-medium">Voice input captured!</span>
+              <div className="mb-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
+                <div className="flex items-center gap-2 mb-1">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span className="text-green-400 font-medium text-sm">Voice input captured!</span>
                 </div>
-                <p className="text-gray-300 text-sm">
+                <p className="text-gray-300 text-xs mb-2">
                   Your voice description will be used to enhance the AI-generated content.
                 </p>
-                <div className="mt-2 p-2 bg-gray-800 rounded text-sm text-gray-300">
-                  "{voiceTranscription.substring(0, 100)}{voiceTranscription.length > 100 ? '...' : ''}"
+                <div className="p-2 bg-gray-800 rounded text-xs text-gray-300">
+                  "{voiceTranscription.substring(0, 80)}{voiceTranscription.length > 80 ? '...' : ''}"
                 </div>
               </div>
             )}
 
             {/* AI Generation Button */}
-            <div className="flex justify-center mb-6">
+            <div className="flex justify-center mb-4">
               <Button
                 type="button"
                 onClick={() => generateWithAI('both')}
                 disabled={isGeneratingContent}
                 variant="outline"
-                size="lg"
+                size="sm"
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-purple-500"
               >
                 {isGeneratingContent ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Generating with AI...
+                    <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                    Generating...
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    {hasVoiceInput ? "Generate with AI + Voice Input" : "Generate Title & Description with AI"}
+                    <Sparkles className="w-3 h-3 mr-1" />
+                    {hasVoiceInput ? "Generate with AI + Voice" : "Generate with AI"}
                   </>
                 )}
               </Button>
@@ -791,7 +791,7 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
                 value={itemData.description}
                 onChange={(e) => setItemData(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Describe your item in detail..."
-                rows={6}
+                rows={4}
                 className="bg-gray-800 border-gray-700 text-white"
               />
             </div>
@@ -800,10 +800,10 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
 
       case 3:
         return (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-white mb-2">Pricing</h2>
-              <p className="text-gray-400">Set your price and minimum offer</p>
+          <div className="space-y-4">
+            <div className="text-center mb-4">
+              <h2 className="text-xl font-bold text-white mb-1">Pricing</h2>
+              <p className="text-gray-400 text-sm">Set your price and minimum offer</p>
             </div>
 
                   <div className="space-y-2">
@@ -841,10 +841,10 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
 
       case 4:
         return (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-white mb-2">Details</h2>
-              <p className="text-gray-400">Category, condition, and location</p>
+          <div className="space-y-4">
+            <div className="text-center mb-4">
+              <h2 className="text-xl font-bold text-white mb-1">Details</h2>
+              <p className="text-gray-400 text-sm">Category, condition, and location</p>
                 </div>
 
                   <div className="space-y-2">
@@ -898,17 +898,17 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
 
       case 5:
         return (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
-              <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-white mb-2">Review & Confirm</h2>
-              <p className="text-gray-400">Check your listing before publishing</p>
+          <div className="space-y-4">
+            <div className="text-center mb-4">
+              <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-2" />
+              <h2 className="text-xl font-bold text-white mb-1">Review & Confirm</h2>
+              <p className="text-gray-400 text-sm">Check your listing before publishing</p>
             </div>
 
             <Card className="bg-gray-800 border-gray-700">
-              <CardContent className="p-6 space-y-4">
+              <CardContent className="p-4 space-y-3">
                 {itemData.image_urls[0] && (
-                  <img src={itemData.image_urls[0]} alt="Main" className="w-full h-48 object-cover rounded-lg" />
+                  <img src={itemData.image_urls[0]} alt="Main" className="w-full h-32 object-cover rounded-lg" />
                 )}
                 
                 <div>
@@ -955,33 +955,33 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-gray-200 p-4 md:p-8">
-      <div className="max-w-3xl mx-auto">
+    <div className="min-h-screen bg-slate-950 text-gray-200 p-4 md:p-6">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-4">
           <Button
             variant="ghost"
             onClick={() => navigate(createPageUrl('MyItems'))}
-            className="text-gray-400 hover:text-white mb-4"
+            className="text-gray-400 hover:text-white mb-2"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
           
-          <h1 className="text-3xl font-bold text-white mb-2">Add New Item</h1>
+          <h1 className="text-2xl font-bold text-white mb-2">Add New Item</h1>
           
           {/* Progress Bar */}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <div className="flex justify-between text-sm text-gray-400">
               <span>Step {currentStep} of {totalSteps}</span>
               <span>{Math.round((currentStep / totalSteps) * 100)}%</span>
             </div>
-            <Progress value={(currentStep / totalSteps) * 100} className="h-2" />
+            <Progress value={(currentStep / totalSteps) * 100} className="h-1" />
           </div>
         </div>
 
         {/* Content */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 md:p-8 mb-6">
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 md:p-6 mb-4">
           {renderStep()}
         </div>
 
