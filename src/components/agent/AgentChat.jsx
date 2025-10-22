@@ -96,33 +96,40 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
         let counterOfferAmount = null;
         let acceptedOfferAmount = null;
         
-        // If offer was accepted, extract the accepted amount (usually the first/only price mentioned)
+        // If offer was accepted by the API, extract the accepted amount
         if (data.offer_accepted && allPriceMatches.length > 0) {
           acceptedOfferAmount = parseFloat(allPriceMatches[0][1].replace(/,/g, ''));
         } else if (allPriceMatches.length > 0) {
-          // Check if it's a counter-offer
-          const isCounterOffer = (responseLower.includes('counter') && responseLower.includes('at')) || 
-                                 responseLower.includes('how about') || 
-                                 responseLower.includes('would you consider') ||
-                                 responseLower.includes('could you do') ||
-                                 (responseLower.includes('meet') && responseLower.includes('at')) ||
-                                 responseLower.includes('i can offer') ||
-                                 responseLower.includes("i'd accept") ||
-                                 responseLower.includes("i would accept") ||
-                                 responseLower.includes("i'd be happy") ||
-                                 responseLower.includes("happy to accept") ||
-                                 responseLower.includes("willing to accept");
+          // Check if AI is accepting the user's offer (not the API flag, but the text)
+          const isAcceptingOffer = (responseLower.includes('can') && responseLower.includes('accept')) ||
+                                    (responseLower.includes('absolutely') && responseLower.includes('accept')) ||
+                                    (responseLower.includes('happy') && responseLower.includes('accept')) ||
+                                    (responseLower.includes('great') && responseLower.includes('offer') && responseLower.includes('accept'));
           
-          // Check for rejection phrases
-          const isRejection = responseLower.includes('appreciate your offer') ||
-                             responseLower.includes('thank you for') ||
-                             (responseLower.includes('while') && responseLower.includes('appreciate'));
-          
-          if (isCounterOffer && !isRejection) {
-            // If there are multiple prices, the LAST one is usually the counter-offer
-            // The first one is usually the user's rejected offer
-            const lastPriceMatch = allPriceMatches[allPriceMatches.length - 1];
-            counterOfferAmount = parseFloat(lastPriceMatch[1].replace(/,/g, ''));
+          if (isAcceptingOffer) {
+            // AI is accepting the user's offer - treat as accepted offer
+            acceptedOfferAmount = parseFloat(allPriceMatches[0][1].replace(/,/g, ''));
+          } else {
+            // Check if it's a counter-offer
+            const isCounterOffer = (responseLower.includes('counter') && responseLower.includes('at')) || 
+                                   responseLower.includes('how about') || 
+                                   responseLower.includes('would you consider') ||
+                                   responseLower.includes('could you do') ||
+                                   (responseLower.includes('meet') && responseLower.includes('at')) ||
+                                   responseLower.includes('i can offer') ||
+                                   (responseLower.includes('happy to') && responseLower.includes('counter'));
+            
+            // Check for rejection phrases
+            const isRejection = responseLower.includes('appreciate your offer') ||
+                               responseLower.includes('thank you for') ||
+                               (responseLower.includes('while') && responseLower.includes('appreciate'));
+            
+            if (isCounterOffer && !isRejection) {
+              // If there are multiple prices, the LAST one is usually the counter-offer
+              // The first one is usually the user's rejected offer
+              const lastPriceMatch = allPriceMatches[allPriceMatches.length - 1];
+              counterOfferAmount = parseFloat(lastPriceMatch[1].replace(/,/g, ''));
+            }
           }
         }
 
