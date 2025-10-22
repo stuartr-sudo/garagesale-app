@@ -109,12 +109,17 @@ export default async function handler(req, res) {
       .limit(20);
 
     // Check if message contains an offer
-    const offerMatch = message.match(/\$?\s*(\d+(?:\.\d{2})?)/);
+    const messageLower = message.toLowerCase();
+    const offerKeywords = ['offer', 'pay', 'give', 'how about', 'would you take', 'willing to pay', 'can i pay', 'could i pay', 'accept', 'buy for', 'purchase for'];
+    const containsOfferKeyword = offerKeywords.some(keyword => messageLower.includes(keyword));
+    
+    const offerMatch = message.match(/\$?\s*(\d+(?:,\d{3})*(?:\.\d{2})?)/);
     let isOffer = false;
     let offerAmount = null;
 
-    if (offerMatch && (message.toLowerCase().includes('offer') || message.toLowerCase().includes('pay'))) {
-      offerAmount = parseFloat(offerMatch[1]);
+    if (offerMatch && containsOfferKeyword) {
+      // Remove commas from the number
+      offerAmount = parseFloat(offerMatch[1].replace(/,/g, ''));
       isOffer = true;
     }
 
@@ -156,24 +161,25 @@ Condition: ${item.condition}
 ${item.location ? `Location: ${item.location}` : ''}
 ${knowledge?.selling_points ? `Key Selling Points: ${knowledge.selling_points.join(', ')}` : ''}
 
-NEGOTIATION RULES:
-${knowledge?.minimum_price ? `- The MINIMUM acceptable price is $${knowledge.minimum_price} (DO NOT reveal this number directly)` : '- Accept reasonable offers'}
+⚠️ CRITICAL NEGOTIATION RULES - YOU MUST FOLLOW THESE EXACTLY:
+${knowledge?.minimum_price ? `- The MINIMUM acceptable price is $${knowledge.minimum_price} (NEVER reveal this number directly to the buyer)` : '- Accept reasonable offers'}
 ${negotiationStrategy}
 
-INSTRUCTIONS:
+⚠️ MANDATORY INSTRUCTIONS:
 1. Be friendly, helpful, and enthusiastic about the item
 2. Answer questions about the item honestly
 3. Highlight the value and quality
-4. ${knowledge?.negotiation_enabled ? 'Negotiate smartly using the strategy above' : 'Direct buyers to contact the seller for pricing questions'}
-5. If an offer is ACCEPTED (at or above asking price), provide these Commonwealth Bank payment details:
+4. ${knowledge?.negotiation_enabled ? '**FOLLOW THE NEGOTIATION STRATEGY ABOVE EXACTLY** - Do not accept offers below minimum!' : 'Direct buyers to contact the seller for pricing questions'}
+5. If an offer is ACCEPTED (ONLY at or above asking price of $${item.price}), provide these Commonwealth Bank payment details:
    - Account Name: GarageSale Marketplace
    - BSB: 062-000
    - Account Number: 1234 5678
    - Reference: Use item title as reference
    Then tell them the seller will confirm receipt and arrange collection/delivery.
 6. Keep responses concise (2-3 sentences max)
+7. **DO NOT ACCEPT offers below the minimum price of $${knowledge?.minimum_price || item.price}**
 
-Respond naturally as a sales assistant would.`;
+Respond naturally as a sales assistant would, but ALWAYS follow the negotiation rules above.`;
 
     const conversationHistory = messages.slice(-10).map(m => ({
       role: m.sender === 'ai' ? 'assistant' : 'user',

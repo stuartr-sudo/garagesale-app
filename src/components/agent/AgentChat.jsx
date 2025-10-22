@@ -87,9 +87,17 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
           setConversationId(data.conversation_id);
         }
 
-        // Extract counter-offer from AI response
-        const counterOfferMatch = data.response.match(/\$(\d+(?:\.\d{2})?)/);
-        const counterOfferAmount = counterOfferMatch ? parseFloat(counterOfferMatch[1]) : null;
+        // Extract counter-offer from AI response ONLY if the response suggests a counter-offer
+        const responseLower = data.response.toLowerCase();
+        const isCounterOffer = responseLower.includes('counter') || 
+                               responseLower.includes('how about') || 
+                               responseLower.includes('would you consider') ||
+                               responseLower.includes('could you do') ||
+                               responseLower.includes('meet at') ||
+                               responseLower.includes('i can offer');
+        
+        const counterOfferMatch = data.response.match(/\$(\d+(?:,\d{3})*(?:\.\d{2})?)/);
+        const counterOfferAmount = (isCounterOffer && counterOfferMatch) ? parseFloat(counterOfferMatch[1].replace(/,/g, '')) : null;
 
         // Add AI response
         setMessages(prev => [...prev, {
