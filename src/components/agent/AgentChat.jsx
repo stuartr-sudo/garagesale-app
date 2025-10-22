@@ -89,17 +89,19 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
 
         // Extract counter-offer or accepted offer amount from AI response
         const responseLower = data.response.toLowerCase();
-        const priceMatch = data.response.match(/\$(\d+(?:,\d{3})*(?:\.\d{2})?)/);
+        
+        // Find ALL dollar amounts in the response
+        const allPriceMatches = [...data.response.matchAll(/\$(\d+(?:,\d{3})*(?:\.\d{2})?)/g)];
         
         let counterOfferAmount = null;
         let acceptedOfferAmount = null;
         
-        // If offer was accepted, extract the accepted amount
-        if (data.offer_accepted && priceMatch) {
-          acceptedOfferAmount = parseFloat(priceMatch[1].replace(/,/g, ''));
-        } else {
-          // Otherwise check if it's a counter-offer
-          const isCounterOffer = (responseLower.includes('counter') && responseLower.includes('offer')) || 
+        // If offer was accepted, extract the accepted amount (usually the first/only price mentioned)
+        if (data.offer_accepted && allPriceMatches.length > 0) {
+          acceptedOfferAmount = parseFloat(allPriceMatches[0][1].replace(/,/g, ''));
+        } else if (allPriceMatches.length > 0) {
+          // Check if it's a counter-offer
+          const isCounterOffer = (responseLower.includes('counter') && responseLower.includes('at')) || 
                                  responseLower.includes('how about') || 
                                  responseLower.includes('would you consider') ||
                                  responseLower.includes('could you do') ||
@@ -107,17 +109,20 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
                                  responseLower.includes('i can offer') ||
                                  responseLower.includes("i'd accept") ||
                                  responseLower.includes("i would accept") ||
+                                 responseLower.includes("i'd be happy") ||
+                                 responseLower.includes("happy to accept") ||
                                  responseLower.includes("willing to accept");
           
-          // Also exclude if the response contains rejection phrases
-          const isRejection = responseLower.includes('below') || 
-                             responseLower.includes('too low') ||
-                             responseLower.includes('cannot accept') ||
-                             responseLower.includes("can't accept") ||
-                             responseLower.includes('decline');
+          // Check for rejection phrases
+          const isRejection = responseLower.includes('appreciate your offer') ||
+                             responseLower.includes('thank you for') ||
+                             (responseLower.includes('while') && responseLower.includes('appreciate'));
           
-          if (isCounterOffer && !isRejection && priceMatch) {
-            counterOfferAmount = parseFloat(priceMatch[1].replace(/,/g, ''));
+          if (isCounterOffer && !isRejection) {
+            // If there are multiple prices, the LAST one is usually the counter-offer
+            // The first one is usually the user's rejected offer
+            const lastPriceMatch = allPriceMatches[allPriceMatches.length - 1];
+            counterOfferAmount = parseFloat(lastPriceMatch[1].replace(/,/g, ''));
           }
         }
 
