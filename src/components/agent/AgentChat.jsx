@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Bot, Send, Loader2, CheckCircle, Sparkles } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
-export default function AgentChat({ itemId, itemTitle, itemPrice }) {
+export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -237,13 +237,11 @@ export default function AgentChat({ itemId, itemTitle, itemPrice }) {
                           e.preventDefault();
                           e.stopPropagation();
                           const acceptedAmount = msg.accepted_offer;
-                          const title = itemTitle;
                           setOfferAccepted(true);
-                          setMessages(prev => [...prev, {
-                            sender: 'system',
-                            content: `🎉 Congratulations! Your offer of $${acceptedAmount} has been accepted!\n\n💳 Payment Details:\n• Account Name: GarageSale Marketplace\n• BSB: 062-000\n• Account Number: 1234 5678\n• Reference: "${title}"\n\nOnce the payment is confirmed, the seller will arrange for collection or delivery.`,
-                            timestamp: new Date().toISOString()
-                          }]);
+                          // Call the parent component to open purchase modal with negotiated price
+                          if (onAcceptOffer) {
+                            onAcceptOffer(acceptedAmount);
+                          }
                         }}
                         className="mt-2 w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold shadow-lg animate-pulse"
                         disabled={loading}

@@ -35,6 +35,7 @@ export default function ItemDetail() {
   const [isInCart, setIsInCart] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [isImageFullscreen, setIsImageFullscreen] = useState(false);
+  const [negotiatedPrice, setNegotiatedPrice] = useState(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -155,6 +156,12 @@ export default function ItemDetail() {
       console.error('Error saving agent settings:', error);
       alert('Error saving settings. Please try again.');
     }
+  };
+
+  const handleAcceptOffer = (acceptedAmount) => {
+    // Set the negotiated price and open the purchase modal
+    setNegotiatedPrice(acceptedAmount);
+    setShowPurchaseModal(true);
   };
 
   const handleAddToCart = async () => {
@@ -398,6 +405,7 @@ export default function ItemDetail() {
               itemId={item.id}
               itemTitle={item.title}
               itemPrice={item.price}
+              onAcceptOffer={handleAcceptOffer}
             />
           ) : isOwner ? (
             <Card className="bg-gray-800/50 border-gray-800">
@@ -574,7 +582,11 @@ export default function ItemDetail() {
         <PurchaseModal
           item={item}
           seller={seller}
-          onClose={() => setShowPurchaseModal(false)}
+          negotiatedPrice={negotiatedPrice}
+          onClose={() => {
+            setShowPurchaseModal(false);
+            setNegotiatedPrice(null); // Reset negotiated price when closing
+          }}
         />
       )}
 

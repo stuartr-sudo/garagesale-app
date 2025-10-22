@@ -27,7 +27,7 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { reserveItem, releaseItemReservation } from "@/api/functions";
 
-export default function PurchaseModal({ item, seller, onClose, onSuccess }) {
+export default function PurchaseModal({ item, seller, onClose, onSuccess, negotiatedPrice = null }) {
   const [step, setStep] = useState(1); // 1=confirm, 2=delivery, 3=payment, 4=waiting
   const [deliveryMethod, setDeliveryMethod] = useState("collect");
   const [shippingAddress, setShippingAddress] = useState("");
@@ -144,8 +144,13 @@ export default function PurchaseModal({ item, seller, onClose, onSuccess }) {
   };
 
   const getTotalPrice = () => {
-    const basePrice = parseFloat(item.price);
+    // Use negotiated price if available, otherwise use item price
+    const basePrice = negotiatedPrice ? parseFloat(negotiatedPrice) : parseFloat(item.price);
     return deliveryMethod === 'ship' ? basePrice + shippingCost : basePrice;
+  };
+
+  const getDisplayPrice = () => {
+    return negotiatedPrice ? parseFloat(negotiatedPrice) : parseFloat(item.price);
   };
 
   const handleConfirmPurchase = () => {
@@ -296,7 +301,12 @@ export default function PurchaseModal({ item, seller, onClose, onSuccess }) {
               </div>
               <div className="text-right">
                 <div className="text-sm text-gray-400">Price</div>
-                <div className="text-2xl font-bold text-cyan-400">${item.price}</div>
+                <div className="text-2xl font-bold text-cyan-400">
+                  ${getDisplayPrice().toFixed(2)}
+                  {negotiatedPrice && (
+                    <div className="text-xs text-green-400 mt-1">Negotiated Price</div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -416,7 +426,12 @@ export default function PurchaseModal({ item, seller, onClose, onSuccess }) {
                 <div className="space-y-2">
                   <div className="flex justify-between text-gray-300">
                     <span>Item Price:</span>
-                    <span>${item.price}</span>
+                    <span>
+                      ${getDisplayPrice().toFixed(2)}
+                      {negotiatedPrice && (
+                        <span className="text-green-400 text-xs ml-2">(Negotiated)</span>
+                      )}
+                    </span>
                   </div>
                   <div className="flex justify-between text-gray-300">
                     <span>Delivery:</span>
