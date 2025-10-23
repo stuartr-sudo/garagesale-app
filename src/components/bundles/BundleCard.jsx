@@ -23,7 +23,7 @@ export default function BundleCard({
   const primaryImage = bundle.bundle_items?.[0]?.items?.image_urls?.[0] || 
     "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop";
 
-  // Load theme from localStorage (same as ItemCard)
+  // Load theme from localStorage (with bundle support)
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem('marketplace-theme');
     return saved ? JSON.parse(saved) : {
@@ -31,7 +31,12 @@ export default function BundleCard({
       cardTo: '#581c87',    // purple-900
       buttonFrom: '#a855f7', // purple-500
       buttonTo: '#db2777',  // pink-600
-      accentColor: '#22d3ee' // cyan-400
+      accentColor: '#22d3ee', // cyan-400
+      bundleCardFrom: '#059669', // emerald-600
+      bundleCardTo: '#047857',   // emerald-700
+      bundleButtonFrom: '#10b981', // emerald-500
+      bundleButtonTo: '#059669',   // emerald-600
+      bundleAccentColor: '#6ee7b7' // emerald-300
     };
   });
 
@@ -52,7 +57,7 @@ export default function BundleCard({
     <Card 
       className="rounded-2xl shadow-2xl shadow-green-500/20 hover:shadow-green-500/40 transition-all duration-300 border-2 border-green-500/30 hover:border-green-400/60 overflow-hidden group hover:scale-[1.02] flex flex-col h-full ring-1 ring-green-400/20 hover:ring-green-400/40"
       style={{
-        background: `linear-gradient(to bottom right, ${theme.cardFrom}, ${theme.cardTo})`
+        background: `linear-gradient(to bottom right, ${theme.bundleCardFrom || theme.cardFrom}, ${theme.bundleCardTo || theme.cardTo})`
       }}
     >
       {/* Image Section - 4:3 aspect ratio like ItemCard */}
@@ -92,7 +97,7 @@ export default function BundleCard({
             style={{ 
               '--hover-color': theme.accentColor 
             }}
-            onMouseEnter={(e) => e.target.style.color = theme.accentColor}
+            onMouseEnter={(e) => e.target.style.color = theme.bundleAccentColor || theme.accentColor}
             onMouseLeave={(e) => e.target.style.color = 'white'}
           >
             {bundle.title}
@@ -120,7 +125,7 @@ export default function BundleCard({
           <div className="flex items-center justify-between mt-3">
             <div 
               className="text-2xl font-bold"
-              style={{ color: theme.accentColor }}
+              style={{ color: theme.bundleAccentColor || theme.accentColor }}
             >
               ${parseFloat(bundle.bundle_price).toFixed(2)}
             </div>
@@ -140,7 +145,7 @@ export default function BundleCard({
             onClick={() => onBuyNow(bundle)}
             className="w-full h-10 hover:opacity-90 rounded-xl font-semibold"
             style={{
-              background: `linear-gradient(to right, ${theme.buttonFrom}, ${theme.buttonTo})`
+              background: `linear-gradient(to right, ${theme.bundleButtonFrom || theme.buttonFrom}, ${theme.bundleButtonTo || theme.buttonTo})`
             }}
           >
             <ShoppingCart className="w-4 h-4 mr-2" />
