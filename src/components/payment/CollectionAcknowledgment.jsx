@@ -2,14 +2,27 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Calendar, MapPin, AlertCircle, Clock } from 'lucide-react';
-import { format } from 'date-fns';
+import { Calendar, MapPin, AlertCircle, Clock, Lock } from 'lucide-react';
+import { format, isAfter, subDays } from 'date-fns';
 
 export default function CollectionAcknowledgment({ 
   item, 
   onAcknowledge, 
   acknowledged 
 }) {
+  // Check if collection address should be shown (24 hours before collection date)
+  const shouldShowAddress = () => {
+    if (!item.collection_date) return false;
+    
+    const collectionDate = new Date(item.collection_date);
+    const now = new Date();
+    const twentyFourHoursBefore = subDays(collectionDate, 1);
+    
+    return isAfter(now, twentyFourHoursBefore);
+  };
+
+  const showAddress = shouldShowAddress();
+
   return (
     <div className="space-y-4">
       <div className="text-center">
@@ -36,9 +49,18 @@ export default function CollectionAcknowledgment({
             <MapPin className="w-4 h-4 text-green-400 mt-1 flex-shrink-0" />
             <div>
               <Label className="text-xs font-medium text-gray-300">Collection Address</Label>
-              <p className="text-white text-sm">
-                {item.collection_address || 'Address to be provided by seller'}
-              </p>
+              {showAddress ? (
+                <p className="text-white text-sm">
+                  {item.collection_address || 'Address to be provided by seller'}
+                </p>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Lock className="w-3 h-3 text-yellow-400" />
+                  <p className="text-yellow-300 text-sm">
+                    Address will be revealed 24 hours before collection date
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -60,6 +82,7 @@ export default function CollectionAcknowledgment({
             <h3 className="text-yellow-400 font-medium mb-1 text-sm">Important Information</h3>
             <ul className="text-yellow-200 text-xs space-y-1">
               <li>• You must collect the item on the specified date</li>
+              <li>• Collection address will be revealed 24 hours before collection</li>
               <li>• Bring a valid ID for verification</li>
               <li>• Payment must be completed before collection</li>
               <li>• Contact the seller if you need to reschedule</li>
@@ -81,8 +104,9 @@ export default function CollectionAcknowledgment({
             className="text-xs text-gray-300 cursor-pointer leading-relaxed"
           >
             I acknowledge that I have read and understand the collection details above. 
-            I agree to collect the item on the specified date and time, and understand 
-            that payment must be completed before collection.
+            I agree to collect the item on the specified date and time, understand that 
+            the collection address will be revealed 24 hours before collection, and that 
+            payment must be completed before collection.
           </Label>
         </div>
       </div>
