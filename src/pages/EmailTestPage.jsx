@@ -3,6 +3,7 @@ import EmailTestButton from '@/components/EmailTestButton'
 import SimpleTestButton from '@/components/SimpleTestButton'
 import GmailAuthTestButton from '@/components/GmailAuthTestButton'
 import ResendTestButton from '@/components/ResendTestButton'
+import ResendConfigTestButton from '@/components/ResendConfigTestButton'
 
 export default function EmailTestPage() {
   return (
@@ -17,6 +18,7 @@ export default function EmailTestPage() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-6">
+            <ResendConfigTestButton />
             <ResendTestButton />
             <SimpleTestButton />
           </div>
