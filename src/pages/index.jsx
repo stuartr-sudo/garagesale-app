@@ -68,6 +68,7 @@ import ThemeSettings from "./ThemeSettings";
 
 import PaymentConfirmations from "./PaymentConfirmations";
 import EmailTestPage from "./EmailTestPage";
+import Baggage from "./Baggage";
 
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
@@ -138,6 +139,8 @@ const PAGES = {
     SpecialOffers: SpecialOffers,
     
     ThemeSettings: ThemeSettings,
+    
+    Baggage: Baggage,
     
 }
 
@@ -250,6 +253,7 @@ function PagesContent() {
                 
                 <Route path="/PaymentConfirmations" element={<PaymentConfirmations />} />
                 <Route path="/EmailTest" element={<EmailTestPage />} />
+                <Route path="/Baggage" element={<Baggage />} />
             </Routes>
         </Layout>
     );

@@ -27,7 +27,8 @@ import {
   RefreshCw, // For Trade Offers
   DollarSign, // For Connect page
   Tag, // For Special Offers
-  Clock // For Payment Confirmations
+  Clock, // For Payment Confirmations
+  Luggage // For Baggage
 } from "lucide-react";
 import { User } from "@/api/entities";
 import { Button } from "@/components/ui/button";
@@ -128,6 +129,12 @@ const navigationItems = [
     title: "Users",
     url: createPageUrl("Users"),
     icon: Users,
+    adminOnly: true,
+  },
+  {
+    title: "Baggage",
+    url: createPageUrl("Baggage"),
+    icon: Luggage,
     adminOnly: true,
   },
   {
