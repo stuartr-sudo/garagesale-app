@@ -757,6 +757,30 @@ Return only the description, nothing else.`
               </div>
             )}
 
+            {/* AI Generation Button - Always Visible */}
+            <div className="flex justify-center mb-4">
+              <Button
+                type="button"
+                onClick={() => generateWithAI('both')}
+                disabled={isGeneratingContent}
+                variant="outline"
+                size="sm"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 hover:shadow-lg hover:shadow-purple-500/25 text-white border-purple-500 hover:border-purple-400 transition-all duration-200"
+              >
+                {isGeneratingContent ? (
+                  <>
+                    <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3 h-3 mr-1" />
+                    {hasVoiceInput ? "Generate with AI + Voice" : "Generate with AI"}
+                  </>
+                )}
+              </Button>
+            </div>
+
             {/* Voice-to-Text Capability Question */}
             {!hasVoiceInput && (
               <div className="mb-4 p-3 bg-gradient-to-r from-purple-900/20 to-pink-900/20 border border-purple-500/30 rounded-lg">
@@ -860,29 +884,6 @@ Return only the description, nothing else.`
               />
             </div>
 
-            {/* AI Generation Button */}
-            <div className="flex justify-center mb-4">
-              <Button
-                type="button"
-                onClick={() => generateWithAI('both')}
-                disabled={isGeneratingContent}
-                variant="outline"
-                size="sm"
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 hover:shadow-lg hover:shadow-purple-500/25 text-white border-purple-500 hover:border-purple-400 transition-all duration-200"
-              >
-                {isGeneratingContent ? (
-                  <>
-                    <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-3 h-3 mr-1" />
-                    {hasVoiceInput ? "Generate with AI + Voice" : "Generate with AI"}
-                  </>
-                )}
-              </Button>
-            </div>
           </div>
         );
 
