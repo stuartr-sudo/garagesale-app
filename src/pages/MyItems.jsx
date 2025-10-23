@@ -6,16 +6,19 @@ import { Transaction } from "@/api/entities";
 import { Rating } from "@/api/entities";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Plus, Package, DollarSign, Eye, Edit, Trash2, Star, ShoppingBag } from "lucide-react";
+import { Plus, Package, DollarSign, Eye, Edit, Trash2, Star, ShoppingBag, CheckSquare, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 
 import MyItemCard from "../components/myitems/MyItemCard";
 import StatsCards from "../components/myitems/StatsCards";
 import RatingModal from "../components/ratings/RatingModal";
 import BundleCreator from "../components/bundles/BundleCreator";
+import BulkDeleteModal from "../components/inventory/BulkDeleteModal";
 
 export default function MyItems() {
   const [items, setItems] = useState([]);
@@ -26,6 +29,13 @@ export default function MyItems() {
   const [itemRatings, setItemRatings] = useState({});
   const [ratingTransaction, setRatingTransaction] = useState(null);
   const [showBundleCreator, setShowBundleCreator] = useState(false);
+  
+  // Bulk delete state
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  const [bulkSelectMode, setBulkSelectMode] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     loadUserItems();
@@ -97,6 +107,106 @@ export default function MyItems() {
     }
   };
 
+  // Bulk delete functions
+  const handleBulkSelectToggle = () => {
+    setBulkSelectMode(!bulkSelectMode);
+    if (bulkSelectMode) {
+      setSelectedItems([]);
+    }
+  };
+
+  const handleItemSelect = (item, isSelected) => {
+    if (isSelected) {
+      setSelectedItems(prev => [...prev, item]);
+    } else {
+      setSelectedItems(prev => prev.filter(selected => selected.id !== item.id));
+    }
+  };
+
+  const handleSelectAll = () => {
+    const currentTabItems = getCurrentTabItems();
+    setSelectedItems(currentTabItems);
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedItems([]);
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedItems.length === 0) {
+      toast({
+        title: "No Items Selected",
+        description: "Please select items to delete.",
+        variant: "destructive"
+      });
+      return;
+    }
+    setShowBulkDeleteModal(true);
+  };
+
+  const confirmBulkDelete = async () => {
+    setIsBulkDeleting(true);
+    try {
+      const response = await fetch('/api/bulk-delete-items', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          itemIds: selectedItems.map(item => item.id),
+          userId: currentUser.id
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: "Items Deleted",
+          description: `Successfully deleted ${data.deletedCount} item(s).`,
+        });
+        
+        // Refresh the items list
+        await loadUserItems();
+        
+        // Reset bulk selection
+        setSelectedItems([]);
+        setBulkSelectMode(false);
+        setShowBulkDeleteModal(false);
+      } else {
+        toast({
+          title: "Delete Failed",
+          description: data.error || "Failed to delete items.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting items:', error);
+      toast({
+        title: "Delete Failed",
+        description: "An error occurred while deleting items.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+
+  const getCurrentTabItems = () => {
+    switch (activeTab) {
+      case 'active':
+        return items.filter(item => item.status === 'active');
+      case 'sold':
+        return items.filter(item => item.status === 'sold');
+      case 'reserved':
+        return items.filter(item => item.status === 'reserved');
+      case 'inactive':
+        return items.filter(item => item.status === 'inactive');
+      default:
+        return items;
+    }
+  };
+
   const getFilteredItems = (status) => {
     if (status === "all") return items;
     return items.filter(item => item.status === status);
@@ -160,6 +270,70 @@ export default function MyItems() {
             </div>
           </div>
 
+          {/* Bulk Actions Bar */}
+          {bulkSelectMode && (
+            <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 mb-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <span className="text-white font-medium">
+                    {selectedItems.length} item(s) selected
+                  </span>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleSelectAll}
+                      variant="outline"
+                      size="sm"
+                      className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                    >
+                      Select All
+                    </Button>
+                    <Button
+                      onClick={handleDeselectAll}
+                      variant="outline"
+                      size="sm"
+                      className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                    >
+                      Deselect All
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Button
+                    onClick={handleBulkDelete}
+                    disabled={selectedItems.length === 0}
+                    className="bg-red-600 hover:bg-red-700 text-white disabled:bg-gray-600 disabled:cursor-not-allowed"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete Selected
+                  </Button>
+                  <Button
+                    onClick={handleBulkSelectToggle}
+                    variant="outline"
+                    size="sm"
+                    className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Bulk Select Toggle */}
+          {!bulkSelectMode && (
+            <div className="mb-6">
+              <Button
+                onClick={handleBulkSelectToggle}
+                variant="outline"
+                className="border-gray-600 text-gray-300 hover:bg-gray-700"
+              >
+                <CheckSquare className="w-4 h-4 mr-2" />
+                Bulk Select Items
+              </Button>
+            </div>
+          )}
+
           {/* Stats Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
             <StatsCards
@@ -213,7 +387,16 @@ export default function MyItems() {
                     {getFilteredItems(status).length > 0 ? (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                         {getFilteredItems(status).map((item) => (
-                          <div key={item.id}>
+                          <div key={item.id} className="relative">
+                            {bulkSelectMode && (
+                              <div className="absolute top-2 left-2 z-10">
+                                <Checkbox
+                                  checked={selectedItems.some(selected => selected.id === item.id)}
+                                  onCheckedChange={(checked) => handleItemSelect(item, checked)}
+                                  className="bg-white/90"
+                                />
+                              </div>
+                            )}
                             <MyItemCard
                               item={item}
                               onDelete={() => handleDeleteItem(item.id)}
@@ -358,6 +541,16 @@ export default function MyItems() {
               }}
         />
       )}
+
+      {/* Bulk Delete Modal */}
+      <BulkDeleteModal
+        isOpen={showBulkDeleteModal}
+        onClose={() => setShowBulkDeleteModal(false)}
+        selectedItems={selectedItems}
+        onConfirm={confirmBulkDelete}
+        onCancel={() => setShowBulkDeleteModal(false)}
+        isLoading={isBulkDeleting}
+      />
     </div>
   );
 }
