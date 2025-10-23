@@ -48,22 +48,73 @@ export default function UsersPage() {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      console.log("Loading users from Supabase profiles table... [v1.0.1 - " + new Date().toISOString() + "]");
+      console.log("🔍 DEBUGGING: Loading users from Supabase... [v1.0.1 - " + new Date().toISOString() + "]");
       
-      // Use direct Supabase query to bypass any entity issues
+      // First, let's test if we can access the profiles table at all
+      console.log("🔍 Testing basic profiles table access...");
+      const { data: testData, error: testError } = await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .limit(1);
+      
+      if (testError) {
+        console.error("🚨 BASIC PROFILES QUERY FAILED:", testError);
+        console.error("Error details:", testError.message, testError.code, testError.details);
+        console.error("This might be an RLS policy issue or table doesn't exist");
+        
+        // Try alternative table names that might exist
+        console.log("🔍 Trying alternative table names...");
+        const alternativeTables = ['users', 'user_profiles', 'auth.users'];
+        
+        for (const tableName of alternativeTables) {
+          try {
+            console.log(`🔍 Testing table: ${tableName}`);
+            const { data: altData, error: altError } = await supabase
+              .from(tableName)
+              .select('id, full_name, email')
+              .limit(1);
+            
+            if (!altError && altData) {
+              console.log(`✅ Found working table: ${tableName}`, altData);
+              // Use this table instead
+              const { data: fullData, error: fullError } = await supabase
+                .from(tableName)
+                .select('*')
+                .order('created_at', { ascending: false });
+              
+              if (!fullError) {
+                console.log(`✅ Successfully loaded from ${tableName}:`, fullData.length, fullData);
+                setUsers(fullData || []);
+                setUserStats({});
+                setLoading(false);
+                return;
+              }
+            }
+          } catch (altErr) {
+            console.log(`❌ Table ${tableName} not accessible:`, altErr.message);
+          }
+        }
+        
+        throw testError;
+      }
+      
+      console.log("✅ Basic profiles query successful:", testData);
+      
+      // Now try the full query
+      console.log("🔍 Loading full user data...");
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .order('created_date', { ascending: false });
       
       if (error) {
-        console.error("🚨 SUPABASE QUERY FAILED:", error);
+        console.error("🚨 FULL PROFILES QUERY FAILED:", error);
         console.error("Error details:", error.message, error.code, error.details);
         throw error;
       }
       
       const allUsers = data || [];
-      console.log("Successfully loaded users:", allUsers.length, allUsers);
+      console.log("✅ Successfully loaded users:", allUsers.length, allUsers);
       setUsers(allUsers);
 
       // Load statistics for each user
