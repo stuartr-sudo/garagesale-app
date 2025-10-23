@@ -52,13 +52,13 @@ export default function PaymentMethodSelector({ onSelect, selected }) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-white mb-2">Choose Payment Method</h2>
-        <p className="text-gray-400">Select how you would like to pay for this item.</p>
+        <h2 className="text-xl font-bold text-white mb-1">Choose Payment Method</h2>
+        <p className="text-gray-400 text-sm">Select how you would like to pay for this item.</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-3">
         {paymentMethods.map((method) => {
           const Icon = method.icon;
           const isSelected = selected === method.id;
@@ -73,14 +73,14 @@ export default function PaymentMethodSelector({ onSelect, selected }) {
               }`}
               onClick={() => onSelect(method.id)}
             >
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className={`p-3 rounded-lg ${
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg ${
                     isSelected 
                       ? 'bg-gray-700' 
                       : 'bg-gray-700/50'
                   }`}>
-                    <Icon className={`w-6 h-6 ${
+                    <Icon className={`w-5 h-5 ${
                       isSelected 
                         ? getColorClasses(method.color).split(' ')[1]
                         : 'text-gray-400'
@@ -88,22 +88,22 @@ export default function PaymentMethodSelector({ onSelect, selected }) {
                   </div>
                   
                   <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-lg font-semibold text-white">
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className="text-base font-semibold text-white">
                         {method.name}
                       </h3>
-                      <div className="flex items-center gap-2 text-sm text-gray-400">
-                        <Clock className="w-4 h-4" />
+                      <div className="flex items-center gap-1 text-xs text-gray-400">
+                        <Clock className="w-3 h-3" />
                         {method.processingTime}
                       </div>
                     </div>
                     
-                    <p className="text-gray-400 mb-3">
+                    <p className="text-gray-400 text-sm mb-2">
                       {method.description}
                     </p>
                     
-                    <div className="flex flex-wrap gap-2">
-                      {method.features.map((feature, index) => (
+                    <div className="flex flex-wrap gap-1">
+                      {method.features.slice(0, 2).map((feature, index) => (
                         <span
                           key={index}
                           className="inline-flex items-center gap-1 px-2 py-1 bg-gray-700/50 text-gray-300 text-xs rounded-md"
@@ -117,8 +117,8 @@ export default function PaymentMethodSelector({ onSelect, selected }) {
                   
                   {isSelected && (
                     <div className="flex-shrink-0">
-                      <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
                       </div>
@@ -131,12 +131,12 @@ export default function PaymentMethodSelector({ onSelect, selected }) {
         })}
       </div>
 
-      <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
-        <div className="flex items-start gap-3">
-          <Shield className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
+      <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-3">
+        <div className="flex items-start gap-2">
+          <Shield className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
           <div>
-            <h3 className="text-green-400 font-medium mb-1">Secure Payment</h3>
-            <p className="text-gray-300 text-sm">
+            <h3 className="text-green-400 font-medium mb-1 text-sm">Secure Payment</h3>
+            <p className="text-gray-300 text-xs">
               All payment methods are secure and protected. Your payment information 
               is encrypted and processed safely.
             </p>

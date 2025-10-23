@@ -144,17 +144,16 @@ export default function CryptoPaymentSelector({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-white mb-2">Select Cryptocurrency</h2>
-        <p className="text-gray-400">Choose which cryptocurrency you'd like to pay with.</p>
+        <h2 className="text-xl font-bold text-white mb-1">Select Cryptocurrency</h2>
+        <p className="text-gray-400 text-sm">Choose which cryptocurrency you'd like to pay with.</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-3">
         {cryptocurrencies.map((crypto) => {
           const isSelected = selected === crypto.id;
           const cryptoAmount = calculateCryptoAmount(crypto.id);
-          const price = getCryptoPrice(crypto.id);
           
           return (
             <Card
@@ -166,10 +165,10 @@ export default function CryptoPaymentSelector({
               }`}
               onClick={() => handleSelect(crypto.id)}
             >
-              <CardContent className="p-6">
+              <CardContent className="p-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl font-bold ${
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xl font-bold ${
                       isSelected 
                         ? 'bg-gray-700' 
                         : 'bg-gray-700/50'
@@ -178,26 +177,26 @@ export default function CryptoPaymentSelector({
                     </div>
                     
                     <div>
-                      <h3 className="text-lg font-semibold text-white">
+                      <h3 className="text-base font-semibold text-white">
                         {crypto.name} ({crypto.symbol})
                       </h3>
-                      <p className="text-gray-400 text-sm">{crypto.network}</p>
+                      <p className="text-gray-400 text-xs">{crypto.network}</p>
                     </div>
                   </div>
                   
                   <div className="text-right">
-                    <div className="text-white font-mono text-lg">
-                      {cryptoAmount} {crypto.symbol}
+                    <div className="text-white font-bold text-lg">
+                      ${amount.toFixed(2)} AUD
                     </div>
-                    <div className="text-gray-400 text-sm">
-                      ≈ ${price.toFixed(2)} AUD
+                    <div className="text-gray-400 text-xs">
+                      {cryptoAmount} {crypto.symbol}
                     </div>
                   </div>
                   
                   {isSelected && (
-                    <div className="flex-shrink-0 ml-4">
-                      <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <div className="flex-shrink-0 ml-3">
+                      <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
                       </div>
@@ -212,29 +211,22 @@ export default function CryptoPaymentSelector({
 
       {selected && (
         <Card className="bg-gray-800/50 border-gray-700">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-white">Payment Summary</h3>
-              <TrendingUp className="w-5 h-5 text-green-400" />
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-base font-semibold text-white">Payment Summary</h3>
+              <TrendingUp className="w-4 h-4 text-green-400" />
             </div>
             
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="flex justify-between">
-                <span className="text-gray-400">Item Price:</span>
+                <span className="text-gray-400 text-sm">Total Amount:</span>
                 <span className="text-white font-medium">${amount.toFixed(2)} AUD</span>
               </div>
               
               <div className="flex justify-between">
-                <span className="text-gray-400">Crypto Amount:</span>
-                <span className="text-white font-mono">
+                <span className="text-gray-400 text-sm">Crypto Amount:</span>
+                <span className="text-white font-mono text-sm">
                   {calculateCryptoAmount(selected)} {cryptocurrencies.find(c => c.id === selected)?.symbol}
-                </span>
-              </div>
-              
-              <div className="flex justify-between">
-                <span className="text-gray-400">Network:</span>
-                <span className="text-white">
-                  {cryptocurrencies.find(c => c.id === selected)?.network}
                 </span>
               </div>
             </div>
@@ -242,30 +234,16 @@ export default function CryptoPaymentSelector({
         </Card>
       )}
 
-      <div className="bg-yellow-900/20 border border-yellow-700 rounded-lg p-4">
-        <div className="flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0" />
+      <div className="bg-yellow-900/20 border border-yellow-700 rounded-lg p-3">
+        <div className="flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
           <div>
-            <h3 className="text-yellow-400 font-medium mb-2">Important Notes</h3>
-            <ul className="text-yellow-200 text-sm space-y-1">
+            <h3 className="text-yellow-400 font-medium mb-1 text-sm">Important Notes</h3>
+            <ul className="text-yellow-200 text-xs space-y-1">
               <li>• Cryptocurrency prices are updated in real-time</li>
               <li>• Network fees may apply to your transaction</li>
               <li>• Transactions are irreversible once confirmed</li>
-              <li>• Double-check the wallet address before sending</li>
             </ul>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4">
-        <div className="flex items-start gap-3">
-          <Shield className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
-          <div>
-            <h3 className="text-blue-400 font-medium mb-1">Secure & Decentralized</h3>
-            <p className="text-blue-200 text-sm">
-              Your payment is processed on the blockchain network. No third-party 
-              intermediaries are involved in the transaction.
-            </p>
           </div>
         </div>
       </div>
