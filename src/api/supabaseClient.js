@@ -203,6 +203,69 @@ export class UserEntity {
     const { data: { session } } = await supabase.auth.getSession();
     return !!session;
   }
+
+  async list(orderBy = 'created_date') {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .order(orderBy.startsWith('-') ? orderBy.substring(1) : orderBy, { 
+        ascending: !orderBy.startsWith('-') 
+      });
+    
+    if (error) throw error;
+    return data || [];
+  }
+
+  async filter(filters = {}, orderBy = 'created_date') {
+    let query = supabase
+      .from('profiles')
+      .select('*');
+    
+    // Apply filters
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        if (key === 'role') {
+          query = query.eq(key, value);
+        } else if (key === 'account_type') {
+          query = query.eq(key, value);
+        } else if (key === 'country') {
+          query = query.eq(key, value);
+        } else if (key === 'postcode') {
+          query = query.ilike(key, `%${value}%`);
+        } else if (key === 'full_name') {
+          query = query.ilike(key, `%${value}%`);
+        } else if (key === 'email') {
+          query = query.ilike(key, `%${value}%`);
+        }
+      }
+    });
+    
+    // Apply ordering
+    if (orderBy) {
+      const ascending = !orderBy.startsWith('-');
+      const field = orderBy.startsWith('-') ? orderBy.substring(1) : orderBy;
+      query = query.order(field, { ascending });
+    }
+    
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
+  }
+
+  async updateMyUserData(updates) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', user.id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
 }
 
 export default supabase;

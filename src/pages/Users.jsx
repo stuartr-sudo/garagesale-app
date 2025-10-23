@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { User } from "@/api/entities";
 import { Item } from "@/api/entities";
 import { Transaction } from "@/api/entities";
+import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -47,8 +48,31 @@ export default function UsersPage() {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      // Load all users
-      const allUsers = await User.list("-created_date");
+      console.log("Loading users...");
+      
+      // Try using User.list first
+      let allUsers = [];
+      try {
+        allUsers = await User.list("-created_date");
+        console.log("Loaded users via User.list:", allUsers.length, allUsers);
+      } catch (userListError) {
+        console.warn("User.list failed, trying direct Supabase query:", userListError);
+        
+        // Fallback to direct Supabase query
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .order('created_date', { ascending: false });
+        
+        if (error) {
+          console.error("Direct Supabase query failed:", error);
+          throw error;
+        }
+        
+        allUsers = data || [];
+        console.log("Loaded users via direct query:", allUsers.length, allUsers);
+      }
+      
       setUsers(allUsers);
 
       // Load statistics for each user
@@ -83,6 +107,9 @@ export default function UsersPage() {
       setUserStats(stats);
     } catch (error) {
       console.error("Error loading users:", error);
+      // Set empty arrays to prevent crashes
+      setUsers([]);
+      setUserStats({});
     }
     setLoading(false);
   };
