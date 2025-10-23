@@ -88,7 +88,15 @@ function BundleCreator({
   };
 
   const handleCreateBundle = async () => {
+    console.log('🔧 BundleCreator Debug:', {
+      selectedItems: selectedItems.length,
+      title: bundleData.title,
+      bundlePrice: bundleData.bundlePrice,
+      isCreating
+    });
+
     if (selectedItems.length < 2) {
+      console.log('❌ Not enough items selected:', selectedItems.length);
       toast({
         title: "Invalid Bundle",
         description: "Please select at least 2 items for the bundle.",
