@@ -80,7 +80,7 @@ export type Database = {
         Row: {
           category: Database["public"]["Enums"]["item_category"] | null
           condition: Database["public"]["Enums"]["item_condition"] | null
-          created_date: string | null
+          created_at: string | null
           description: string | null
           id: string
           image_urls: string[] | null
@@ -96,7 +96,7 @@ export type Database = {
         Insert: {
           category?: Database["public"]["Enums"]["item_category"] | null
           condition?: Database["public"]["Enums"]["item_condition"] | null
-          created_date?: string | null
+          created_at?: string | null
           description?: string | null
           id?: string
           image_urls?: string[] | null
@@ -112,7 +112,7 @@ export type Database = {
         Update: {
           category?: Database["public"]["Enums"]["item_category"] | null
           condition?: Database["public"]["Enums"]["item_condition"] | null
-          created_date?: string | null
+          created_at?: string | null
           description?: string | null
           id?: string
           image_urls?: string[] | null
