@@ -107,6 +107,7 @@ const navigationItems = [
     title: "Trade Offers",
     url: createPageUrl("TradeOffers"),
     icon: RefreshCw,
+    adminOnly: true,
   },
   {
     title: "Requests",
@@ -145,11 +146,13 @@ const navigationItems = [
     title: "Settings",
     url: createPageUrl("Settings"),
     icon: Settings,
+    adminOnly: true,
   },
   {
     title: "Theme Settings",
     url: createPageUrl("ThemeSettings"),
     icon: Palette,
+    adminOnly: true,
   }
 ];
 
