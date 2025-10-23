@@ -15,12 +15,42 @@ const THEME_PRESETS = {
     buttonFrom: '#a855f7', // purple-500
     buttonTo: '#db2777',  // pink-600
     accentColor: '#22d3ee', // cyan-400
-    // Advertisement colors
+    // Advertisement colors - Top Banner
     adBannerFrom: '#701a75', // fuchsia-900
     adBannerTo: '#1f2937',   // gray-800
     adBorderColor: '#a21caf', // fuchsia-700
     adButtonFrom: '#22d3ee',  // cyan-400
-    adButtonTo: '#3b82f6'     // blue-500
+    adButtonTo: '#3b82f6',   // blue-500
+    // Local Deals Cards
+    localDealsFrom: '#059669', // emerald-600
+    localDealsTo: '#047857',   // emerald-700
+    localDealsBorder: '#10b981', // emerald-500
+    localDealsButtonFrom: '#22c55e', // green-500
+    localDealsButtonTo: '#16a34a',  // green-600
+    // Bottom Banner Ads
+    bottomBannerFrom: '#7c2d12', // orange-900
+    bottomBannerTo: '#9a3412',  // orange-800
+    bottomBannerBorder: '#ea580c', // orange-600
+    bottomBannerButtonFrom: '#f97316', // orange-500
+    bottomBannerButtonTo: '#ea580c',  // orange-600
+    // Special Offers Cards
+    specialOffersFrom: '#be185d', // pink-700
+    specialOffersTo: '#9d174d',   // pink-800
+    specialOffersBorder: '#ec4899', // pink-500
+    specialOffersButtonFrom: '#f472b6', // pink-400
+    specialOffersButtonTo: '#ec4899',  // pink-500
+    // Featured Item Cards
+    featuredFrom: '#7c3aed', // violet-600
+    featuredTo: '#6d28d9',   // violet-700
+    featuredBorder: '#8b5cf6', // violet-500
+    featuredButtonFrom: '#a855f7', // purple-500
+    featuredButtonTo: '#9333ea',  // violet-600
+    // Promoted Item Cards
+    promotedFrom: '#0891b2', // cyan-600
+    promotedTo: '#0e7490',   // cyan-700
+    promotedBorder: '#06b6d4', // cyan-500
+    promotedButtonFrom: '#22d3ee', // cyan-400
+    promotedButtonTo: '#06b6d4'    // cyan-500
   },
   'Dark Slate': {
     cardFrom: '#334155',  // slate-700
@@ -28,11 +58,42 @@ const THEME_PRESETS = {
     buttonFrom: '#a855f7', // purple-500
     buttonTo: '#db2777',  // pink-600
     accentColor: '#22d3ee', // cyan-400
+    // Advertisement colors - Top Banner
     adBannerFrom: '#701a75',
     adBannerTo: '#1f2937',
     adBorderColor: '#a21caf',
     adButtonFrom: '#22d3ee',
-    adButtonTo: '#3b82f6'
+    adButtonTo: '#3b82f6',
+    // Local Deals Cards
+    localDealsFrom: '#059669',
+    localDealsTo: '#047857',
+    localDealsBorder: '#10b981',
+    localDealsButtonFrom: '#22c55e',
+    localDealsButtonTo: '#16a34a',
+    // Bottom Banner Ads
+    bottomBannerFrom: '#7c2d12',
+    bottomBannerTo: '#9a3412',
+    bottomBannerBorder: '#ea580c',
+    bottomBannerButtonFrom: '#f97316',
+    bottomBannerButtonTo: '#ea580c',
+    // Special Offers Cards
+    specialOffersFrom: '#be185d',
+    specialOffersTo: '#9d174d',
+    specialOffersBorder: '#ec4899',
+    specialOffersButtonFrom: '#f472b6',
+    specialOffersButtonTo: '#ec4899',
+    // Featured Item Cards
+    featuredFrom: '#7c3aed',
+    featuredTo: '#6d28d9',
+    featuredBorder: '#8b5cf6',
+    featuredButtonFrom: '#a855f7',
+    featuredButtonTo: '#9333ea',
+    // Promoted Item Cards
+    promotedFrom: '#0891b2',
+    promotedTo: '#0e7490',
+    promotedBorder: '#06b6d4',
+    promotedButtonFrom: '#22d3ee',
+    promotedButtonTo: '#06b6d4'
   },
   'Ocean Blue': {
     cardFrom: '#1e40af',  // blue-800
@@ -40,11 +101,42 @@ const THEME_PRESETS = {
     buttonFrom: '#3b82f6', // blue-500
     buttonTo: '#0891b2',  // cyan-600
     accentColor: '#93c5fd', // blue-300
+    // Advertisement colors - Top Banner
     adBannerFrom: '#164e63', // cyan-900
     adBannerTo: '#1e3a8a',   // blue-900
     adBorderColor: '#0891b2', // cyan-600
     adButtonFrom: '#06b6d4',  // cyan-500
-    adButtonTo: '#3b82f6'     // blue-500
+    adButtonTo: '#3b82f6',   // blue-500
+    // Local Deals Cards
+    localDealsFrom: '#059669',
+    localDealsTo: '#047857',
+    localDealsBorder: '#10b981',
+    localDealsButtonFrom: '#22c55e',
+    localDealsButtonTo: '#16a34a',
+    // Bottom Banner Ads
+    bottomBannerFrom: '#7c2d12',
+    bottomBannerTo: '#9a3412',
+    bottomBannerBorder: '#ea580c',
+    bottomBannerButtonFrom: '#f97316',
+    bottomBannerButtonTo: '#ea580c',
+    // Special Offers Cards
+    specialOffersFrom: '#be185d',
+    specialOffersTo: '#9d174d',
+    specialOffersBorder: '#ec4899',
+    specialOffersButtonFrom: '#f472b6',
+    specialOffersButtonTo: '#ec4899',
+    // Featured Item Cards
+    featuredFrom: '#7c3aed',
+    featuredTo: '#6d28d9',
+    featuredBorder: '#8b5cf6',
+    featuredButtonFrom: '#a855f7',
+    featuredButtonTo: '#9333ea',
+    // Promoted Item Cards
+    promotedFrom: '#0891b2',
+    promotedTo: '#0e7490',
+    promotedBorder: '#06b6d4',
+    promotedButtonFrom: '#22d3ee',
+    promotedButtonTo: '#06b6d4'
   },
   'Sunset': {
     cardFrom: '#9a3412',  // orange-800
@@ -52,11 +144,42 @@ const THEME_PRESETS = {
     buttonFrom: '#f97316', // orange-500
     buttonTo: '#db2777',  // pink-600
     accentColor: '#fdba74', // orange-300
+    // Advertisement colors - Top Banner
     adBannerFrom: '#9a3412', // orange-800
     adBannerTo: '#7c2d12',   // orange-900
     adBorderColor: '#ea580c', // orange-600
     adButtonFrom: '#f97316',  // orange-500
-    adButtonTo: '#fb923c'     // orange-400
+    adButtonTo: '#fb923c',   // orange-400
+    // Local Deals Cards
+    localDealsFrom: '#059669',
+    localDealsTo: '#047857',
+    localDealsBorder: '#10b981',
+    localDealsButtonFrom: '#22c55e',
+    localDealsButtonTo: '#16a34a',
+    // Bottom Banner Ads
+    bottomBannerFrom: '#7c2d12',
+    bottomBannerTo: '#9a3412',
+    bottomBannerBorder: '#ea580c',
+    bottomBannerButtonFrom: '#f97316',
+    bottomBannerButtonTo: '#ea580c',
+    // Special Offers Cards
+    specialOffersFrom: '#be185d',
+    specialOffersTo: '#9d174d',
+    specialOffersBorder: '#ec4899',
+    specialOffersButtonFrom: '#f472b6',
+    specialOffersButtonTo: '#ec4899',
+    // Featured Item Cards
+    featuredFrom: '#7c3aed',
+    featuredTo: '#6d28d9',
+    featuredBorder: '#8b5cf6',
+    featuredButtonFrom: '#a855f7',
+    featuredButtonTo: '#9333ea',
+    // Promoted Item Cards
+    promotedFrom: '#0891b2',
+    promotedTo: '#0e7490',
+    promotedBorder: '#06b6d4',
+    promotedButtonFrom: '#22d3ee',
+    promotedButtonTo: '#06b6d4'
   },
   'Forest': {
     cardFrom: '#14532d',  // green-900
@@ -64,11 +187,42 @@ const THEME_PRESETS = {
     buttonFrom: '#22c55e', // green-500
     buttonTo: '#10b981',  // emerald-600
     accentColor: '#86efac', // green-300
+    // Advertisement colors - Top Banner
     adBannerFrom: '#064e3b', // emerald-900
     adBannerTo: '#14532d',   // green-900
     adBorderColor: '#059669', // emerald-600
     adButtonFrom: '#10b981',  // emerald-500
-    adButtonTo: '#22c55e'     // green-500
+    adButtonTo: '#22c55e',   // green-500
+    // Local Deals Cards
+    localDealsFrom: '#059669',
+    localDealsTo: '#047857',
+    localDealsBorder: '#10b981',
+    localDealsButtonFrom: '#22c55e',
+    localDealsButtonTo: '#16a34a',
+    // Bottom Banner Ads
+    bottomBannerFrom: '#7c2d12',
+    bottomBannerTo: '#9a3412',
+    bottomBannerBorder: '#ea580c',
+    bottomBannerButtonFrom: '#f97316',
+    bottomBannerButtonTo: '#ea580c',
+    // Special Offers Cards
+    specialOffersFrom: '#be185d',
+    specialOffersTo: '#9d174d',
+    specialOffersBorder: '#ec4899',
+    specialOffersButtonFrom: '#f472b6',
+    specialOffersButtonTo: '#ec4899',
+    // Featured Item Cards
+    featuredFrom: '#7c3aed',
+    featuredTo: '#6d28d9',
+    featuredBorder: '#8b5cf6',
+    featuredButtonFrom: '#a855f7',
+    featuredButtonTo: '#9333ea',
+    // Promoted Item Cards
+    promotedFrom: '#0891b2',
+    promotedTo: '#0e7490',
+    promotedBorder: '#06b6d4',
+    promotedButtonFrom: '#22d3ee',
+    promotedButtonTo: '#06b6d4'
   },
   'Royal': {
     cardFrom: '#581c87',  // purple-900
@@ -76,11 +230,42 @@ const THEME_PRESETS = {
     buttonFrom: '#a855f7', // purple-500
     buttonTo: '#6366f1',  // indigo-600
     accentColor: '#c4b5fd', // purple-300
+    // Advertisement colors - Top Banner
     adBannerFrom: '#581c87', // purple-900
     adBannerTo: '#312e81',   // indigo-900
     adBorderColor: '#7c3aed', // violet-600
     adButtonFrom: '#a855f7',  // purple-500
-    adButtonTo: '#8b5cf6'     // violet-500
+    adButtonTo: '#8b5cf6',   // violet-500
+    // Local Deals Cards
+    localDealsFrom: '#059669',
+    localDealsTo: '#047857',
+    localDealsBorder: '#10b981',
+    localDealsButtonFrom: '#22c55e',
+    localDealsButtonTo: '#16a34a',
+    // Bottom Banner Ads
+    bottomBannerFrom: '#7c2d12',
+    bottomBannerTo: '#9a3412',
+    bottomBannerBorder: '#ea580c',
+    bottomBannerButtonFrom: '#f97316',
+    bottomBannerButtonTo: '#ea580c',
+    // Special Offers Cards
+    specialOffersFrom: '#be185d',
+    specialOffersTo: '#9d174d',
+    specialOffersBorder: '#ec4899',
+    specialOffersButtonFrom: '#f472b6',
+    specialOffersButtonTo: '#ec4899',
+    // Featured Item Cards
+    featuredFrom: '#7c3aed',
+    featuredTo: '#6d28d9',
+    featuredBorder: '#8b5cf6',
+    featuredButtonFrom: '#a855f7',
+    featuredButtonTo: '#9333ea',
+    // Promoted Item Cards
+    promotedFrom: '#0891b2',
+    promotedTo: '#0e7490',
+    promotedBorder: '#06b6d4',
+    promotedButtonFrom: '#22d3ee',
+    promotedButtonTo: '#06b6d4'
   }
 };
 
@@ -248,20 +433,20 @@ export default function ThemeSettings() {
 
               <Separator className="my-6 bg-gray-700" />
 
-              {/* Advertisement Colors Section */}
-              <div className="space-y-4 bg-amber-900/10 border border-amber-700/30 rounded-lg p-4">
+              {/* Advertisement & Promoted Items - Multiple Card Types */}
+              <div className="space-y-6 bg-amber-900/10 border border-amber-700/30 rounded-lg p-6">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">📢</span>
                   <h3 className="text-xl font-bold text-white">Advertisement & Promoted Items</h3>
                 </div>
-                <p className="text-sm text-gray-400">Customize colors for advertisements, sponsored content, and promoted products</p>
+                <p className="text-sm text-gray-400">Customize colors for different types of advertisements and promoted content cards</p>
 
-                {/* Ad Banner Gradient */}
-                <div className="space-y-3">
-                  <Label className="text-white text-lg">Ad Banner Background</Label>
+                {/* Top Banner Ads */}
+                <div className="space-y-4 bg-blue-900/10 border border-blue-700/30 rounded-lg p-4">
+                  <h4 className="text-lg font-semibold text-blue-300">Top Banner Ads</h4>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <Label className="text-sm text-gray-400">From Color</Label>
+                      <Label className="text-sm text-gray-400">Background From</Label>
                       <Input
                         type="color"
                         value={theme.adBannerFrom || '#701a75'}
@@ -276,7 +461,7 @@ export default function ThemeSettings() {
                       />
                     </div>
                     <div>
-                      <Label className="text-sm text-gray-400">To Color</Label>
+                      <Label className="text-sm text-gray-400">Background To</Label>
                       <Input
                         type="color"
                         value={theme.adBannerTo || '#1f2937'}
@@ -291,34 +476,24 @@ export default function ThemeSettings() {
                       />
                     </div>
                   </div>
-                </div>
-
-                {/* Ad Border Color */}
-                <div className="space-y-3">
-                  <Label className="text-white text-lg">Ad Border Color</Label>
-                  <Input
-                    type="color"
-                    value={theme.adBorderColor || '#a21caf'}
-                    onChange={(e) => updateThemeField('adBorderColor', e.target.value)}
-                    className="h-10 w-full cursor-pointer"
-                  />
-                  <Input
-                    value={theme.adBorderColor || '#a21caf'}
-                    onChange={(e) => updateThemeField('adBorderColor', e.target.value)}
-                    placeholder="e.g., #a21caf"
-                    className="bg-gray-800 border-gray-700 text-white"
-                  />
-                  <p className="text-xs text-gray-500">
-                    Border color for advertisement cards
-                  </p>
-                </div>
-
-                {/* Ad Button Gradient */}
-                <div className="space-y-3">
-                  <Label className="text-white text-lg">Ad Button Gradient</Label>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <Label className="text-sm text-gray-400">From Color</Label>
+                      <Label className="text-sm text-gray-400">Border Color</Label>
+                      <Input
+                        type="color"
+                        value={theme.adBorderColor || '#a21caf'}
+                        onChange={(e) => updateThemeField('adBorderColor', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.adBorderColor || '#a21caf'}
+                        onChange={(e) => updateThemeField('adBorderColor', e.target.value)}
+                        placeholder="e.g., #a21caf"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-400">Button From</Label>
                       <Input
                         type="color"
                         value={theme.adButtonFrom || '#22d3ee'}
@@ -332,25 +507,442 @@ export default function ThemeSettings() {
                         className="bg-gray-800 border-gray-700 text-white mt-1"
                       />
                     </div>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-gray-400">Button To</Label>
+                    <Input
+                      type="color"
+                      value={theme.adButtonTo || '#3b82f6'}
+                      onChange={(e) => updateThemeField('adButtonTo', e.target.value)}
+                      className="h-10 w-full cursor-pointer"
+                    />
+                    <Input
+                      value={theme.adButtonTo || '#3b82f6'}
+                      onChange={(e) => updateThemeField('adButtonTo', e.target.value)}
+                      placeholder="e.g., #3b82f6"
+                      className="bg-gray-800 border-gray-700 text-white mt-1"
+                    />
+                  </div>
+                </div>
+
+                {/* Local Deals Cards */}
+                <div className="space-y-4 bg-green-900/10 border border-green-700/30 rounded-lg p-4">
+                  <h4 className="text-lg font-semibold text-green-300">Local Deals Cards</h4>
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <Label className="text-sm text-gray-400">To Color</Label>
+                      <Label className="text-sm text-gray-400">Background From</Label>
                       <Input
                         type="color"
-                        value={theme.adButtonTo || '#3b82f6'}
-                        onChange={(e) => updateThemeField('adButtonTo', e.target.value)}
+                        value={theme.localDealsFrom || '#059669'}
+                        onChange={(e) => updateThemeField('localDealsFrom', e.target.value)}
                         className="h-10 w-full cursor-pointer"
                       />
                       <Input
-                        value={theme.adButtonTo || '#3b82f6'}
-                        onChange={(e) => updateThemeField('adButtonTo', e.target.value)}
-                        placeholder="e.g., #3b82f6"
+                        value={theme.localDealsFrom || '#059669'}
+                        onChange={(e) => updateThemeField('localDealsFrom', e.target.value)}
+                        placeholder="e.g., #059669"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-400">Background To</Label>
+                      <Input
+                        type="color"
+                        value={theme.localDealsTo || '#047857'}
+                        onChange={(e) => updateThemeField('localDealsTo', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.localDealsTo || '#047857'}
+                        onChange={(e) => updateThemeField('localDealsTo', e.target.value)}
+                        placeholder="e.g., #047857"
                         className="bg-gray-800 border-gray-700 text-white mt-1"
                       />
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500">
-                    Call-to-action button colors for ads
-                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-sm text-gray-400">Border Color</Label>
+                      <Input
+                        type="color"
+                        value={theme.localDealsBorder || '#10b981'}
+                        onChange={(e) => updateThemeField('localDealsBorder', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.localDealsBorder || '#10b981'}
+                        onChange={(e) => updateThemeField('localDealsBorder', e.target.value)}
+                        placeholder="e.g., #10b981"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-400">Button From</Label>
+                      <Input
+                        type="color"
+                        value={theme.localDealsButtonFrom || '#22c55e'}
+                        onChange={(e) => updateThemeField('localDealsButtonFrom', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.localDealsButtonFrom || '#22c55e'}
+                        onChange={(e) => updateThemeField('localDealsButtonFrom', e.target.value)}
+                        placeholder="e.g., #22c55e"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-gray-400">Button To</Label>
+                    <Input
+                      type="color"
+                      value={theme.localDealsButtonTo || '#16a34a'}
+                      onChange={(e) => updateThemeField('localDealsButtonTo', e.target.value)}
+                      className="h-10 w-full cursor-pointer"
+                    />
+                    <Input
+                      value={theme.localDealsButtonTo || '#16a34a'}
+                      onChange={(e) => updateThemeField('localDealsButtonTo', e.target.value)}
+                      placeholder="e.g., #16a34a"
+                      className="bg-gray-800 border-gray-700 text-white mt-1"
+                    />
+                  </div>
+                </div>
+
+                {/* Bottom Banner Ads */}
+                <div className="space-y-4 bg-orange-900/10 border border-orange-700/30 rounded-lg p-4">
+                  <h4 className="text-lg font-semibold text-orange-300">Bottom Banner Ads</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-sm text-gray-400">Background From</Label>
+                      <Input
+                        type="color"
+                        value={theme.bottomBannerFrom || '#7c2d12'}
+                        onChange={(e) => updateThemeField('bottomBannerFrom', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.bottomBannerFrom || '#7c2d12'}
+                        onChange={(e) => updateThemeField('bottomBannerFrom', e.target.value)}
+                        placeholder="e.g., #7c2d12"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-400">Background To</Label>
+                      <Input
+                        type="color"
+                        value={theme.bottomBannerTo || '#9a3412'}
+                        onChange={(e) => updateThemeField('bottomBannerTo', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.bottomBannerTo || '#9a3412'}
+                        onChange={(e) => updateThemeField('bottomBannerTo', e.target.value)}
+                        placeholder="e.g., #9a3412"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-sm text-gray-400">Border Color</Label>
+                      <Input
+                        type="color"
+                        value={theme.bottomBannerBorder || '#ea580c'}
+                        onChange={(e) => updateThemeField('bottomBannerBorder', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.bottomBannerBorder || '#ea580c'}
+                        onChange={(e) => updateThemeField('bottomBannerBorder', e.target.value)}
+                        placeholder="e.g., #ea580c"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-400">Button From</Label>
+                      <Input
+                        type="color"
+                        value={theme.bottomBannerButtonFrom || '#f97316'}
+                        onChange={(e) => updateThemeField('bottomBannerButtonFrom', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.bottomBannerButtonFrom || '#f97316'}
+                        onChange={(e) => updateThemeField('bottomBannerButtonFrom', e.target.value)}
+                        placeholder="e.g., #f97316"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-gray-400">Button To</Label>
+                    <Input
+                      type="color"
+                      value={theme.bottomBannerButtonTo || '#ea580c'}
+                      onChange={(e) => updateThemeField('bottomBannerButtonTo', e.target.value)}
+                      className="h-10 w-full cursor-pointer"
+                    />
+                    <Input
+                      value={theme.bottomBannerButtonTo || '#ea580c'}
+                      onChange={(e) => updateThemeField('bottomBannerButtonTo', e.target.value)}
+                      placeholder="e.g., #ea580c"
+                      className="bg-gray-800 border-gray-700 text-white mt-1"
+                    />
+                  </div>
+                </div>
+
+                {/* Special Offers Cards */}
+                <div className="space-y-4 bg-pink-900/10 border border-pink-700/30 rounded-lg p-4">
+                  <h4 className="text-lg font-semibold text-pink-300">Special Offers Cards</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-sm text-gray-400">Background From</Label>
+                      <Input
+                        type="color"
+                        value={theme.specialOffersFrom || '#be185d'}
+                        onChange={(e) => updateThemeField('specialOffersFrom', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.specialOffersFrom || '#be185d'}
+                        onChange={(e) => updateThemeField('specialOffersFrom', e.target.value)}
+                        placeholder="e.g., #be185d"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-400">Background To</Label>
+                      <Input
+                        type="color"
+                        value={theme.specialOffersTo || '#9d174d'}
+                        onChange={(e) => updateThemeField('specialOffersTo', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.specialOffersTo || '#9d174d'}
+                        onChange={(e) => updateThemeField('specialOffersTo', e.target.value)}
+                        placeholder="e.g., #9d174d"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-sm text-gray-400">Border Color</Label>
+                      <Input
+                        type="color"
+                        value={theme.specialOffersBorder || '#ec4899'}
+                        onChange={(e) => updateThemeField('specialOffersBorder', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.specialOffersBorder || '#ec4899'}
+                        onChange={(e) => updateThemeField('specialOffersBorder', e.target.value)}
+                        placeholder="e.g., #ec4899"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-400">Button From</Label>
+                      <Input
+                        type="color"
+                        value={theme.specialOffersButtonFrom || '#f472b6'}
+                        onChange={(e) => updateThemeField('specialOffersButtonFrom', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.specialOffersButtonFrom || '#f472b6'}
+                        onChange={(e) => updateThemeField('specialOffersButtonFrom', e.target.value)}
+                        placeholder="e.g., #f472b6"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-gray-400">Button To</Label>
+                    <Input
+                      type="color"
+                      value={theme.specialOffersButtonTo || '#ec4899'}
+                      onChange={(e) => updateThemeField('specialOffersButtonTo', e.target.value)}
+                      className="h-10 w-full cursor-pointer"
+                    />
+                    <Input
+                      value={theme.specialOffersButtonTo || '#ec4899'}
+                      onChange={(e) => updateThemeField('specialOffersButtonTo', e.target.value)}
+                      placeholder="e.g., #ec4899"
+                      className="bg-gray-800 border-gray-700 text-white mt-1"
+                    />
+                  </div>
+                </div>
+
+                {/* Featured Item Cards */}
+                <div className="space-y-4 bg-purple-900/10 border border-purple-700/30 rounded-lg p-4">
+                  <h4 className="text-lg font-semibold text-purple-300">Featured Item Cards</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-sm text-gray-400">Background From</Label>
+                      <Input
+                        type="color"
+                        value={theme.featuredFrom || '#7c3aed'}
+                        onChange={(e) => updateThemeField('featuredFrom', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.featuredFrom || '#7c3aed'}
+                        onChange={(e) => updateThemeField('featuredFrom', e.target.value)}
+                        placeholder="e.g., #7c3aed"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-400">Background To</Label>
+                      <Input
+                        type="color"
+                        value={theme.featuredTo || '#6d28d9'}
+                        onChange={(e) => updateThemeField('featuredTo', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.featuredTo || '#6d28d9'}
+                        onChange={(e) => updateThemeField('featuredTo', e.target.value)}
+                        placeholder="e.g., #6d28d9"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-sm text-gray-400">Border Color</Label>
+                      <Input
+                        type="color"
+                        value={theme.featuredBorder || '#8b5cf6'}
+                        onChange={(e) => updateThemeField('featuredBorder', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.featuredBorder || '#8b5cf6'}
+                        onChange={(e) => updateThemeField('featuredBorder', e.target.value)}
+                        placeholder="e.g., #8b5cf6"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-400">Button From</Label>
+                      <Input
+                        type="color"
+                        value={theme.featuredButtonFrom || '#a855f7'}
+                        onChange={(e) => updateThemeField('featuredButtonFrom', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.featuredButtonFrom || '#a855f7'}
+                        onChange={(e) => updateThemeField('featuredButtonFrom', e.target.value)}
+                        placeholder="e.g., #a855f7"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-gray-400">Button To</Label>
+                    <Input
+                      type="color"
+                      value={theme.featuredButtonTo || '#9333ea'}
+                      onChange={(e) => updateThemeField('featuredButtonTo', e.target.value)}
+                      className="h-10 w-full cursor-pointer"
+                    />
+                    <Input
+                      value={theme.featuredButtonTo || '#9333ea'}
+                      onChange={(e) => updateThemeField('featuredButtonTo', e.target.value)}
+                      placeholder="e.g., #9333ea"
+                      className="bg-gray-800 border-gray-700 text-white mt-1"
+                    />
+                  </div>
+                </div>
+
+                {/* Promoted Item Cards */}
+                <div className="space-y-4 bg-cyan-900/10 border border-cyan-700/30 rounded-lg p-4">
+                  <h4 className="text-lg font-semibold text-cyan-300">Promoted Item Cards</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-sm text-gray-400">Background From</Label>
+                      <Input
+                        type="color"
+                        value={theme.promotedFrom || '#0891b2'}
+                        onChange={(e) => updateThemeField('promotedFrom', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.promotedFrom || '#0891b2'}
+                        onChange={(e) => updateThemeField('promotedFrom', e.target.value)}
+                        placeholder="e.g., #0891b2"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-400">Background To</Label>
+                      <Input
+                        type="color"
+                        value={theme.promotedTo || '#0e7490'}
+                        onChange={(e) => updateThemeField('promotedTo', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.promotedTo || '#0e7490'}
+                        onChange={(e) => updateThemeField('promotedTo', e.target.value)}
+                        placeholder="e.g., #0e7490"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-sm text-gray-400">Border Color</Label>
+                      <Input
+                        type="color"
+                        value={theme.promotedBorder || '#06b6d4'}
+                        onChange={(e) => updateThemeField('promotedBorder', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.promotedBorder || '#06b6d4'}
+                        onChange={(e) => updateThemeField('promotedBorder', e.target.value)}
+                        placeholder="e.g., #06b6d4"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-400">Button From</Label>
+                      <Input
+                        type="color"
+                        value={theme.promotedButtonFrom || '#22d3ee'}
+                        onChange={(e) => updateThemeField('promotedButtonFrom', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.promotedButtonFrom || '#22d3ee'}
+                        onChange={(e) => updateThemeField('promotedButtonFrom', e.target.value)}
+                        placeholder="e.g., #22d3ee"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-gray-400">Button To</Label>
+                    <Input
+                      type="color"
+                      value={theme.promotedButtonTo || '#06b6d4'}
+                      onChange={(e) => updateThemeField('promotedButtonTo', e.target.value)}
+                      className="h-10 w-full cursor-pointer"
+                    />
+                    <Input
+                      value={theme.promotedButtonTo || '#06b6d4'}
+                      onChange={(e) => updateThemeField('promotedButtonTo', e.target.value)}
+                      placeholder="e.g., #06b6d4"
+                      className="bg-gray-800 border-gray-700 text-white mt-1"
+                    />
+                  </div>
                 </div>
               </div>
 
