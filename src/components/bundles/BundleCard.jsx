@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import BundleImageCollage from './BundleImageCollage';
 import { 
   ShoppingBag, 
   ShoppingCart, 
@@ -60,15 +61,11 @@ export default function BundleCard({
         background: `linear-gradient(to bottom right, ${theme.bundleCardFrom || theme.cardFrom}, ${theme.bundleCardTo || theme.cardTo})`
       }}
     >
-      {/* Image Section - Standardized square aspect ratio to match Featured Items */}
+      {/* Image Section - Bundle Collage */}
       <div className="relative overflow-hidden aspect-square">
-        <img
-          src={primaryImage}
-          alt={bundle.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          onError={(e) => {
-            e.target.src = "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop";
-          }}
+        <BundleImageCollage 
+          bundleItems={bundle.bundle_items} 
+          maxImages={4}
         />
         
         {/* Bundle Badge - Top Left */}

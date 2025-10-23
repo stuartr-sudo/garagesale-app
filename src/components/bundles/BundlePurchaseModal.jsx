@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import BundleImageCollage from './BundleImageCollage';
 import { 
   ShoppingBag, 
   DollarSign, 
@@ -88,6 +89,19 @@ export default function BundlePurchaseModal({
               <h2 className="text-2xl font-bold text-white mb-2">{bundle.title}</h2>
               <p className="text-gray-400">{bundle.description}</p>
             </div>
+
+            {/* Bundle Image Collage */}
+            <Card className="bg-gray-800/50 border-gray-700">
+              <CardContent className="p-4">
+                <h3 className="text-lg font-semibold text-white mb-3">Bundle Preview</h3>
+                <div className="w-full h-48 rounded-lg overflow-hidden">
+                  <BundleImageCollage 
+                    bundleItems={bundle.bundle_items} 
+                    maxImages={4}
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Pricing */}
             <Card className="bg-gray-800/50 border-gray-700">
