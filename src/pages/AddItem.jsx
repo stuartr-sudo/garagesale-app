@@ -42,7 +42,7 @@ export default function AddItem() {
   const { toast } = useToast();
   const [currentUser, setCurrentUser] = useState(null);
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 6;
+  const totalSteps = 7;
   
   const [itemData, setItemData] = useState({
     title: "",
@@ -53,7 +53,9 @@ export default function AddItem() {
     category: "other",
     postcode: "",
     tags: [],
-    image_urls: []
+    image_urls: [],
+    collection_date: "",
+    collection_address: ""
   });
   
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
@@ -595,8 +597,9 @@ Return only the description, nothing else.`
       case 2: return itemData.title.trim() && itemData.description.trim();
       case 3: return itemData.price;
       case 4: return itemData.category && itemData.condition && itemData.postcode;
-      case 5: return true;
-      case 6: return ownershipConfirmed;
+      case 5: return itemData.collection_date && itemData.collection_address.trim();
+      case 6: return true;
+      case 7: return ownershipConfirmed;
       default: return false;
     }
   };
@@ -630,7 +633,9 @@ Return only the description, nothing else.`
         tags: itemData.tags,
         image_urls: itemData.image_urls,
         seller_id: currentUser.id,
-        status: 'active'
+        status: 'active',
+        collection_date: itemData.collection_date,
+        collection_address: itemData.collection_address
       };
 
       const { data: newItem, error: itemError } = await supabase
@@ -987,6 +992,59 @@ Return only the description, nothing else.`
         return (
           <div className="space-y-4">
             <div className="text-center mb-4">
+              <h2 className="text-xl font-bold text-white mb-1">Collection Details</h2>
+              <p className="text-gray-400 text-sm">When and where can buyers collect this item?</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="collection_date" className="text-gray-300">Collection Date *</Label>
+              <Input
+                id="collection_date"
+                type="datetime-local"
+                value={itemData.collection_date}
+                onChange={(e) => setItemData(prev => ({ ...prev, collection_date: e.target.value }))}
+                className="bg-gray-800 border-gray-700 text-white"
+                min={new Date().toISOString().slice(0, 16)}
+              />
+              <p className="text-xs text-gray-500">
+                Choose a date and time when buyers can collect the item
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="collection_address" className="text-gray-300">Collection Address *</Label>
+              <Textarea
+                id="collection_address"
+                value={itemData.collection_address}
+                onChange={(e) => setItemData(prev => ({ ...prev, collection_address: e.target.value }))}
+                placeholder="Enter the full address where buyers can collect the item..."
+                rows={3}
+                className="bg-gray-800 border-gray-700 text-white"
+              />
+              <p className="text-xs text-gray-500">
+                Provide the complete address including street, suburb, and postcode
+              </p>
+            </div>
+
+            <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0">ℹ️</div>
+                <div>
+                  <h3 className="text-blue-400 font-medium mb-1">Collection Information</h3>
+                  <p className="text-blue-200 text-sm">
+                    Buyers will see this information when they purchase your item. 
+                    Make sure the date and address are accurate and accessible.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 6:
+        return (
+          <div className="space-y-4">
+            <div className="text-center mb-4">
               <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-2" />
               <h2 className="text-xl font-bold text-white mb-1">Review & Confirm</h2>
               <p className="text-gray-400 text-sm">Check your listing before publishing</p>
@@ -1022,6 +1080,32 @@ Return only the description, nothing else.`
                   </div>
                 </div>
 
+                <div className="border-t border-gray-700 pt-3">
+                  <h4 className="text-gray-300 font-medium mb-2">Collection Details</h4>
+                  <div className="space-y-1 text-sm">
+                    <div>
+                      <span className="text-gray-500">Collection Date:</span>
+                      <span className="text-white ml-2">
+                        {itemData.collection_date 
+                          ? new Date(itemData.collection_date).toLocaleString('en-AU', {
+                              weekday: 'long',
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })
+                          : 'Not set'
+                        }
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Collection Address:</span>
+                      <span className="text-white ml-2 block mt-1">{itemData.collection_address}</span>
+                    </div>
+                  </div>
+                </div>
+
                 {itemData.tags.length > 0 && (
                   <div>
                     <span className="text-gray-500 text-sm">Tags:</span>
@@ -1039,7 +1123,7 @@ Return only the description, nothing else.`
           </div>
         );
 
-      case 6:
+      case 7:
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">

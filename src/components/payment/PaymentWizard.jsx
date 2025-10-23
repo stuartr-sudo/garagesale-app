@@ -16,7 +16,8 @@ import {
   MapPin,
   Shield,
   Clock,
-  AlertCircle
+  AlertCircle,
+  X
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import CollectionAcknowledgment from './CollectionAcknowledgment';
