@@ -1,5 +1,5 @@
-// Use frontend Supabase client for now (temporary fix)
-import { supabase } from '@/lib/supabase';
+// Use the existing Supabase client from entities
+import { supabase } from '../src/lib/supabase.js';
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
