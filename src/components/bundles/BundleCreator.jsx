@@ -391,7 +391,16 @@ function BundleCreator({
             </Button>
             
             <Button
-              onClick={handleCreateBundle}
+              onClick={() => {
+                console.log('🔧 Button clicked!', {
+                  selectedItems: selectedItems.length,
+                  title: bundleData.title,
+                  bundlePrice: bundleData.bundlePrice,
+                  isCreating,
+                  disabled: selectedItems.length < 2 || !bundleData.title.trim() || isCreating
+                });
+                handleCreateBundle();
+              }}
               disabled={selectedItems.length < 2 || !bundleData.title.trim() || isCreating}
               className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-xl"
             >
