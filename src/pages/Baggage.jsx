@@ -17,7 +17,8 @@ import {
   Weight,
   Palette,
   FileText,
-  Mic
+  Mic,
+  Eye
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -30,6 +31,7 @@ export default function BaggagePage() {
   const [inlineEditData, setInlineEditData] = useState({});
   const [showVoiceInput, setShowVoiceInput] = useState(false);
   const [showInlineVoiceInput, setShowInlineVoiceInput] = useState(false);
+  const [viewingItem, setViewingItem] = useState(null);
   const [formData, setFormData] = useState({
     color: "",
     weight: "",
@@ -228,6 +230,10 @@ export default function BaggagePage() {
     setShowInlineVoiceInput(false);
   };
 
+  const handleViewItem = (item) => {
+    setViewingItem(item);
+  };
+
   if (loading) {
     return (
       <div className="p-6 md:p-8">
@@ -386,6 +392,96 @@ export default function BaggagePage() {
             />
           )}
 
+          {/* View Item Modal */}
+          {viewingItem && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+              <Card className="bg-gray-900/95 backdrop-blur-sm shadow-2xl border border-gray-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+                <CardHeader className="bg-gray-800/50 border-b border-gray-700">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-white">
+                      <Luggage className="w-6 h-6 text-pink-500" />
+                      Baggage Item Details
+                    </CardTitle>
+                    <Button
+                      onClick={() => setViewingItem(null)}
+                      size="sm"
+                      variant="outline"
+                      className="border-gray-600 text-gray-300 hover:bg-gray-700 rounded-lg"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Palette className="w-4 h-4 text-pink-400" />
+                        <Label className="text-sm font-medium text-gray-300">Color</Label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 rounded-full bg-pink-500"></div>
+                        <span className="text-white font-medium">{viewingItem.color}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Weight className="w-4 h-4 text-blue-400" />
+                        <Label className="text-sm font-medium text-gray-300">Weight</Label>
+                      </div>
+                      <span className="text-white font-medium">{viewingItem.weight} kg</span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-green-400" />
+                      <Label className="text-sm font-medium text-gray-300">Contents</Label>
+                    </div>
+                    <div className="bg-gray-800 rounded-lg p-4">
+                      <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
+                        {viewingItem.contents}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-4 border-t border-gray-700">
+                    <div className="flex items-center justify-between text-sm text-gray-400">
+                      <span>Added {format(new Date(viewingItem.created_at), 'MMM d, yyyy \'at\' h:mm a')}</span>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => {
+                            setViewingItem(null);
+                            handleInlineEdit(viewingItem);
+                          }}
+                          size="sm"
+                          variant="outline"
+                          className="border-blue-600 text-blue-300 hover:bg-blue-900/20 rounded-lg"
+                        >
+                          <Edit className="w-3 h-3 mr-1" />
+                          Edit
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            setViewingItem(null);
+                            handleDelete(viewingItem.id);
+                          }}
+                          size="sm"
+                          variant="outline"
+                          className="border-red-600 text-red-300 hover:bg-red-900/20 rounded-lg"
+                        >
+                          <Trash2 className="w-3 h-3 mr-1" />
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
           {/* Baggage Items Table */}
           <div className="bg-gray-900/80 backdrop-blur-sm shadow-xl border border-gray-800 rounded-2xl overflow-hidden">
             <div className="overflow-x-auto">
@@ -491,10 +587,20 @@ export default function BaggagePage() {
                           ) : (
                             <>
                               <Button
+                                onClick={() => handleViewItem(item)}
+                                size="sm"
+                                variant="outline"
+                                className="border-green-600 text-green-300 hover:bg-green-900/20 rounded-lg"
+                                title="View details"
+                              >
+                                <Eye className="w-3 h-3" />
+                              </Button>
+                              <Button
                                 onClick={() => handleInlineEdit(item)}
                                 size="sm"
                                 variant="outline"
                                 className="border-blue-600 text-blue-300 hover:bg-blue-900/20 rounded-lg"
+                                title="Edit item"
                               >
                                 <Edit className="w-3 h-3" />
                               </Button>
@@ -503,6 +609,7 @@ export default function BaggagePage() {
                                 size="sm"
                                 variant="outline"
                                 className="border-red-600 text-red-300 hover:bg-red-900/20 rounded-lg"
+                                title="Delete item"
                               >
                                 <Trash2 className="w-3 h-3" />
                               </Button>
