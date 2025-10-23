@@ -434,9 +434,6 @@ export const emailTemplates = {
       </div>
     `),
     text: `Test Email Successful!\n\nThis is a test email sent to ${recipientEmail} to confirm your email system is working correctly.\n\nSystem Status:\n- Resend integration working\n- Edge Functions deployed\n- Email templates configured\n- Delivery system active`
-  })
-};
-    text: `Welcome to The Village Way, ${userName}!\n\nThanks for joining our community marketplace. You're now ready to buy and sell items locally.\n\nWhat's Next?\n- Browse items in your local area\n- Add items to your cart and checkout\n- List your own items for sale\n- Chat with buyers and sellers\n\nStart shopping: ${process.env.VITE_APP_URL || 'https://thevillageway.com'}/marketplace\n\nNeed help? Contact us at support@thevillageway.com`
   }),
 
   // Payment confirmation email for sellers
@@ -601,7 +598,7 @@ export const emailTemplates = {
     `,
     text: `Account Restricted - Payment Confirmations Required\n\nYour account has been restricted due to pending payment confirmations.\n\nRestriction Details:\n- Reason: ${restrictionReason}\n- Pending Confirmations: ${pendingCount}\n\nWhat This Means:\n- You cannot access the marketplace\n- All your listings are hidden\n- You cannot create new listings\n- Restrictions will be lifted once you confirm all pending payments\n\nConfirm Pending Payments: ${process.env.VITE_APP_URL || 'https://thevillageway.com'}/PaymentConfirmations`
   })
-}
+};
 
 /**
  * Send email via Gmail OAuth
