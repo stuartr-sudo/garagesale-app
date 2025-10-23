@@ -48,50 +48,60 @@ export default function UsersPage() {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      console.log("Loading users...");
+      console.log("Loading users from Supabase profiles table...");
       
-      // Try using User.list first
-      let allUsers = [];
-      try {
-        allUsers = await User.list("-created_date");
-        console.log("Loaded users via User.list:", allUsers.length, allUsers);
-      } catch (userListError) {
-        console.warn("User.list failed, trying direct Supabase query:", userListError);
-        
-        // Fallback to direct Supabase query
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .order('created_date', { ascending: false });
-        
-        if (error) {
-          console.error("Direct Supabase query failed:", error);
-          throw error;
-        }
-        
-        allUsers = data || [];
-        console.log("Loaded users via direct query:", allUsers.length, allUsers);
+      // Use direct Supabase query to bypass any entity issues
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_date', { ascending: false });
+      
+      if (error) {
+        console.error("Supabase query failed:", error);
+        throw error;
       }
       
+      const allUsers = data || [];
+      console.log("Successfully loaded users:", allUsers.length, allUsers);
       setUsers(allUsers);
 
       // Load statistics for each user
       const stats = {};
       for (const user of allUsers) {
         try {
-          const userItems = await Item.filter({ seller_id: user.id });
-          const userTransactions = await Transaction.filter({ seller_id: user.id });
+          // Get user items
+          const { data: userItems, error: itemsError } = await supabase
+            .from('items')
+            .select('*')
+            .eq('seller_id', user.id);
+          
+          if (itemsError) {
+            console.warn(`Could not load items for user ${user.id}:`, itemsError);
+          }
+          
+          // Get user transactions
+          const { data: userTransactions, error: transactionsError } = await supabase
+            .from('transactions')
+            .select('*')
+            .eq('seller_id', user.id);
+          
+          if (transactionsError) {
+            console.warn(`Could not load transactions for user ${user.id}:`, transactionsError);
+          }
+          
+          const items = userItems || [];
+          const transactions = userTransactions || [];
           
           stats[user.id] = {
-            totalItems: userItems.length,
-            activeItems: userItems.filter(item => item.status === 'active').length,
-            soldItems: userItems.filter(item => item.status === 'sold').length,
-            totalRevenue: userTransactions
+            totalItems: items.length,
+            activeItems: items.filter(item => item.status === 'active').length,
+            soldItems: items.filter(item => item.status === 'sold').length,
+            totalRevenue: transactions
               .filter(t => t.status === 'completed')
-              .reduce((sum, t) => sum + t.amount, 0),
-            totalListingValue: userItems
+              .reduce((sum, t) => sum + (t.amount || 0), 0),
+            totalListingValue: items
               .filter(item => item.status === 'active')
-              .reduce((sum, item) => sum + item.price, 0)
+              .reduce((sum, item) => sum + (item.price || 0), 0)
           };
         } catch (error) {
           console.warn(`Could not load stats for user ${user.id}:`, error);
@@ -105,6 +115,7 @@ export default function UsersPage() {
         }
       }
       setUserStats(stats);
+      console.log("User statistics loaded:", stats);
     } catch (error) {
       console.error("Error loading users:", error);
       // Set empty arrays to prevent crashes
@@ -136,13 +147,34 @@ export default function UsersPage() {
 
   const viewUserDetails = async (user) => {
     try {
-      const userItems = await Item.filter({ seller_id: user.id }, "-created_date");
-      const userTransactions = await Transaction.filter({ seller_id: user.id }, "-created_date");
+      console.log("Loading details for user:", user.id);
+      
+      // Get user items directly from Supabase
+      const { data: userItems, error: itemsError } = await supabase
+        .from('items')
+        .select('*')
+        .eq('seller_id', user.id)
+        .order('created_date', { ascending: false });
+      
+      if (itemsError) {
+        console.error("Error loading user items:", itemsError);
+      }
+      
+      // Get user transactions directly from Supabase
+      const { data: userTransactions, error: transactionsError } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('seller_id', user.id)
+        .order('created_date', { ascending: false });
+      
+      if (transactionsError) {
+        console.error("Error loading user transactions:", transactionsError);
+      }
       
       setSelectedUser({
         ...user,
-        items: userItems,
-        transactions: userTransactions
+        items: userItems || [],
+        transactions: userTransactions || []
       });
     } catch (error) {
       console.error("Error loading user details:", error);
