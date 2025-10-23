@@ -479,19 +479,19 @@ export default function ThemeSettings() {
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <Label className="text-sm text-gray-400">Border Color</Label>
-                      <Input
-                        type="color"
-                        value={theme.adBorderColor || '#a21caf'}
-                        onChange={(e) => updateThemeField('adBorderColor', e.target.value)}
-                        className="h-10 w-full cursor-pointer"
-                      />
-                      <Input
-                        value={theme.adBorderColor || '#a21caf'}
-                        onChange={(e) => updateThemeField('adBorderColor', e.target.value)}
-                        placeholder="e.g., #a21caf"
+                  <Input
+                    type="color"
+                    value={theme.adBorderColor || '#a21caf'}
+                    onChange={(e) => updateThemeField('adBorderColor', e.target.value)}
+                    className="h-10 w-full cursor-pointer"
+                  />
+                  <Input
+                    value={theme.adBorderColor || '#a21caf'}
+                    onChange={(e) => updateThemeField('adBorderColor', e.target.value)}
+                    placeholder="e.g., #a21caf"
                         className="bg-gray-800 border-gray-700 text-white mt-1"
-                      />
-                    </div>
+                  />
+                </div>
                     <div>
                       <Label className="text-sm text-gray-400">Button From</Label>
                       <Input
@@ -507,23 +507,23 @@ export default function ThemeSettings() {
                         className="bg-gray-800 border-gray-700 text-white mt-1"
                       />
                     </div>
-                  </div>
-                  <div>
+                    </div>
+                    <div>
                     <Label className="text-sm text-gray-400">Button To</Label>
-                    <Input
-                      type="color"
-                      value={theme.adButtonTo || '#3b82f6'}
-                      onChange={(e) => updateThemeField('adButtonTo', e.target.value)}
-                      className="h-10 w-full cursor-pointer"
-                    />
-                    <Input
-                      value={theme.adButtonTo || '#3b82f6'}
-                      onChange={(e) => updateThemeField('adButtonTo', e.target.value)}
-                      placeholder="e.g., #3b82f6"
-                      className="bg-gray-800 border-gray-700 text-white mt-1"
-                    />
+                      <Input
+                        type="color"
+                        value={theme.adButtonTo || '#3b82f6'}
+                        onChange={(e) => updateThemeField('adButtonTo', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.adButtonTo || '#3b82f6'}
+                        onChange={(e) => updateThemeField('adButtonTo', e.target.value)}
+                        placeholder="e.g., #3b82f6"
+                        className="bg-gray-800 border-gray-700 text-white mt-1"
+                      />
+                    </div>
                   </div>
-                </div>
 
                 {/* Local Deals Cards */}
                 <div className="space-y-4 bg-green-900/10 border border-green-700/30 rounded-lg p-4">
@@ -967,19 +967,21 @@ export default function ThemeSettings() {
             </CardContent>
           </Card>
 
-          {/* Preview */}
+          {/* Comprehensive Live Preview */}
           <Card className="bg-gray-900 border-gray-800">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Eye className="w-5 h-5" />
                 Live Preview
               </CardTitle>
-              <CardDescription>See how your theme will look</CardDescription>
+              <CardDescription>See how your theme will look across all card types</CardDescription>
             </CardHeader>
-            <CardContent>
-              {/* Preview Card */}
-              <div 
-                className="rounded-2xl shadow-2xl p-6 border-2 border-cyan-500/30"
+            <CardContent className="space-y-8">
+              {/* Standard Item Card Preview */}
+              <div className="space-y-3">
+                <h4 className="text-lg font-semibold text-white">Standard Item Card</h4>
+                <div 
+                  className="rounded-2xl shadow-2xl p-6 border-2 border-cyan-500/30 max-w-sm"
                 style={{
                   background: `linear-gradient(to bottom right, ${theme.cardFrom}, ${theme.cardTo})`
                 }}
@@ -1003,18 +1005,194 @@ export default function ThemeSettings() {
                   <Eye className="w-4 h-4 mr-2" />
                   View Details
                 </Button>
+                </div>
+              </div>
+
+              {/* Advertisement & Promoted Items Previews */}
+              <div className="space-y-6">
+                <h4 className="text-lg font-semibold text-white">Advertisement & Promoted Items</h4>
+                
+                {/* Top Banner Ads Preview */}
+                <div className="space-y-3">
+                  <h5 className="text-md font-medium text-blue-300">Top Banner Ads</h5>
+                  <div 
+                    className="rounded-lg p-4 border-2 max-w-2xl"
+                    style={{
+                      background: `linear-gradient(to right, ${theme.adBannerFrom || '#701a75'}, ${theme.adBannerTo || '#1f2937'})`,
+                      borderColor: theme.adBorderColor || '#a21caf'
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h6 className="text-lg font-bold text-white">Special Promotion</h6>
+                        <p className="text-sm text-gray-300">Limited time offer - 50% off!</p>
+                      </div>
+                      <Button 
+                        size="sm"
+                        style={{
+                          background: `linear-gradient(to right, ${theme.adButtonFrom || '#22d3ee'}, ${theme.adButtonTo || '#3b82f6'})`
+                        }}
+                      >
+                        Learn More
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Local Deals Cards Preview */}
+                <div className="space-y-3">
+                  <h5 className="text-md font-medium text-green-300">Local Deals Cards</h5>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div 
+                      className="rounded-lg p-4 border-2"
+                      style={{
+                        background: `linear-gradient(to bottom right, ${theme.localDealsFrom || '#059669'}, ${theme.localDealsTo || '#047857'})`,
+                        borderColor: theme.localDealsBorder || '#10b981'
+                      }}
+                    >
+                      <div className="bg-gray-800/30 rounded-lg h-32 mb-3 flex items-center justify-center text-gray-300">
+                        <span className="text-sm">Deal Image</span>
+                      </div>
+                      <h6 className="text-lg font-bold text-white mb-2">Local Deal</h6>
+                      <p className="text-sm text-gray-300 mb-3">Great savings in your area</p>
+                      <Button 
+                        size="sm"
+                        className="w-full"
+                        style={{
+                          background: `linear-gradient(to right, ${theme.localDealsButtonFrom || '#22c55e'}, ${theme.localDealsButtonTo || '#16a34a'})`
+                        }}
+                      >
+                        View Deal
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom Banner Ads Preview */}
+                <div className="space-y-3">
+                  <h5 className="text-md font-medium text-orange-300">Bottom Banner Ads</h5>
+                  <div 
+                    className="rounded-lg p-4 border-2 max-w-2xl"
+                    style={{
+                      background: `linear-gradient(to right, ${theme.bottomBannerFrom || '#7c2d12'}, ${theme.bottomBannerTo || '#9a3412'})`,
+                      borderColor: theme.bottomBannerBorder || '#ea580c'
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h6 className="text-lg font-bold text-white">Bottom Banner</h6>
+                        <p className="text-sm text-gray-300">Call to action message</p>
+                      </div>
+                      <Button 
+                        size="sm"
+                        style={{
+                          background: `linear-gradient(to right, ${theme.bottomBannerButtonFrom || '#f97316'}, ${theme.bottomBannerButtonTo || '#ea580c'})`
+                        }}
+                      >
+                        Action
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Special Offers Cards Preview */}
+                <div className="space-y-3">
+                  <h5 className="text-md font-medium text-pink-300">Special Offers Cards</h5>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div 
+                      className="rounded-lg p-4 border-2"
+                      style={{
+                        background: `linear-gradient(to bottom right, ${theme.specialOffersFrom || '#be185d'}, ${theme.specialOffersTo || '#9d174d'})`,
+                        borderColor: theme.specialOffersBorder || '#ec4899'
+                      }}
+                    >
+                      <div className="bg-gray-800/30 rounded-lg h-32 mb-3 flex items-center justify-center text-gray-300">
+                        <span className="text-sm">Offer Image</span>
+                      </div>
+                      <h6 className="text-lg font-bold text-white mb-2">Special Offer</h6>
+                      <p className="text-sm text-gray-300 mb-3">Exclusive deal for you</p>
+                      <Button 
+                        size="sm"
+                        className="w-full"
+                        style={{
+                          background: `linear-gradient(to right, ${theme.specialOffersButtonFrom || '#f472b6'}, ${theme.specialOffersButtonTo || '#ec4899'})`
+                        }}
+                      >
+                        Get Offer
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Featured Item Cards Preview */}
+                <div className="space-y-3">
+                  <h5 className="text-md font-medium text-purple-300">Featured Item Cards</h5>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div 
+                      className="rounded-lg p-4 border-2"
+                      style={{
+                        background: `linear-gradient(to bottom right, ${theme.featuredFrom || '#7c3aed'}, ${theme.featuredTo || '#6d28d9'})`,
+                        borderColor: theme.featuredBorder || '#8b5cf6'
+                      }}
+                    >
+                      <div className="bg-gray-800/30 rounded-lg h-32 mb-3 flex items-center justify-center text-gray-300">
+                        <span className="text-sm">Featured Image</span>
+                      </div>
+                      <h6 className="text-lg font-bold text-white mb-2">Featured Item</h6>
+                      <p className="text-sm text-gray-300 mb-3">Premium selection</p>
+                      <Button 
+                        size="sm"
+                        className="w-full"
+                        style={{
+                          background: `linear-gradient(to right, ${theme.featuredButtonFrom || '#a855f7'}, ${theme.featuredButtonTo || '#9333ea'})`
+                        }}
+                      >
+                        View Featured
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Promoted Item Cards Preview */}
+                <div className="space-y-3">
+                  <h5 className="text-md font-medium text-cyan-300">Promoted Item Cards</h5>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div 
+                      className="rounded-lg p-4 border-2"
+                      style={{
+                        background: `linear-gradient(to bottom right, ${theme.promotedFrom || '#0891b2'}, ${theme.promotedTo || '#0e7490'})`,
+                        borderColor: theme.promotedBorder || '#06b6d4'
+                      }}
+                    >
+                      <div className="bg-gray-800/30 rounded-lg h-32 mb-3 flex items-center justify-center text-gray-300">
+                        <span className="text-sm">Promoted Image</span>
+                      </div>
+                      <h6 className="text-lg font-bold text-white mb-2">Promoted Item</h6>
+                      <p className="text-sm text-gray-300 mb-3">Sponsored content</p>
+                      <Button 
+                        size="sm"
+                        className="w-full"
+                        style={{
+                          background: `linear-gradient(to right, ${theme.promotedButtonFrom || '#22d3ee'}, ${theme.promotedButtonTo || '#06b6d4'})`
+                        }}
+                      >
+                        View Promoted
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Theme Presets - Full Width */}
+          {/* Theme Presets - Full Width with Visual Examples */}
           <Card className="bg-gray-900 border-gray-800 lg:col-span-2">
             <CardHeader>
               <CardTitle>Theme Presets</CardTitle>
-              <CardDescription>Quick start with pre-made themes</CardDescription>
+              <CardDescription>Quick start with pre-made themes - click to see full preview</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Object.entries(THEME_PRESETS).map(([name, preset]) => (
                   <button
                     key={name}
@@ -1025,11 +1203,62 @@ export default function ThemeSettings() {
                         : 'border-gray-700 hover:border-gray-600'
                     }`}
                   >
-                    <div className={`h-24 bg-gradient-to-br from-${preset.cardFrom} to-${preset.cardTo}`}>
-                      <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-r from-${preset.buttonFrom} to-${preset.buttonTo} h-8`} />
+                    {/* Mini Preview Card */}
+                    <div 
+                      className="p-4 h-48"
+                      style={{
+                        background: `linear-gradient(to bottom right, ${preset.cardFrom}, ${preset.cardTo})`
+                      }}
+                    >
+                      <div className="bg-gray-800/50 rounded-lg h-16 mb-3 flex items-center justify-center text-gray-300">
+                        <span className="text-xs">Image</span>
                     </div>
-                    <div className="bg-gray-800 p-2">
-                      <p className="text-xs font-semibold text-white text-center">{name}</p>
+                      <h6 className="text-sm font-bold text-white mb-1">Sample Item</h6>
+                      <div 
+                        className="text-lg font-bold mb-2"
+                        style={{ color: preset.accentColor }}
+                      >
+                        $99.99
+                      </div>
+                      <Button 
+                        size="sm"
+                        className="w-full text-xs"
+                        style={{
+                          background: `linear-gradient(to right, ${preset.buttonFrom}, ${preset.buttonTo})`
+                        }}
+                      >
+                        View
+                      </Button>
+                    </div>
+                    
+                    {/* Advertisement Preview */}
+                    <div 
+                      className="p-3 border-t"
+                      style={{
+                        background: `linear-gradient(to right, ${preset.adBannerFrom}, ${preset.adBannerTo})`,
+                        borderColor: preset.adBorderColor
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h6 className="text-xs font-bold text-white">Ad Banner</h6>
+                          <p className="text-xs text-gray-300">Preview</p>
+                        </div>
+                        <Button 
+                          size="sm"
+                          className="text-xs px-2 py-1"
+                          style={{
+                            background: `linear-gradient(to right, ${preset.adButtonFrom}, ${preset.adButtonTo})`
+                          }}
+                        >
+                          Click
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-800 p-3">
+                      <p className="text-sm font-semibold text-white text-center">{name}</p>
+                      <p className="text-xs text-gray-400 text-center mt-1">Click to apply</p>
                     </div>
                   </button>
                 ))}
