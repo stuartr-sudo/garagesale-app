@@ -20,10 +20,10 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
-export default function BundleCreator({ 
-  sellerId, 
-  onClose, 
-  onSuccess 
+function BundleCreator({ 
+  sellerId,
+  onClose,
+  onSuccess
 }) {
   const [availableItems, setAvailableItems] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
@@ -402,3 +402,5 @@ export default function BundleCreator({
     </div>
   );
 }
+
+export default BundleCreator;
