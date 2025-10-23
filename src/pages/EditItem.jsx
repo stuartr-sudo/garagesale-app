@@ -9,9 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate, useParams } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowLeft, Save, Loader2, X } from "lucide-react";
+import { ArrowLeft, Save, Loader2, X, Mic, MicOff, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ImageUpload from "../components/additem/ImageUpload";
+import VoiceInputField from "../components/additem/VoiceInputField";
+import { syncItemWithKnowledgeBase, updateKnowledgeWithVoiceData, extractSellingPointsFromVoice, generateFAQsFromVoice } from "@/utils/knowledgeSync";
 
 const categories = [
   { value: "electronics", label: "Electronics" },
@@ -43,6 +45,15 @@ export default function EditItem() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [itemLoaded, setItemLoaded] = useState(false);
+  
+  // Voice input states
+  const [showVoiceInput, setShowVoiceInput] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [voiceTranscription, setVoiceTranscription] = useState('');
+  const [hasVoiceInput, setHasVoiceInput] = useState(false);
+  const [voiceTargetField, setVoiceTargetField] = useState('description');
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [maxRecordingTime] = useState(30); // 30 seconds max
   
   const [itemData, setItemData] = useState({
     title: "",
@@ -255,6 +266,131 @@ export default function EditItem() {
     }));
   };
 
+  // Voice input handlers
+  const handleVoiceTranscript = async (transcript) => {
+    setVoiceTranscription(transcript);
+    setHasVoiceInput(true);
+    
+    // Apply voice input to the appropriate field
+    if (voiceTargetField === 'title') {
+      setItemData(prev => ({ 
+        ...prev, 
+        title: prev.title ? `${prev.title} - ${transcript}` : transcript 
+      }));
+    } else if (voiceTargetField === 'description') {
+      setItemData(prev => ({ 
+        ...prev, 
+        description: prev.description ? `${prev.description}\n\n${transcript}` : transcript 
+      }));
+    } else {
+      // For general updates, intelligently parse the voice input
+      try {
+        const parsed = await parseVoiceInputIntelligently(transcript);
+        
+        setItemData(prev => ({
+          ...prev,
+          title: parsed.title ? (prev.title ? `${prev.title} - ${parsed.title}` : parsed.title) : prev.title,
+          description: parsed.description ? (prev.description ? `${prev.description}\n\n${parsed.description}` : parsed.description) : prev.description
+        }));
+        
+        toast({
+          title: "Voice Input Processed",
+          description: `AI has intelligently parsed your voice input and updated the relevant fields.`,
+        });
+      } catch (error) {
+        console.error('Error parsing voice input:', error);
+        // Fallback: just use the voice text as description
+        setItemData(prev => ({ 
+          ...prev, 
+          description: prev.description ? `${prev.description}\n\n${transcript}` : transcript 
+        }));
+      }
+    }
+    
+    setShowVoiceInput(false);
+  };
+
+  const parseVoiceInputIntelligently = async (voiceText) => {
+    try {
+      const openaiApiKey = import.meta.env.VITE_OPENAI_API_KEY;
+      
+      if (!openaiApiKey) {
+        throw new Error('OpenAI API key not available');
+      }
+
+      const { OpenAI } = await import('openai');
+      const openai = new OpenAI({ apiKey: openaiApiKey });
+
+      const response = await openai.chat.completions.create({
+        model: 'gpt-3.5-turbo',
+        messages: [{
+          role: 'user',
+          content: `Parse this voice input about editing an item listing. Extract title updates and description updates separately.
+
+Voice input: "${voiceText}"
+
+Return JSON with:
+- title: Any title updates or additions
+- description: Any description updates or additions
+
+Example: {"title": "Vintage Leather Jacket - Excellent Condition", "description": "This is a beautiful vintage leather jacket in excellent condition with minimal wear."}
+
+Return only JSON, no other text.`
+        }],
+        temperature: 0.3,
+        max_tokens: 200
+      });
+
+      const data = response.choices[0].message.content;
+      
+      if (data.error) {
+        throw new Error(data.error.message || 'Failed to parse voice input');
+      }
+      
+      const result = JSON.parse(data);
+      return {
+        title: result.title?.trim() || '',
+        description: result.description?.trim() || '',
+        confidence: result.confidence || 'medium'
+      };
+    } catch (error) {
+      console.error('Error parsing voice input:', error);
+      // Fallback: just use the voice text as description
+      return {
+        title: '',
+        description: voiceText,
+        confidence: 'low'
+      };
+    }
+  };
+
+  const startRecording = () => {
+    setRecordingTime(0);
+    setIsRecording(true);
+    setShowVoiceInput(true);
+  };
+
+  const stopRecording = () => {
+    setIsRecording(false);
+  };
+
+  // Recording timer effect
+  useEffect(() => {
+    let interval;
+    if (isRecording) {
+      interval = setInterval(() => {
+        setRecordingTime(prev => {
+          if (prev >= maxRecordingTime) {
+            setIsRecording(false);
+            return maxRecordingTime;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isRecording, maxRecordingTime]);
+
   const handleSubmit = async () => {
     // Validation
     if (!itemData.title.trim()) {
@@ -316,9 +452,54 @@ export default function EditItem() {
 
       if (updateError) throw updateError;
 
+      // Sync with knowledge base
+      const syncResult = await syncItemWithKnowledgeBase(id, {
+        minimum_price: itemData.minimum_price ? parseFloat(itemData.minimum_price) : null,
+        title: itemData.title.trim(),
+        description: itemData.description.trim(),
+        condition: itemData.condition,
+        category: itemData.category
+      });
+
+      if (!syncResult.success) {
+        console.warn('Knowledge base sync failed:', syncResult.error);
+        // Don't fail the whole operation, just log the warning
+      }
+
+      // If voice input was provided, update knowledge base with voice data
+      if (hasVoiceInput && voiceTranscription) {
+        const voiceResult = await updateKnowledgeWithVoiceData(id, voiceTranscription);
+        
+        if (voiceResult.success) {
+          // Extract selling points and FAQs from voice input
+          try {
+            const sellingPoints = await extractSellingPointsFromVoice(voiceTranscription, itemData.title);
+            const faqs = await generateFAQsFromVoice(voiceTranscription, itemData.title);
+            
+            // Update knowledge base with AI-generated content
+            if (sellingPoints.length > 0 || Object.keys(faqs).length > 0) {
+              const { error: knowledgeUpdateError } = await supabase
+                .from('item_knowledge')
+                .update({
+                  selling_points: sellingPoints.length > 0 ? sellingPoints : null,
+                  faqs: Object.keys(faqs).length > 0 ? faqs : null,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('item_id', id);
+
+              if (knowledgeUpdateError) {
+                console.warn('Failed to update knowledge base with AI content:', knowledgeUpdateError);
+              }
+            }
+          } catch (error) {
+            console.warn('Failed to generate AI content from voice:', error);
+          }
+        }
+      }
+
       toast({
         title: "Success!",
-        description: "Your listing has been updated"
+        description: "Your listing and AI agent knowledge have been updated"
       });
 
       navigate(createPageUrl('MyItems'));
@@ -412,14 +593,35 @@ export default function EditItem() {
             {/* Description */}
             <div>
               <Label htmlFor="description" className="text-white text-lg">Description *</Label>
-              <Textarea
-                id="description"
-                value={itemData.description}
-                onChange={(e) => setItemData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Describe your item in detail..."
-                className="mt-2 bg-gray-800 border-gray-700 text-white placeholder-gray-500 min-h-[150px]"
-                maxLength={1000}
-              />
+              <div className="flex gap-2 mt-2">
+                <Textarea
+                  id="description"
+                  value={itemData.description}
+                  onChange={(e) => setItemData(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Describe your item in detail..."
+                  className="flex-1 bg-gray-800 border-gray-700 text-white placeholder-gray-500 min-h-[150px]"
+                  maxLength={1000}
+                />
+                <div className="flex flex-col gap-2">
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setVoiceTargetField('description');
+                      startRecording();
+                    }}
+                    disabled={isRecording}
+                    className="bg-cyan-600 hover:bg-cyan-700 text-white p-2"
+                    title="Add voice description"
+                  >
+                    <Mic className="w-4 h-4" />
+                  </Button>
+                  {hasVoiceInput && (
+                    <div className="text-xs text-cyan-400 text-center">
+                      Voice added
+                    </div>
+                  )}
+                </div>
+              </div>
               <p className="text-xs text-gray-500 mt-1">{itemData.description.length}/1000 characters</p>
             </div>
 
@@ -498,6 +700,59 @@ export default function EditItem() {
                 placeholder="e.g., London, UK or SW1A 1AA"
                 className="mt-2 bg-gray-800 border-gray-700 text-white placeholder-gray-500"
               />
+            </div>
+
+            {/* Voice Input Section */}
+            <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <Label className="text-white text-lg">Voice Updates</Label>
+                <div className="flex items-center gap-2 text-sm text-gray-400">
+                  <Clock className="w-4 h-4" />
+                  Max 30 seconds
+                </div>
+              </div>
+              <p className="text-sm text-gray-400 mb-4">
+                Use voice to add additional details, selling points, or update your listing description.
+                The AI will intelligently parse your voice input and update the relevant fields.
+              </p>
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setVoiceTargetField('general');
+                    startRecording();
+                  }}
+                  disabled={isRecording}
+                  className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white"
+                >
+                  {isRecording ? (
+                    <>
+                      <MicOff className="w-4 h-4 mr-2" />
+                      Recording... ({recordingTime}s)
+                    </>
+                  ) : (
+                    <>
+                      <Mic className="w-4 h-4 mr-2" />
+                      Start Voice Update
+                    </>
+                  )}
+                </Button>
+                {isRecording && (
+                  <Button
+                    type="button"
+                    onClick={stopRecording}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    Stop Recording
+                  </Button>
+                )}
+              </div>
+              {hasVoiceInput && (
+                <div className="mt-3 p-3 bg-cyan-900/20 border border-cyan-700 rounded-lg">
+                  <p className="text-sm text-cyan-300 mb-2">Voice input processed:</p>
+                  <p className="text-sm text-gray-300 italic">"{voiceTranscription}"</p>
+                </div>
+              )}
             </div>
 
             {/* Images */}
@@ -587,6 +842,17 @@ export default function EditItem() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Voice Input Modal */}
+      {showVoiceInput && (
+        <VoiceInputField
+          isOpen={showVoiceInput}
+          onClose={() => setShowVoiceInput(false)}
+          onTranscript={handleVoiceTranscript}
+          maxDuration={maxRecordingTime}
+          targetField={voiceTargetField}
+        />
+      )}
     </div>
   );
 }
