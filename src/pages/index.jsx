@@ -26,6 +26,8 @@ import Terms from "./Terms";
 
 import Announcements from "./Announcements";
 
+import AnnouncementEditor from "./AnnouncementEditor";
+
 import Donations from "./Donations";
 
 import Requests from "./Requests";
@@ -96,6 +98,8 @@ const PAGES = {
     Terms: Terms,
     
     Announcements: Announcements,
+    
+    AnnouncementEditor: AnnouncementEditor,
     
     Donations: Donations,
     
@@ -203,6 +207,8 @@ function PagesContent() {
                 <Route path="/Terms" element={<Terms />} />
                 
                 <Route path="/Announcements" element={<Announcements />} />
+                
+                <Route path="/AnnouncementEditor" element={<AnnouncementEditor />} />
                 
                 <Route path="/Donations" element={<Donations />} />
                 
