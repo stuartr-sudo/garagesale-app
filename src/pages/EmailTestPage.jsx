@@ -2,6 +2,7 @@ import React from 'react'
 import EmailTestButton from '@/components/EmailTestButton'
 import SimpleTestButton from '@/components/SimpleTestButton'
 import GmailAuthTestButton from '@/components/GmailAuthTestButton'
+import ResendTestButton from '@/components/ResendTestButton'
 
 export default function EmailTestPage() {
   return (
@@ -14,10 +15,15 @@ export default function EmailTestPage() {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <EmailTestButton />
-          <SimpleTestButton />
-          <GmailAuthTestButton />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-6">
+            <ResendTestButton />
+            <SimpleTestButton />
+          </div>
+          <div className="space-y-6">
+            <EmailTestButton />
+            <GmailAuthTestButton />
+          </div>
         </div>
         
         <div className="mt-8 bg-gray-800/50 rounded-lg p-6">
