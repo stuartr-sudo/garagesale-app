@@ -273,6 +273,20 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
     }));
   };
 
+  const setMainImage = (index) => {
+    setItemData(prev => {
+      const newImages = [...prev.image_urls];
+      // Move the selected image to the front (index 0)
+      const [selectedImage] = newImages.splice(index, 1);
+      newImages.unshift(selectedImage);
+      
+      return {
+        ...prev,
+        image_urls: newImages
+      };
+    });
+  };
+
   const generateWithAI = async (field) => {
     // Check if we have an image to analyze
     if (!itemData.image_urls || itemData.image_urls.length === 0) {
@@ -690,36 +704,17 @@ Return only the description, nothing else.`
           <div className="space-y-4">
             <div className="text-center mb-4">
               <h2 className="text-xl font-bold text-white mb-1">Add Photos</h2>
-              <p className="text-gray-400 text-sm">Upload images of your item (first image will be the main photo)</p>
+              <p className="text-gray-400 text-sm">Upload images of your item. Click "Set as Main" on any image to make it the main photo.</p>
           </div>
 
                 <ImageUpload
                   images={itemData.image_urls}
                   onUpload={handleImageUpload}
-              onRemove={removeImage}
-              isUploading={isUploading}
-            />
+                  onRemove={removeImage}
+                  onSetMain={setMainImage}
+                  isUploading={isUploading}
+                />
 
-            {itemData.image_urls.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {itemData.image_urls.map((url, index) => (
-                  <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-gray-800">
-                    <img src={url} alt={`Upload ${index + 1}`} className="w-full h-full object-cover" />
-                    <button
-                      onClick={() => removeImage(index)}
-                      className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                    {index === 0 && (
-                      <div className="absolute bottom-2 left-2 bg-pink-600 text-white text-xs px-2 py-1 rounded">
-                        Main Photo
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         );
 

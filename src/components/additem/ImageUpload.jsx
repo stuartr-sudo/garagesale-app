@@ -4,7 +4,7 @@ import { Upload, Camera, X, Plus, Loader2, ImageIcon } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import MobileCameraCapture from "@/components/camera/MobileCameraCapture";
 
-export default function ImageUpload({ images = [], onUpload, onRemove, isUploading = false }) {
+export default function ImageUpload({ images = [], onUpload, onRemove, onSetMain, isUploading = false }) {
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
   const [showMobileCamera, setShowMobileCamera] = useState(false);
@@ -35,12 +35,14 @@ export default function ImageUpload({ images = [], onUpload, onRemove, isUploadi
     <div className="space-y-4">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {safeImages.map((imageUrl, index) => (
-          <div key={index} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
+          <div key={index} className={`relative aspect-square rounded-xl overflow-hidden bg-gray-100 ${index === 0 ? 'ring-2 ring-emerald-500' : ''}`}>
             <img
               src={imageUrl}
               alt={`Item image ${index + 1}`}
               className="w-full h-full object-cover"
             />
+            
+            {/* Remove button */}
             <Button
               type="button"
               variant="destructive"
@@ -50,12 +52,26 @@ export default function ImageUpload({ images = [], onUpload, onRemove, isUploadi
             >
               <X className="w-3 h-3" />
             </Button>
+            
+            {/* Main image indicator */}
             {index === 0 && (
               <div className="absolute bottom-2 left-2">
-                <span className="bg-emerald-600 text-white text-xs px-2 py-1 rounded">
+                <span className="bg-emerald-600 text-white text-xs px-2 py-1 rounded font-semibold">
                   Main
                 </span>
               </div>
+            )}
+            
+            {/* Set as main button for non-main images */}
+            {index !== 0 && onSetMain && (
+              <Button
+                type="button"
+                size="sm"
+                className="absolute bottom-2 left-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-2 py-1 rounded font-semibold"
+                onClick={() => onSetMain(index)}
+              >
+                Set as Main
+              </Button>
             )}
           </div>
         ))}
@@ -134,8 +150,8 @@ export default function ImageUpload({ images = [], onUpload, onRemove, isUploadi
 
       <p className="text-sm text-gray-500 text-center">
         {isMobile 
-          ? "Add up to 8 photos. Tap the placeholder to choose from gallery or 'Take Photo' for camera."
-          : "Add up to 8 photos. Click the placeholder to upload or 'Take Photo' for camera. The first photo will be the main image."
+          ? "Add up to 8 photos. Tap the placeholder to choose from gallery or 'Take Photo' for camera. Use 'Set as Main' to choose your main image."
+          : "Add up to 8 photos. Click the placeholder to upload or 'Take Photo' for camera. Use 'Set as Main' to choose your main image."
         }
       </p>
 
