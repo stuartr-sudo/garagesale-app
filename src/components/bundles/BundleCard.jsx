@@ -105,7 +105,10 @@ export default function BundleCard({
           
           {/* Bundle Description */}
           {bundle.description && (
-            <p className="text-gray-400 text-sm mt-2 line-clamp-2 leading-relaxed">
+            <p 
+              className="text-sm mt-2 line-clamp-2 leading-relaxed"
+              style={{ color: theme.bundleDescriptionColor || theme.descriptionColor || '#9ca3af' }}
+            >
               {bundle.description}
             </p>
           )}

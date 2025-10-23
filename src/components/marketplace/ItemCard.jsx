@@ -178,7 +178,10 @@ export default function ItemCard({ item, seller, isSold = false, currentUser = n
           
           {/* Product Description */}
           {item.description && (
-            <p className="text-gray-400 text-sm mt-2 line-clamp-2 leading-relaxed">
+            <p 
+              className="text-sm mt-2 line-clamp-2 leading-relaxed"
+              style={{ color: theme.descriptionColor || '#9ca3af' }}
+            >
               {item.description}
             </p>
           )}

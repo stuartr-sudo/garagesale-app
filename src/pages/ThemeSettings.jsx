@@ -15,12 +15,14 @@ const THEME_PRESETS = {
     buttonFrom: '#a855f7', // purple-500
     buttonTo: '#db2777',  // pink-600
     accentColor: '#22d3ee', // cyan-400
+    descriptionColor: '#9ca3af', // gray-400
     // Bundle Card Colors
     bundleCardFrom: '#059669', // emerald-600
     bundleCardTo: '#047857',   // emerald-700
     bundleButtonFrom: '#10b981', // emerald-500
     bundleButtonTo: '#059669',   // emerald-600
     bundleAccentColor: '#6ee7b7', // emerald-300
+    bundleDescriptionColor: '#9ca3af', // gray-400
     // Advertisement colors - Top Banner
     adBannerFrom: '#701a75', // fuchsia-900
     adBannerTo: '#1f2937',   // gray-800
@@ -64,12 +66,14 @@ const THEME_PRESETS = {
     buttonFrom: '#a855f7', // purple-500
     buttonTo: '#db2777',  // pink-600
     accentColor: '#22d3ee', // cyan-400
+    descriptionColor: '#9ca3af', // gray-400
     // Bundle Card Colors
     bundleCardFrom: '#059669', // emerald-600
     bundleCardTo: '#047857',   // emerald-700
     bundleButtonFrom: '#10b981', // emerald-500
     bundleButtonTo: '#059669',   // emerald-600
     bundleAccentColor: '#6ee7b7', // emerald-300
+    bundleDescriptionColor: '#9ca3af', // gray-400
     // Advertisement colors - Top Banner
     adBannerFrom: '#701a75',
     adBannerTo: '#1f2937',
@@ -113,12 +117,14 @@ const THEME_PRESETS = {
     buttonFrom: '#3b82f6', // blue-500
     buttonTo: '#0891b2',  // cyan-600
     accentColor: '#93c5fd', // blue-300
+    descriptionColor: '#9ca3af', // gray-400
     // Bundle Card Colors
     bundleCardFrom: '#0d9488', // teal-600
     bundleCardTo: '#0f766e',   // teal-700
     bundleButtonFrom: '#14b8a6', // teal-500
     bundleButtonTo: '#0d9488',   // teal-600
     bundleAccentColor: '#5eead4', // teal-300
+    bundleDescriptionColor: '#9ca3af', // gray-400
     // Advertisement colors - Top Banner
     adBannerFrom: '#164e63', // cyan-900
     adBannerTo: '#1e3a8a',   // blue-900
@@ -162,12 +168,14 @@ const THEME_PRESETS = {
     buttonFrom: '#f97316', // orange-500
     buttonTo: '#db2777',  // pink-600
     accentColor: '#fdba74', // orange-300
+    descriptionColor: '#9ca3af', // gray-400
     // Bundle Card Colors
     bundleCardFrom: '#dc2626', // red-600
     bundleCardTo: '#b91c1c',   // red-700
     bundleButtonFrom: '#ef4444', // red-500
     bundleButtonTo: '#dc2626',   // red-600
     bundleAccentColor: '#fca5a5', // red-300
+    bundleDescriptionColor: '#9ca3af', // gray-400
     // Advertisement colors - Top Banner
     adBannerFrom: '#9a3412', // orange-800
     adBannerTo: '#7c2d12',   // orange-900
@@ -211,12 +219,14 @@ const THEME_PRESETS = {
     buttonFrom: '#22c55e', // green-500
     buttonTo: '#10b981',  // emerald-600
     accentColor: '#86efac', // green-300
+    descriptionColor: '#9ca3af', // gray-400
     // Bundle Card Colors
     bundleCardFrom: '#059669', // emerald-600
     bundleCardTo: '#047857',   // emerald-700
     bundleButtonFrom: '#10b981', // emerald-500
     bundleButtonTo: '#059669',   // emerald-600
     bundleAccentColor: '#6ee7b7', // emerald-300
+    bundleDescriptionColor: '#9ca3af', // gray-400
     // Advertisement colors - Top Banner
     adBannerFrom: '#064e3b', // emerald-900
     adBannerTo: '#14532d',   // green-900
@@ -260,12 +270,14 @@ const THEME_PRESETS = {
     buttonFrom: '#a855f7', // purple-500
     buttonTo: '#6366f1',  // indigo-600
     accentColor: '#c4b5fd', // purple-300
+    descriptionColor: '#9ca3af', // gray-400
     // Bundle Card Colors
     bundleCardFrom: '#059669', // emerald-600
     bundleCardTo: '#047857',   // emerald-700
     bundleButtonFrom: '#10b981', // emerald-500
     bundleButtonTo: '#059669',   // emerald-600
     bundleAccentColor: '#6ee7b7', // emerald-300
+    bundleDescriptionColor: '#9ca3af', // gray-400
     // Advertisement colors - Top Banner
     adBannerFrom: '#581c87', // purple-900
     adBannerTo: '#312e81',   // indigo-900
@@ -467,6 +479,26 @@ export default function ThemeSettings() {
                 </p>
               </div>
 
+              {/* Description Text Color */}
+              <div className="space-y-3">
+                <Label className="text-white text-lg">Description Text Color</Label>
+                <Input
+                  type="color"
+                  value={theme.descriptionColor || '#9ca3af'}
+                  onChange={(e) => updateThemeField('descriptionColor', e.target.value)}
+                  className="h-10 w-full cursor-pointer"
+                />
+                <Input
+                  value={theme.descriptionColor || '#9ca3af'}
+                  onChange={(e) => updateThemeField('descriptionColor', e.target.value)}
+                  placeholder="e.g., #9ca3af"
+                  className="bg-gray-800 border-gray-700 text-white"
+                />
+                <p className="text-xs text-gray-500">
+                  Used for item descriptions and secondary text
+                </p>
+              </div>
+
               <Separator className="my-6 bg-gray-700" />
 
               {/* Bundle Cards */}
@@ -568,6 +600,26 @@ export default function ThemeSettings() {
                   />
                   <p className="text-xs text-gray-500">
                     Used for bundle price text and highlights
+                  </p>
+                </div>
+
+                {/* Bundle Description Text Color */}
+                <div className="space-y-3">
+                  <Label className="text-white text-lg">Bundle Description Text Color</Label>
+                  <Input
+                    type="color"
+                    value={theme.bundleDescriptionColor || '#9ca3af'}
+                    onChange={(e) => updateThemeField('bundleDescriptionColor', e.target.value)}
+                    className="h-10 w-full cursor-pointer"
+                  />
+                  <Input
+                    value={theme.bundleDescriptionColor || '#9ca3af'}
+                    onChange={(e) => updateThemeField('bundleDescriptionColor', e.target.value)}
+                    placeholder="e.g., #9ca3af"
+                    className="bg-gray-800 border-gray-700 text-white"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Used for bundle descriptions and secondary text
                   </p>
                 </div>
               </div>
@@ -1131,6 +1183,12 @@ export default function ThemeSettings() {
                   <span className="text-sm">Item Image</span>
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">Sample Item Title</h3>
+                <p 
+                  className="text-sm mb-3"
+                  style={{ color: theme.descriptionColor || '#9ca3af' }}
+                >
+                  Sample item description text
+                </p>
                 <div 
                   className="text-3xl font-bold mb-4"
                   style={{ color: theme.accentColor }}
@@ -1162,6 +1220,12 @@ export default function ThemeSettings() {
                   <span className="text-sm">Bundle Image</span>
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">Sample Bundle Title</h3>
+                <p 
+                  className="text-sm mb-3"
+                  style={{ color: theme.bundleDescriptionColor || '#9ca3af' }}
+                >
+                  Sample bundle description text
+                </p>
                 <div 
                   className="text-3xl font-bold mb-4"
                   style={{ color: theme.bundleAccentColor || '#6ee7b7' }}
