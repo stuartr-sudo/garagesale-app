@@ -16,6 +16,8 @@ import OnboardingTour from "../components/onboarding/OnboardingTour";
 import SearchFilters from "../components/marketplace/SearchFilters";
 import SmartRecommendations from "../components/recommendations/SmartRecommendations";
 import RecentlySold from "../components/marketplace/RecentlySold";
+import BundleCard from "../components/bundles/BundleCard";
+import BundlePurchaseModal from "../components/bundles/BundlePurchaseModal";
 import { supabase } from '@/lib/supabase';
 
 // Define a set of demo items to display if no real items are available
@@ -146,9 +148,12 @@ const DEMO_ITEMS = [
 export default function Marketplace() {
   const [items, setItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
+  const [bundles, setBundles] = useState([]);
+  const [filteredBundles, setFilteredBundles] = useState([]);
   const [recentlySoldItems, setRecentlySoldItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedBundle, setSelectedBundle] = useState(null);
   const [selectedAd, setSelectedAd] = useState(null);
   const [sellers, setSellers] = useState({});
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -164,6 +169,7 @@ export default function Marketplace() {
 
   useEffect(() => {
     loadItems();
+    loadBundles();
     loadRecentlySold();
   }, []);
 
@@ -223,6 +229,40 @@ export default function Marketplace() {
       console.error("Error loading items:", error);
     }
     setLoading(false);
+  };
+
+  const loadBundles = async () => {
+    try {
+      const response = await fetch('/api/bundles?status=active&limit=20');
+      if (response.ok) {
+        const data = await response.json();
+        setBundles(data.bundles || []);
+        
+        // Load seller information for bundles
+        const bundleSellerIds = [...new Set((data.bundles || []).map((bundle) => bundle.seller_id))];
+        const bundleSellersData = { ...sellers };
+
+        for (const sellerId of bundleSellerIds) {
+          if (!bundleSellersData[sellerId]) {
+            try {
+              const seller = await User.get(sellerId);
+              bundleSellersData[sellerId] = seller;
+            } catch (error) {
+              console.warn(`Could not load bundle seller ${sellerId}:`, error);
+              bundleSellersData[sellerId] = {
+                id: sellerId,
+                full_name: 'Anonymous Seller',
+                email: 'anonymous@marketplace.com'
+              };
+            }
+          }
+        }
+        setSellers(bundleSellersData);
+      }
+    } catch (error) {
+      console.error("Error loading bundles:", error);
+      setBundles([]);
+    }
   };
 
   const loadRecentlySold = async () => {
@@ -390,6 +430,14 @@ export default function Marketplace() {
     setSelectedAd(ad);
   };
 
+  const handleBundlePurchase = (bundle) => {
+    setSelectedBundle(bundle);
+  };
+
+  const handleBundleViewDetails = (bundle) => {
+    setSelectedBundle(bundle);
+  };
+
   const categories = [
   { value: "all", label: "All Categories" },
   { value: "electronics", label: "Electronics" },
@@ -489,6 +537,33 @@ export default function Marketplace() {
                 </React.Fragment>
             )}
 
+              {/* Bundle Deals Section */}
+              {bundles.length > 0 && (
+                <>
+                  {/* Full-width separator */}
+                  <div className="md:col-span-2 lg:col-span-3 xl:col-span-4 mt-8 mb-4">
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent"></div>
+                      <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                        <Package className="w-6 h-6 text-green-400" />
+                        Bundle Deals
+                      </h2>
+                      <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent"></div>
+                    </div>
+                  </div>
+
+                  {/* Bundle Cards */}
+                  {bundles.map((bundle) => (
+                    <BundleCard
+                      key={bundle.id}
+                      bundle={bundle}
+                      onBuyNow={handleBundlePurchase}
+                      onViewDetails={handleBundleViewDetails}
+                    />
+                  ))}
+                </>
+              )}
+
               {/* Recently Sold Items - Added directly to the same grid */}
               {recentlySoldItems.length > 0 && (
                 <>
@@ -556,6 +631,19 @@ export default function Marketplace() {
           <AdModal
             ad={selectedAd}
             onClose={() => setSelectedAd(null)}
+          />
+        )}
+
+        {selectedBundle && (
+          <BundlePurchaseModal
+            bundle={selectedBundle}
+            onClose={() => setSelectedBundle(null)}
+            onSuccess={() => {
+              setSelectedBundle(null);
+              loadItems();
+              loadBundles();
+              loadRecentlySold();
+            }}
           />
         )}
 

@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MyItemCard from "../components/myitems/MyItemCard";
 import StatsCards from "../components/myitems/StatsCards";
 import RatingModal from "../components/ratings/RatingModal";
+import BundleCreator from "../components/bundles/BundleCreator";
 
 export default function MyItems() {
   const [items, setItems] = useState([]);
@@ -23,6 +24,7 @@ export default function MyItems() {
   const [activeTab, setActiveTab] = useState("active");
   const [itemRatings, setItemRatings] = useState({});
   const [ratingTransaction, setRatingTransaction] = useState(null);
+  const [showBundleCreator, setShowBundleCreator] = useState(false);
 
   useEffect(() => {
     loadUserItems();
@@ -125,12 +127,21 @@ export default function MyItems() {
               <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">My Items</h1>
               <p className="text-base md:text-lg text-gray-400">Manage your listings and track your sales</p>
             </div>
-            <Link to={createPageUrl("AddItem")}>
-              <Button className="bg-gradient-to-r from-pink-500 to-fuchsia-600 hover:from-pink-600 hover:to-fuchsia-700 shadow-lg hover:shadow-xl transition-all duration-300 h-12 px-6 rounded-xl w-full md:w-auto">
-                <Plus className="w-5 h-5 mr-2" />
-                Add New Item
+            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+              <Link to={createPageUrl("AddItem")} className="flex-1">
+                <Button className="bg-gradient-to-r from-pink-500 to-fuchsia-600 hover:from-pink-600 hover:to-fuchsia-700 shadow-lg hover:shadow-xl transition-all duration-300 h-12 px-6 rounded-xl w-full">
+                  <Plus className="w-5 h-5 mr-2" />
+                  Add New Item
+                </Button>
+              </Link>
+              <Button 
+                onClick={() => setShowBundleCreator(true)}
+                className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all duration-300 h-12 px-6 rounded-xl w-full sm:w-auto"
+              >
+                <Package className="w-5 h-5 mr-2" />
+                Create Bundle
               </Button>
-            </Link>
+            </div>
           </div>
 
           {/* Stats Cards */}
@@ -244,6 +255,17 @@ export default function MyItems() {
           role="seller_rating_buyer"
           onClose={() => setRatingTransaction(null)}
           onRatingSuccess={loadUserItems}
+        />
+      )}
+
+      {showBundleCreator && currentUser && (
+        <BundleCreator
+          sellerId={currentUser.id}
+          onClose={() => setShowBundleCreator(false)}
+          onSuccess={() => {
+            setShowBundleCreator(false);
+            loadUserItems(); // Refresh items to show updated status
+          }}
         />
       )}
     </div>
