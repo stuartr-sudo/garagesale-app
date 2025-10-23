@@ -24,6 +24,22 @@ export default async function handler(req, res) {
         });
       }
 
+      // Validate payment method (replaces database constraint)
+      const validPaymentMethods = ['bank_transfer', 'stripe', 'crypto'];
+      if (!validPaymentMethods.includes(paymentMethod)) {
+        return res.status(400).json({
+          error: 'Invalid payment method. Must be one of: bank_transfer, stripe, crypto'
+        });
+      }
+
+      // Validate payment status (replaces database constraint)
+      const validPaymentStatuses = ['pending', 'confirmed', 'completed', 'failed'];
+      if (!validPaymentStatuses.includes(paymentStatus)) {
+        return res.status(400).json({
+          error: 'Invalid payment status. Must be one of: pending, confirmed, completed, failed'
+        });
+      }
+
       // Create transaction record
       const { data: transaction, error } = await supabase
         .from('transactions')
