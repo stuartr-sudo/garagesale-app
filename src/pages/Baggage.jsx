@@ -381,15 +381,16 @@ export default function BaggagePage() {
             </TabsList>
 
             <TabsContent value="baggage" className="mt-6">
-              <Button
-                onClick={() => setIsAdding(true)}
-                className="bg-gradient-to-r from-pink-500 to-fuchsia-600 hover:from-pink-600 hover:to-fuchsia-700 rounded-xl"
-                disabled={isAdding}
-              >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Baggage Item
-            </Button>
-          </div>
+              <div className="mb-6">
+                <Button
+                  onClick={() => setIsAdding(true)}
+                  className="bg-gradient-to-r from-pink-500 to-fuchsia-600 hover:from-pink-600 hover:to-fuchsia-700 rounded-xl"
+                  disabled={isAdding}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Baggage Item
+                </Button>
+              </div>
 
           {/* Add/Edit Form */}
           {isAdding && (
