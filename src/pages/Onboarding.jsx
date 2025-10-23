@@ -197,7 +197,7 @@ export default function Onboarding() {
               <Store className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="font-bold text-xl text-white">GarageSale</h1>
+              <h1 className="font-bold text-xl text-white">BlockSwap</h1>
               <p className="text-sm text-gray-400">Welcome to the community!</p>
             </div>
           </div>
@@ -393,7 +393,7 @@ export default function Onboarding() {
                             Terms of Service
                           </Label>
                           <p className="text-sm text-gray-400 mt-2">
-                            I agree to follow the GarageSale Terms of Service, which govern my use of the platform, including buying, selling, and trading items.
+                            I agree to follow the BlockSwap Terms of Service, which govern my use of the platform, including buying, selling, and trading items.
                           </p>
                           <a href={createPageUrl('Terms')} target="_blank" className="text-sm text-pink-400 hover:text-pink-300 underline mt-2 inline-block">
                             Read Full Terms of Service →
@@ -419,7 +419,7 @@ export default function Onboarding() {
                             Privacy Policy
                           </Label>
                           <p className="text-sm text-gray-400 mt-2">
-                            I understand how GarageSale collects, uses, and protects my personal information as described in the Privacy Policy.
+                            I understand how BlockSwap collects, uses, and protects my personal information as described in the Privacy Policy.
                           </p>
                           <a href={createPageUrl('Privacy')} target="_blank" className="text-sm text-pink-400 hover:text-pink-300 underline mt-2 inline-block">
                             Read Privacy Policy →
@@ -445,7 +445,7 @@ export default function Onboarding() {
                             Acceptable Use Agreement
                           </Label>
                           <p className="text-sm text-gray-400 mt-2 mb-3">
-                            I agree to use GarageSale responsibly and will not:
+                            I agree to use BlockSwap responsibly and will not:
                           </p>
                           <ul className="text-sm text-gray-400 space-y-1.5 ml-4 list-disc">
                             <li>Post illegal, illicit, or prohibited items</li>
@@ -465,7 +465,7 @@ export default function Onboarding() {
                         <div>
                           <h4 className="font-semibold text-yellow-300 mb-2">Important Notice</h4>
                           <p className="text-sm text-yellow-200">
-                            By accepting these terms, you acknowledge that violation of any of these policies may result in suspension or permanent removal from the platform. GarageSale reserves the right to moderate content and take appropriate action against policy violations.
+                            By accepting these terms, you acknowledge that violation of any of these policies may result in suspension or permanent removal from the platform. BlockSwap reserves the right to moderate content and take appropriate action against policy violations.
                           </p>
                         </div>
                       </div>

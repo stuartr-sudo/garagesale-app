@@ -54,7 +54,7 @@ export default function SignIn() {
           <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-fuchsia-600 rounded-2xl flex items-center justify-center shadow-lg">
             <Store className="w-7 h-7 text-white" />
           </div>
-          <h1 className="font-bold text-3xl text-white">GarageSale</h1>
+          <h1 className="font-bold text-3xl text-white">BlockSwap</h1>
         </div>
 
         <Card className="bg-gray-900/80 backdrop-blur-sm border-gray-800 shadow-xl">

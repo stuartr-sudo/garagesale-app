@@ -310,13 +310,13 @@ function LayoutContent({ currentUser, currentPageName, visibleNavItems, handleLo
           <SidebarHeader className="border-b border-gray-800 shrink-0">
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton size="lg" asChild tooltip="GarageSale">
+                <SidebarMenuButton size="lg" asChild tooltip="BlockSwap">
                   <Link to={createPageUrl("Marketplace")}>
                     <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-fuchsia-600 rounded-xl flex items-center justify-center shadow-lg shrink-0">
                       <Store className="w-5 h-5 text-white" />
                     </div>
                     <span className="flex flex-col">
-                      <span className="font-bold text-base text-white">GarageSale</span>
+                      <span className="font-bold text-base text-white">BlockSwap</span>
                       <span className="text-xs text-gray-400">Local Marketplace</span>
                     </span>
                   </Link>

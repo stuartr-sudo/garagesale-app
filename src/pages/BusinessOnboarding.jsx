@@ -268,7 +268,7 @@ export default function BusinessOnboarding() {
               <Building className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="font-bold text-xl text-white">GarageSale Business</h1>
+              <h1 className="font-bold text-xl text-white">BlockSwap Business</h1>
               <p className="text-sm text-gray-400">Set up your business account</p>
             </div>
           </div>

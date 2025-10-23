@@ -103,7 +103,7 @@ export default function HomePage() {
             <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-fuchsia-600 rounded-2xl flex items-center justify-center shadow-lg">
                 <Store className="w-6 h-6 text-white" />
             </div>
-            <h1 className="font-bold text-xl md:text-2xl text-white">GarageSale</h1>
+            <h1 className="font-bold text-xl md:text-2xl text-white">BlockSwap</h1>
           </Link>
           <div className="flex items-center gap-2 md:gap-4">
             {loading ? (
