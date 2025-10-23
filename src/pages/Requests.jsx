@@ -30,7 +30,7 @@ export default function Requests() {
   const loadRequests = async () => {
     setLoading(true);
     try {
-      const requestsData = await Request.filter({ status: "active" }, "-created_date");
+      const requestsData = await Request.filter({ status: "active" }, "-created_at");
       setRequests(requestsData);
       
       // Load requester information

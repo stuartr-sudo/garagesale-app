@@ -88,7 +88,7 @@ export default function RequestCard({ request, requester, onContact }) {
             
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4" />
-              <span>Posted {format(new Date(request.created_date), 'MMM d')}</span>
+              <span>Posted {format(new Date(request.created_at), 'MMM d')}</span>
             </div>
           </div>
 

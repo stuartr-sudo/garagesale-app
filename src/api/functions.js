@@ -38,7 +38,7 @@ export const processItemSubmission = async (itemData) => {
 // Get user's items
 export const getUserItems = async (userId) => {
   try {
-    const items = await Item.filter({ seller_id: userId }, '-created_date');
+    const items = await Item.filter({ seller_id: userId }, '-created_at');
     return items;
   } catch (error) {
     console.error('Error getting user items:', error);

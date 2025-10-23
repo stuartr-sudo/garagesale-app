@@ -204,7 +204,7 @@ export class UserEntity {
     return !!session;
   }
 
-  async list(orderBy = 'created_date') {
+  async list(orderBy = 'created_at') {
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -216,7 +216,7 @@ export class UserEntity {
     return data || [];
   }
 
-  async filter(filters = {}, orderBy = 'created_date') {
+  async filter(filters = {}, orderBy = 'created_at') {
     let query = supabase
       .from('profiles')
       .select('*');

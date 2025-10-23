@@ -34,7 +34,7 @@ export default function MyItems() {
       const user = await User.me();
       setCurrentUser(user);
       
-      const userItems = await Item.filter({ seller_id: user.id }, "-created_date");
+      const userItems = await Item.filter({ seller_id: user.id }, "-created_at");
       setItems(userItems);
 
       // For sold items, check if we've rated the buyer

@@ -29,7 +29,7 @@ const DEMO_ITEMS = [
   status: "active",
   seller_id: "demo_seller_1",
   image_url: "https://images.unsplash.com/photo-1592078619227-da1917f7b3e0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-  created_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
+  created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
   tags: ["vintage", "leather", "chair", "furniture"]
 },
 {
@@ -41,7 +41,7 @@ const DEMO_ITEMS = [
   status: "active",
   seller_id: "demo_seller_2",
   image_url: "https://images.unsplash.com/photo-1546868871-70417937397b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-  created_date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+  created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
   tags: ["smartwatch", "fitness", "electronics", "wearable"]
 },
 {
@@ -53,7 +53,7 @@ const DEMO_ITEMS = [
   status: "active",
   seller_id: "demo_seller_3",
   image_url: "https://images.unsplash.com/photo-1563299292-0b3a3b0b5e2a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-  created_date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
+  created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
   tags: ["art", "decor", "prints", "home"]
 },
 {
@@ -65,7 +65,7 @@ const DEMO_ITEMS = [
   status: "active",
   seller_id: "demo_seller_1",
   image_url: "https://images.unsplash.com/photo-1560707765-b1a9e70198f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-  created_date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+  created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
   tags: ["music", "instrument", "guitar", "free"]
 },
 {
@@ -77,7 +77,7 @@ const DEMO_ITEMS = [
   status: "active",
   seller_id: "demo_seller_2",
   image_url: "https://images.unsplash.com/photo-1532012195217-5735ae15a317?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-  created_date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
+  created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
   tags: ["kids", "books", "reading", "education"]
 },
 {
@@ -89,7 +89,7 @@ const DEMO_ITEMS = [
   status: "active",
   seller_id: "demo_seller_3",
   image_url: "https://images.unsplash.com/photo-1552346152-47535b91b5c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-  created_date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(), // 6 days ago
+  created_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(), // 6 days ago
   tags: ["shoes", "running", "sports", "athletic"]
 },
 {
@@ -101,7 +101,7 @@ const DEMO_ITEMS = [
   status: "active",
   seller_id: "demo_seller_1",
   image_url: "https://images.unsplash.com/photo-1627962137976-79b8a5d3f2d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-  created_date: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(), // 8 days ago
+  created_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(), // 8 days ago
   tags: ["stamps", "vintage", "collectibles", "hobby"]
 },
 {
@@ -113,7 +113,7 @@ const DEMO_ITEMS = [
   status: "active",
   seller_id: "demo_seller_2",
   image_url: "https://images.unsplash.com/photo-1542152814-1e25776d5e18?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-  created_date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), // 4 days ago
+  created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), // 4 days ago
   tags: ["backpack", "hiking", "outdoor", "camping"]
 },
 {
@@ -125,7 +125,7 @@ const DEMO_ITEMS = [
   status: "active",
   seller_id: "demo_seller_3",
   image_url: "https://images.unsplash.com/photo-1598463162818-f29e9d6d8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-  created_date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days ago
+  created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days ago
   tags: ["antique", "clock", "decor", "vintage"]
 },
 {
@@ -137,7 +137,7 @@ const DEMO_ITEMS = [
   status: "active",
   seller_id: "demo_seller_1",
   image_url: "https://images.unsplash.com/photo-1529699211952-73604f23b275?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-  created_date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+  created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
   tags: ["chess", "game", "toy", "boardgame"]
 }];
 
@@ -179,7 +179,7 @@ export default function Marketplace() {
   const loadItems = async () => {
     setLoading(true);
     try {
-      let itemsData = await Item.filter({ status: "active" }, "-created_date");
+      let itemsData = await Item.filter({ status: "active" }, "-created_at");
 
       // If no real items are found, populate with demo items
       if (itemsData.length === 0) {
@@ -241,7 +241,7 @@ export default function Marketplace() {
             price,
             description,
             condition,
-            created_date,
+            created_at,
             seller_id
           )
         `)
@@ -363,9 +363,9 @@ export default function Marketplace() {
     filtered.sort((a, b) => {
       switch (filterOptions.sortBy) {
         case 'date_desc':
-          return new Date(b.created_date) - new Date(a.created_date);
+          return new Date(b.created_at) - new Date(a.created_at);
         case 'date_asc':
-          return new Date(a.created_date) - new Date(b.created_date);
+          return new Date(a.created_at) - new Date(b.created_at);
         case 'price_asc':
           return parseFloat(a.price) - parseFloat(b.price);
         case 'price_desc':

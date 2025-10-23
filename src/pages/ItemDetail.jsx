@@ -346,7 +346,7 @@ export default function ItemDetail() {
                 <div className="flex items-center gap-2 text-gray-400 text-xs mt-1">
                   <div className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
-                    {formatDistanceToNow(new Date(item.created_date), { addSuffix: true })}
+                    {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
                   </div>
                   {item.location && (
                     <div className="flex items-center gap-1">

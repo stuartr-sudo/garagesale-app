@@ -188,7 +188,7 @@ export default async function handler(req, res) {
       tags: tags || [],
       location: location || null,
       status: 'active',
-      created_date: new Date().toISOString(),
+      created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
 

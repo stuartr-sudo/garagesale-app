@@ -24,7 +24,7 @@ export default function MyPurchases() {
     setLoading(true);
     try {
       const user = await User.me();
-      const userTransactions = await Transaction.filter({ buyer_id: user.id, status: "completed" }, "-created_date");
+      const userTransactions = await Transaction.filter({ buyer_id: user.id, status: "completed" }, "-created_at");
       
       const purchaseDetails = await Promise.all(
         userTransactions.map(async (transaction) => {
@@ -66,7 +66,7 @@ export default function MyPurchases() {
                     <img src={item.image_urls?.[0]} alt={item.title} className="w-full md:w-32 h-32 object-cover rounded-xl"/>
                     <div className="flex-1">
                       <h3 className="text-xl font-bold">{item.title}</h3>
-                      <p className="text-sm text-stone-600">Purchased on {format(new Date(transaction.created_date), 'PPP')}</p>
+                      <p className="text-sm text-stone-600">Purchased on {format(new Date(transaction.created_at), 'PPP')}</p>
                       <p className="text-lg font-semibold text-emerald-600 mt-1">${transaction.amount.toFixed(2)}</p>
                        <p className="text-sm text-stone-500 mt-2">Sold by: {seller.full_name}</p>
                     </div>

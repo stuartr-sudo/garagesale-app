@@ -30,7 +30,7 @@ export default function TradeOffers() {
       setCurrentUser(user);
 
       // Load received offers
-      const received = await TradeProposal.filter({ target_user_id: user.id }, "-created_date");
+      const received = await TradeProposal.filter({ target_user_id: user.id }, "-created_at");
       const receivedWithDetails = await Promise.all(
         received.map(async (offer) => {
           const proposer = await User.get(offer.proposer_user_id);
@@ -40,7 +40,7 @@ export default function TradeOffers() {
       );
 
       // Load sent offers
-      const sent = await TradeProposal.filter({ proposer_user_id: user.id }, "-created_date");
+      const sent = await TradeProposal.filter({ proposer_user_id: user.id }, "-created_at");
       const sentWithDetails = await Promise.all(
         sent.map(async (offer) => {
           const targetUser = await User.get(offer.target_user_id);
@@ -86,7 +86,7 @@ export default function TradeOffers() {
                   {isReceived ? `${otherUser?.full_name} wants to trade` : `Trade with ${otherUser?.full_name}`}
                 </CardTitle>
                 <p className="text-gray-400 text-sm">
-                  {formatDistanceToNow(new Date(offer.created_date), { addSuffix: true })}
+                  {formatDistanceToNow(new Date(offer.created_at), { addSuffix: true })}
                 </p>
               </div>
             </div>

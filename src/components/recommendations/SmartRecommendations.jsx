@@ -101,7 +101,7 @@ export default function SmartRecommendations({
       .select('*')
       .eq('status', 'active')
       .neq('id', currentItemId || '')
-      .gte('created_date', sevenDaysAgo.toISOString())
+      .gte('created_at', sevenDaysAgo.toISOString())
       .order('views_count', { ascending: false })
       .limit(limit);
 
@@ -121,7 +121,7 @@ export default function SmartRecommendations({
       .eq('status', 'active')
       .eq('category', currentItem.category)
       .neq('id', currentItemId)
-      .order('created_date', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(limit);
 
     if (error) throw error;
@@ -158,7 +158,7 @@ export default function SmartRecommendations({
       .eq('status', 'active')
       .eq('seller_id', currentItem.seller_id)
       .neq('id', currentItemId)
-      .order('created_date', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(limit);
 
     if (error) throw error;

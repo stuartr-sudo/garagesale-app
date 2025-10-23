@@ -126,7 +126,7 @@ export default function MyItemCard({ item, onDelete, onStatusChange }) {
               ${item.price}
             </div>
             <div className="text-sm text-gray-500">
-              Listed {format(new Date(item.created_date), 'MMM d')}
+              Listed {format(new Date(item.created_at), 'MMM d')}
             </div>
           </div>
 

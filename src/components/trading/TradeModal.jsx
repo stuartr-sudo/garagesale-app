@@ -40,7 +40,7 @@ export default function TradeModal({ targetItem, targetSeller, onClose }) {
       const items = await Item.filter({ 
         seller_id: user.id, 
         status: "active" 
-      }, "-created_date");
+      }, "-created_at");
       
       setUserItems(items);
     } catch (error) {

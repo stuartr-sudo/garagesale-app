@@ -105,7 +105,7 @@ export default function UsersPage() {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .order('created_date', { ascending: false });
+        .order('created_at', { ascending: false });
       
       if (error) {
         console.error("🚨 FULL PROFILES QUERY FAILED:", error);
@@ -206,7 +206,7 @@ export default function UsersPage() {
         .from('items')
         .select('*')
         .eq('seller_id', user.id)
-        .order('created_date', { ascending: false });
+        .order('created_at', { ascending: false });
       
       if (itemsError) {
         console.error("Error loading user items:", itemsError);
@@ -217,7 +217,7 @@ export default function UsersPage() {
         .from('transactions')
         .select('*')
         .eq('seller_id', user.id)
-        .order('created_date', { ascending: false });
+        .order('created_at', { ascending: false });
       
       if (transactionsError) {
         console.error("Error loading user transactions:", transactionsError);
@@ -340,7 +340,7 @@ export default function UsersPage() {
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-400">Member Since</label>
-                    <p className="text-sm text-gray-300">{format(new Date(selectedUser.created_date), 'PPP')}</p>
+                    <p className="text-sm text-gray-300">{format(new Date(selectedUser.created_at), 'PPP')}</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-400">Total Revenue</label>
@@ -377,7 +377,7 @@ export default function UsersPage() {
                         </div>
                         <p className="text-2xl font-bold text-emerald-400">${item.price}</p>
                         <p className="text-sm text-gray-400 mt-1">
-                          {format(new Date(item.created_date), 'MMM d, yyyy')}
+                          {format(new Date(item.created_at), 'MMM d, yyyy')}
                         </p>
                       </div>
                     ))}
@@ -404,7 +404,7 @@ export default function UsersPage() {
                         <div>
                           <p className="font-semibold text-white">Transaction #{transaction.id.slice(-8)}</p>
                           <p className="text-sm text-gray-400">
-                            {format(new Date(transaction.created_date), 'PPP')}
+                            {format(new Date(transaction.created_at), 'PPP')}
                           </p>
                         </div>
                         <div className="text-right">
@@ -795,7 +795,7 @@ export default function UsersPage() {
 
                     <div className="flex items-center gap-2 text-sm text-gray-400 mb-4">
                       <Calendar className="w-4 h-4" />
-                      <span>Joined {format(new Date(user.created_date), 'MMM yyyy')}</span>
+                      <span>Joined {format(new Date(user.created_at), 'MMM yyyy')}</span>
                     </div>
 
                     <Button
