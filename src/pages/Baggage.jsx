@@ -6,9 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import VoiceInputField from "@/components/additem/VoiceInputField";
 import { useIsMobile } from "@/hooks/use-mobile";
 import MobileCameraCapture from "@/components/camera/MobileCameraCapture";
+import TodoList from "@/components/baggage/TodoList";
 import { 
   Plus, 
   Trash2, 
@@ -24,7 +26,9 @@ import {
   Upload,
   Camera,
   Loader2,
-  ImageIcon
+  ImageIcon,
+  CheckSquare,
+  List
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -32,6 +36,7 @@ export default function BaggagePage() {
   const [baggageItems, setBaggageItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
+  const [user, setUser] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [inlineEditingId, setInlineEditingId] = useState(null);
   const [inlineEditData, setInlineEditData] = useState({});
@@ -51,8 +56,18 @@ export default function BaggagePage() {
   const isMobile = useIsMobile();
 
   useEffect(() => {
+    loadUser();
     loadBaggageItems();
   }, []);
+
+  const loadUser = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    } catch (error) {
+      console.error('Error loading user:', error);
+    }
+  };
 
   const loadBaggageItems = async () => {
     try {
@@ -348,13 +363,29 @@ export default function BaggagePage() {
           <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
               <h1 className="text-4xl font-bold text-white mb-2">Baggage Management</h1>
-              <p className="text-lg text-gray-400">Manage baggage items with color, weight, and contents</p>
+              <p className="text-lg text-gray-400">Manage baggage items and track your tasks</p>
             </div>
-            <Button
-              onClick={() => setIsAdding(true)}
-              className="bg-gradient-to-r from-pink-500 to-fuchsia-600 hover:from-pink-600 hover:to-fuchsia-700 rounded-xl"
-              disabled={isAdding}
-            >
+          </div>
+
+          {/* Tabs */}
+          <Tabs defaultValue="baggage" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 bg-gray-800 border-gray-700">
+              <TabsTrigger value="baggage" className="flex items-center space-x-2">
+                <Luggage className="w-4 h-4" />
+                <span>Baggage Items</span>
+              </TabsTrigger>
+              <TabsTrigger value="todos" className="flex items-center space-x-2">
+                <CheckSquare className="w-4 h-4" />
+                <span>To-Do List</span>
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="baggage" className="mt-6">
+              <Button
+                onClick={() => setIsAdding(true)}
+                className="bg-gradient-to-r from-pink-500 to-fuchsia-600 hover:from-pink-600 hover:to-fuchsia-700 rounded-xl"
+                disabled={isAdding}
+              >
               <Plus className="w-4 h-4 mr-2" />
               Add Baggage Item
             </Button>
@@ -865,6 +896,12 @@ export default function BaggagePage() {
               </Button>
             </div>
           )}
+            </TabsContent>
+
+            <TabsContent value="todos" className="mt-6">
+              <TodoList userId={user?.id} />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
