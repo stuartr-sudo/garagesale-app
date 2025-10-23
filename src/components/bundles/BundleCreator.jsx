@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Package, 
+  ShoppingBag, 
   Plus, 
   Minus, 
   DollarSign, 
@@ -189,7 +189,7 @@ function BundleCreator({
         <CardHeader className="bg-gray-800/50 border-b border-gray-700 flex-shrink-0">
           <div className="flex items-center justify-between">
             <CardTitle className="text-white text-xl flex items-center gap-2">
-              <Package className="w-5 h-5" />
+              <ShoppingBag className="w-5 h-5" />
               Create Bundle
             </CardTitle>
             <Button
@@ -282,7 +282,7 @@ function BundleCreator({
                 
                 {availableItems.length === 0 ? (
                   <div className="text-center py-8">
-                    <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <ShoppingBag className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-400">No active items available for bundling</p>
                   </div>
                 ) : (

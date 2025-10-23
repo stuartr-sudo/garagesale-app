@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Package, 
+  ShoppingBag, 
   DollarSign, 
   Percent, 
   Calendar, 
@@ -67,7 +67,7 @@ export default function BundlePurchaseModal({
         <CardHeader className="bg-gray-800/50 border-b border-gray-700 flex-shrink-0">
           <div className="flex items-center justify-between">
             <CardTitle className="text-white text-xl flex items-center gap-2">
-              <Package className="w-5 h-5" />
+              <ShoppingBag className="w-5 h-5" />
               Bundle Details
             </CardTitle>
             <Button

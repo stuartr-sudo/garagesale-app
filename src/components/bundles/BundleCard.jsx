@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Package, 
+  ShoppingBag, 
   ShoppingCart, 
   Percent, 
   DollarSign, 
@@ -62,7 +62,7 @@ export default function BundleCard({
                   
                   <div className="flex items-center gap-4 text-xs text-gray-400">
                     <div className="flex items-center gap-1">
-                      <Package className="w-3 h-3" />
+                      <ShoppingBag className="w-3 h-3" />
                       {bundle.bundle_items?.length || 0} items
                     </div>
                     <div className="flex items-center gap-1">

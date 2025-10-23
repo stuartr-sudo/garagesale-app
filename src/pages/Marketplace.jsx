@@ -5,7 +5,7 @@ import { User } from "@/api/entities";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Star, ShoppingCart } from "lucide-react";
+import { Search, MapPin, Star, ShoppingCart, ShoppingBag } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import ItemCard from "../components/marketplace/ItemCard";
@@ -545,7 +545,7 @@ export default function Marketplace() {
                     <div className="flex items-center gap-4">
                       <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent"></div>
                       <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                        <Package className="w-6 h-6 text-green-400" />
+                        <ShoppingBag className="w-6 h-6 text-green-400" />
                         Bundle Deals
                       </h2>
                       <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent"></div>
