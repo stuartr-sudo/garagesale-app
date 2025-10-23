@@ -44,11 +44,14 @@ function BundleCreator({
 
   const fetchAvailableItems = async () => {
     try {
-      const response = await fetch(`/api/items?sellerId=${sellerId}&status=active`);
-      if (response.ok) {
-        const data = await response.json();
-        setAvailableItems(data.items || []);
-      }
+      // Use the existing Item entity to fetch items
+      const { Item } = await import('@/api/entities');
+      const items = await Item.filter({ 
+        seller_id: sellerId, 
+        status: 'active' 
+      }, '-created_at');
+      
+      setAvailableItems(items || []);
     } catch (error) {
       console.error('Error fetching items:', error);
       toast({
