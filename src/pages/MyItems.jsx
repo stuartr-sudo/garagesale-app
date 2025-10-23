@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Plus, Package, DollarSign, Eye, Edit, Trash2, Star } from "lucide-react";
+import { Plus, Package, DollarSign, Eye, Edit, Trash2, Star, ShoppingBag } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -320,14 +320,14 @@ export default function MyItems() {
                     </div>
                   ) : (
                     <div className="text-center py-12">
-                      <Package className="w-16 h-16 text-gray-600 mx-auto mb-6" />
+                      <ShoppingBag className="w-16 h-16 text-gray-600 mx-auto mb-6" />
                       <h3 className="text-xl font-semibold text-white mb-2">No bundles yet!</h3>
                       <p className="text-gray-400 mb-6">Create your first bundle to group items together at a discounted price.</p>
                       <Button
                         onClick={() => setShowBundleCreator(true)}
                         className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-xl"
                       >
-                        <Package className="w-5 h-5 mr-2" />
+                        <ShoppingBag className="w-5 h-5 mr-2" />
                         Create Your First Bundle
                       </Button>
                     </div>
