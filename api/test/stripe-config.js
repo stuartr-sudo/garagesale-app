@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     // Test 2: Try to initialize Stripe
     if (stripeSecretKey) {
       try {
-        const Stripe = require('stripe');
+        const Stripe = (await import('stripe')).default;
         const stripe = new Stripe(stripeSecretKey);
         
         // Try to retrieve account info
@@ -63,7 +63,7 @@ export default async function handler(req, res) {
     // Test 3: Check if we can create a test payment intent
     if (stripeSecretKey) {
       try {
-        const Stripe = require('stripe');
+        const Stripe = (await import('stripe')).default;
         const stripe = new Stripe(stripeSecretKey);
         
         const paymentIntent = await stripe.paymentIntents.create({
