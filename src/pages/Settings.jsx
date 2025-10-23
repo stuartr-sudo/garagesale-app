@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { User as UserIcon, Save, MapPin, Globe } from "lucide-react";
 
@@ -27,7 +28,8 @@ export default function Settings() {
     state_region: "",
     city: "",
     postcode: "",
-    phone: ""
+    phone: "",
+    collection_address: ""
   });
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -55,7 +57,8 @@ export default function Settings() {
         state_region: user.state_region || "",
         city: user.city || "",
         postcode: user.postcode || "",
-        phone: user.phone || ""
+        phone: user.phone || "",
+        collection_address: user.collection_address || ""
       });
 
       if (user.country) {
@@ -99,7 +102,8 @@ export default function Settings() {
         state_region: formData.state_region,
         city: formData.city,
         postcode: formData.postcode,
-        phone: formData.phone
+        phone: formData.phone,
+        collection_address: formData.collection_address
       });
       
       setShowSuccess(true);
@@ -194,6 +198,30 @@ export default function Settings() {
                         className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white focus:border-pink-500 focus:ring-pink-500"
                       />
                     </div>
+                  </div>
+                </div>
+
+                {/* Collection Information */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <MapPin className="w-5 h-5" />
+                    Collection Details
+                  </h3>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="collection_address" className="text-gray-300">Default Collection Address</Label>
+                    <Textarea
+                      id="collection_address"
+                      value={formData.collection_address}
+                      onChange={handleInputChange}
+                      placeholder="Enter your default collection address (street, suburb, postcode)"
+                      rows={3}
+                      className="rounded-xl bg-gray-800 border-gray-700 text-white focus:border-pink-500 focus:ring-pink-500"
+                    />
+                    <p className="text-xs text-gray-500">
+                      This address will be pre-filled when you create new listings. You can still change it for individual items.
+                    </p>
+                  </div>
                   </div>
                   
                   <div className="space-y-2">

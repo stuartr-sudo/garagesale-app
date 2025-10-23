@@ -79,6 +79,9 @@ export default function AddItem() {
       if (user.postcode) {
         setItemData(prev => ({ ...prev, postcode: user.postcode }));
       }
+      if (user.collection_address) {
+        setItemData(prev => ({ ...prev, collection_address: user.collection_address }));
+      }
     } catch (error) {
       console.error("Error loading user:", error);
     }
