@@ -160,6 +160,15 @@ export default function Onboarding() {
         terms_accepted: true, // Mark that user has accepted terms
         terms_accepted_date: new Date().toISOString()
       });
+
+      // Send welcome email after successful onboarding
+      try {
+        const { sendUserWelcomeEmail } = await import('@/api/email');
+        await sendUserWelcomeEmail(currentUser.id, currentUser.email, formData.full_name);
+      } catch (emailError) {
+        console.error('Error sending welcome email:', emailError);
+        // Don't fail the onboarding if email fails
+      }
       
       // Redirect to marketplace after successful completion
       navigate(createPageUrl('Marketplace'));

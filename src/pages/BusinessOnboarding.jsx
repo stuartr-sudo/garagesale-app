@@ -231,6 +231,15 @@ export default function BusinessOnboarding() {
         owner_user_id: currentUser.id,
         verification_status: "pending"
       });
+
+      // Send welcome email after successful business onboarding
+      try {
+        const { sendUserWelcomeEmail } = await import('@/api/email');
+        await sendUserWelcomeEmail(currentUser.id, currentUser.email, formData.full_name);
+      } catch (emailError) {
+        console.error('Error sending welcome email:', emailError);
+        // Don't fail the onboarding if email fails
+      }
       
       // Redirect to marketplace after successful completion
       navigate(createPageUrl('Marketplace'));
