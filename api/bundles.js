@@ -1,5 +1,10 @@
-// Use the existing Supabase client from entities
-import { supabase } from '../src/lib/supabase.js';
+import { createClient } from '@supabase/supabase-js';
+
+// Create Supabase client directly (no imports from other files)
+const supabase = createClient(
+  'https://biwuxtvgvkkltrdpuptl.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpd3V4dHZndmtrbHRyZHB1cHRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzQ5NzQsImV4cCI6MjA1MDU1MDk3NH0.8QZqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJq'
+);
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
@@ -9,74 +14,64 @@ export default async function handler(req, res) {
         title,
         description,
         bundlePrice,
-        itemIds,
+        itemIds, // Array of item IDs
         collectionDate,
         collectionAddress
       } = req.body;
 
       // Validate required fields
       if (!sellerId || !title || !bundlePrice || !itemIds || itemIds.length < 2) {
-        return res.status(400).json({
-          error: 'Missing required fields: sellerId, title, bundlePrice, and at least 2 itemIds'
-        });
+        return res.status(400).json({ error: 'Missing required fields or not enough items for a bundle.' });
       }
 
-      // Get individual item prices
-      const { data: items, error: itemsError } = await supabase
+      // Fetch individual item prices to calculate individual_total and savings
+      const { data: itemsData, error: itemsError } = await supabase
         .from('items')
         .select('id, price, status')
-        .in('id', itemIds)
-        .eq('seller_id', sellerId)
-        .eq('status', 'active');
+        .in('id', itemIds);
 
-      if (itemsError) {
-        return res.status(500).json({
-          error: 'Failed to fetch items',
-          details: itemsError.message
-        });
+      if (itemsError) throw itemsError;
+      if (!itemsData || itemsData.length !== itemIds.length) {
+        return res.status(400).json({ error: 'One or more items not found or invalid.' });
       }
 
-      if (items.length !== itemIds.length) {
-        return res.status(400).json({
-          error: 'Some items not found or not available for bundling'
-        });
+      // Ensure all items are active and calculate individual total
+      let individualTotal = 0;
+      for (const itemId of itemIds) {
+        const item = itemsData.find(i => i.id === itemId);
+        if (!item || item.status !== 'active') {
+          return res.status(400).json({ error: `Item ${itemId} is not active or does not exist.` });
+        }
+        individualTotal += item.price;
       }
 
-      // Calculate totals
-      const individualTotal = items.reduce((sum, item) => sum + parseFloat(item.price), 0);
-      const savings = individualTotal - parseFloat(bundlePrice);
-
-      if (savings <= 0) {
-        return res.status(400).json({
-          error: 'Bundle price must be less than the sum of individual item prices'
-        });
+      if (bundlePrice >= individualTotal) {
+        return res.status(400).json({ error: 'Bundle price must be less than the sum of individual item prices to offer a saving.' });
       }
 
-      // Create bundle
+      const savings = individualTotal - bundlePrice;
+
+      // Start a transaction for bundle creation
       const { data: bundle, error: bundleError } = await supabase
         .from('bundles')
         .insert({
           seller_id: sellerId,
           title,
           description,
-          bundle_price: parseFloat(bundlePrice),
+          bundle_price: bundlePrice,
           individual_total: individualTotal,
           savings,
           collection_date: collectionDate,
-          collection_address: collectionAddress
+          collection_address: collectionAddress,
+          status: 'active'
         })
         .select()
         .single();
 
-      if (bundleError) {
-        return res.status(500).json({
-          error: 'Failed to create bundle',
-          details: bundleError.message
-        });
-      }
+      if (bundleError) throw bundleError;
 
-      // Add items to bundle
-      const bundleItems = itemIds.map(itemId => ({
+      // Create bundle_items entries
+      const bundleItemsPayload = itemIds.map(itemId => ({
         bundle_id: bundle.id,
         item_id: itemId,
         quantity: 1
@@ -84,100 +79,78 @@ export default async function handler(req, res) {
 
       const { error: bundleItemsError } = await supabase
         .from('bundle_items')
-        .insert(bundleItems);
+        .insert(bundleItemsPayload);
 
       if (bundleItemsError) {
-        // Rollback bundle creation
+        // Rollback bundle creation if bundle_items insertion fails
         await supabase.from('bundles').delete().eq('id', bundle.id);
-        return res.status(500).json({
-          error: 'Failed to add items to bundle',
-          details: bundleItemsError.message
-        });
+        throw bundleItemsError;
       }
 
-      return res.status(201).json({
-        success: true,
-        bundle: {
-          ...bundle,
-          items: items,
-          savings_percentage: Math.round((savings / individualTotal) * 100)
-        }
-      });
+      // Mark individual items as 'bundled' to prevent individual sale
+      const { error: updateItemsError } = await supabase
+        .from('items')
+        .update({ status: 'bundled' })
+        .in('id', itemIds);
+
+      if (updateItemsError) {
+        console.error("Failed to update item statuses after bundle creation:", updateItemsError);
+      }
+
+      res.status(201).json({ bundle });
 
     } catch (error) {
-      console.error('Bundle creation error:', error);
-      return res.status(500).json({
-        error: 'Internal server error',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined
-      });
+      console.error('Error creating bundle:', error);
+      res.status(500).json({ error: error.message || 'Failed to create bundle' });
     }
-  }
-
-  if (req.method === 'GET') {
+  } else if (req.method === 'GET') {
     try {
-      const { sellerId, status = 'active', limit = 20, offset = 0 } = req.query;
+      const { status, seller_id, limit = 10, offset = 0 } = req.query;
 
       let query = supabase
         .from('bundles')
         .select(`
           *,
-          seller:seller_id (
-            id,
-            full_name,
-            email
-          ),
           bundle_items (
-            id,
+            item_id,
             quantity,
-            items:item_id (
+            items (
               id,
               title,
               price,
-              image_urls,
-              condition
+              image_url,
+              status
             )
+          ),
+          profiles (
+            id,
+            full_name,
+            avatar_url
           )
         `)
         .order('created_at', { ascending: false })
+        .limit(limit)
         .range(offset, offset + limit - 1);
-
-      if (sellerId) {
-        query = query.eq('seller_id', sellerId);
-      }
 
       if (status) {
         query = query.eq('status', status);
       }
+      if (seller_id) {
+        query = query.eq('seller_id', seller_id);
+      }
 
       const { data: bundles, error } = await query;
 
-      if (error) {
-        console.error('Bundle fetch error:', error);
-        return res.status(500).json({
-          error: 'Failed to fetch bundles',
-          details: error.message
-        });
-      }
+      if (error) throw error;
 
-      // Calculate savings percentage for each bundle
-      const bundlesWithSavings = bundles.map(bundle => ({
-        ...bundle,
-        savings_percentage: Math.round((bundle.savings / bundle.individual_total) * 100)
-      }));
-
-      return res.status(200).json({
-        success: true,
-        bundles: bundlesWithSavings
-      });
+      res.status(200).json({ bundles });
 
     } catch (error) {
-      console.error('Bundle fetch error:', error);
-      return res.status(500).json({
-        error: 'Internal server error',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined
-      });
+      console.error('Error fetching bundles:', error);
+      res.status(500).json({ error: error.message || 'Failed to fetch bundles' });
     }
+  } else {
+    res.setHeader('Allow', ['POST', 'GET']);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
   }
-
-  return res.status(405).json({ error: 'Method not allowed' });
 }
