@@ -123,8 +123,8 @@ export default function ItemCard({ item, seller, isSold = false, currentUser = n
         background: `linear-gradient(to bottom right, ${theme.cardFrom}, ${theme.cardTo})`
       }}
     >
-      {/* EDIT: Use 4:3 aspect ratio to avoid squashed image */}
-      <div className="relative overflow-hidden aspect-[4/3]">
+      {/* Standardized square aspect ratio to match Featured Items */}
+      <div className="relative overflow-hidden aspect-square">
         <img
           src={primaryImage}
           alt={item.title}

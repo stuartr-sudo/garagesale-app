@@ -60,8 +60,8 @@ export default function BundleCard({
         background: `linear-gradient(to bottom right, ${theme.bundleCardFrom || theme.cardFrom}, ${theme.bundleCardTo || theme.cardTo})`
       }}
     >
-      {/* Image Section - 4:3 aspect ratio like ItemCard */}
-      <div className="relative overflow-hidden aspect-[4/3]">
+      {/* Image Section - Standardized square aspect ratio to match Featured Items */}
+      <div className="relative overflow-hidden aspect-square">
         <img
           src={primaryImage}
           alt={bundle.title}
