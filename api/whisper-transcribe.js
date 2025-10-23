@@ -6,7 +6,7 @@
 import OpenAI from 'openai';
 import { Blob } from 'buffer'; // Node.js built-in (Node 18+)
 
-const openaiApiKey = process.env.VITE_OPENAI_API_KEY;
+const openaiApiKey = process.env.OPENAI_API_KEY?.trim();
 
 if (!openaiApiKey) {
   console.error('⚠️ MISSING OPENAI API KEY!');
