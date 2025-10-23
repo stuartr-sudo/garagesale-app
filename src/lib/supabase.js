@@ -14,7 +14,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true,       // ENABLED: Persist sessions
     detectSessionInUrl: true,   // ENABLED: Process OAuth callbacks
     flowType: 'pkce',
-    redirectTo: 'https://garage-sale-40afc1f5.vercel.app/marketplace'
+    redirectTo: 'https://blockswap.club/marketplace'
   }
 });
 

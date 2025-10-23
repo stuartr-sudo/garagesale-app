@@ -1,4 +1,4 @@
-# GarageSale Marketplace
+# BlockSwap Marketplace
 
 A modern, AI-powered local marketplace platform built with React, Supabase, and OpenAI.
 
@@ -27,7 +27,7 @@ A modern, AI-powered local marketplace platform built with React, Supabase, and 
 
 ```bash
 git clone <your-repo-url>
-cd garage-sale-40afc1f5
+cd blockswap-marketplace
 npm install
 ```
 

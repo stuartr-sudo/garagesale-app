@@ -276,7 +276,7 @@ await sendOfferReceivedEmail(sellerId, buyerId, itemId, offerAmount, originalPri
 ## **📞 Support**
 
 For email template customization or technical support:
-- **Email:** support@thevillageway.com
+- **Email:** support@blockswap.club
 - **Documentation:** This file and inline code comments
 - **Resend Support:** [resend.com/support](https://resend.com/support)
 

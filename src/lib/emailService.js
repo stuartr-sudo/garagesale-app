@@ -14,7 +14,7 @@ const baseEmailTemplate = (content, actionButton = null) => `
   <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;">
     <!-- Header -->
     <div style="text-align: center; margin-bottom: 30px; padding: 20px 0; border-bottom: 3px solid #06b6d4;">
-      <h1 style="color: #06b6d4; font-size: 32px; margin: 0; font-weight: bold;">🏪 The Village Way</h1>
+      <h1 style="color: #06b6d4; font-size: 32px; margin: 0; font-weight: bold;">🏪 BlockSwap</h1>
       <p style="color: #6b7280; font-size: 16px; margin: 8px 0 0 0;">Your Local Marketplace</p>
     </div>
     
@@ -31,7 +31,7 @@ const baseEmailTemplate = (content, actionButton = null) => `
     <!-- Footer -->
     <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
       <p style="color: #6b7280; font-size: 14px; margin: 0 0 10px 0;">
-        Need help? Contact us at <a href="mailto:support@thevillageway.com" style="color: #06b6d4; text-decoration: none;">support@thevillageway.com</a>
+        Need help? Contact us at <a href="mailto:support@blockswap.club" style="color: #06b6d4; text-decoration: none;">support@blockswap.club</a>
       </p>
       <p style="color: #9ca3af; font-size: 12px; margin: 0;">
         © 2025 TheVillageWay. All rights reserved.
@@ -47,7 +47,7 @@ export const emailTemplates = {
   // ============================================
   
   welcome: (userName, userEmail) => ({
-    subject: 'Welcome to The Village Way! 🎉',
+    subject: 'Welcome to BlockSwap! 🎉',
     html: baseEmailTemplate(`
       <div style="background: linear-gradient(135deg, #06b6d4, #3b82f6); padding: 30px; border-radius: 12px; margin-bottom: 30px; color: white;">
         <h2 style="color: white; margin: 0 0 15px 0; font-size: 24px;">Welcome ${userName}! 👋</h2>
@@ -66,16 +66,16 @@ export const emailTemplates = {
         </ul>
       </div>
     `, `
-      <a href="${process.env.VITE_APP_URL || 'https://thevillageway.com'}/marketplace" 
+      <a href="${process.env.VITE_APP_URL || 'https://blockswap.club'}/marketplace" 
          style="background: #06b6d4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
         Start Shopping Now
       </a>
     `),
-    text: `Welcome to The Village Way, ${userName}!\n\nThanks for joining our community marketplace! You're now ready to buy and sell items locally.\n\nWhat's Next?\n- Browse items in your local area\n- Add items to your cart and checkout\n- List your own items for sale\n- Chat with buyers and sellers\n\nStart shopping: ${process.env.VITE_APP_URL || 'https://thevillageway.com'}/marketplace`
+    text: `Welcome to BlockSwap, ${userName}!\n\nThanks for joining our community marketplace! You're now ready to buy and sell items locally.\n\nWhat's Next?\n- Browse items in your local area\n- Add items to your cart and checkout\n- List your own items for sale\n- Chat with buyers and sellers\n\nStart shopping: ${process.env.VITE_APP_URL || 'https://blockswap.club'}/marketplace`
   }),
 
   emailVerification: (userName, verificationLink) => ({
-    subject: 'Verify Your Email Address - The Village Way',
+    subject: 'Verify Your Email Address - BlockSwap',
     html: baseEmailTemplate(`
       <div style="background: #fef3c7; border: 1px solid #f59e0b; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
         <h3 style="color: #92400e; margin: 0 0 10px 0;">📧 Email Verification Required</h3>
@@ -92,7 +92,7 @@ export const emailTemplates = {
         Verify Email Address
       </a>
     `),
-    text: `Hi ${userName},\n\nTo complete your The Village Way account setup, please verify your email address by clicking this link: ${verificationLink}`
+    text: `Hi ${userName},\n\nTo complete your BlockSwap account setup, please verify your email address by clicking this link: ${verificationLink}`
   }),
 
   // ============================================
@@ -100,7 +100,7 @@ export const emailTemplates = {
   // ============================================
   
   purchaseConfirmation: (buyerName, itemName, amount, orderId, sellerName) => ({
-    subject: `Order Confirmed - ${itemName} | The Village Way`,
+    subject: `Order Confirmed - ${itemName} | BlockSwap`,
     html: baseEmailTemplate(`
       <div style="background: #d1fae5; border: 1px solid #10b981; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
         <h3 style="color: #065f46; margin: 0 0 10px 0;">✅ Order Confirmed!</h3>
@@ -132,7 +132,7 @@ export const emailTemplates = {
         You'll receive updates on your order status.
       </p>
     `, `
-      <a href="${process.env.VITE_APP_URL || 'https://thevillageway.com'}/my-orders" 
+      <a href="${process.env.VITE_APP_URL || 'https://blockswap.club'}/my-orders" 
          style="background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
         View My Orders
       </a>
@@ -141,7 +141,7 @@ export const emailTemplates = {
   }),
 
   saleNotification: (sellerName, itemName, amount, buyerName, orderId) => ({
-    subject: `New Sale - ${itemName} | The Village Way`,
+    subject: `New Sale - ${itemName} | BlockSwap`,
     html: baseEmailTemplate(`
       <div style="background: #dbeafe; border: 1px solid #3b82f6; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
         <h3 style="color: #1e40af; margin: 0 0 10px 0;">💰 New Sale!</h3>
@@ -175,7 +175,7 @@ export const emailTemplates = {
         </p>
       </div>
     `, `
-      <a href="${process.env.VITE_APP_URL || 'https://thevillageway.com'}/payment-confirmations" 
+      <a href="${process.env.VITE_APP_URL || 'https://blockswap.club'}/payment-confirmations" 
          style="background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
         Confirm Payment Received
       </a>
@@ -184,7 +184,7 @@ export const emailTemplates = {
   }),
 
   offerReceived: (sellerName, itemName, offerAmount, buyerName, originalPrice) => ({
-    subject: `New Offer for ${itemName} | The Village Way`,
+    subject: `New Offer for ${itemName} | BlockSwap`,
     html: baseEmailTemplate(`
       <div style="background: #f0f9ff; border: 1px solid #0ea5e9; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
         <h3 style="color: #0c4a6e; margin: 0 0 10px 0;">🤝 New Offer Received!</h3>
@@ -215,7 +215,7 @@ export const emailTemplates = {
         You can accept this offer, make a counter-offer, or decline it. The buyer will be notified of your decision.
       </p>
     `, `
-      <a href="${process.env.VITE_APP_URL || 'https://thevillageway.com'}/my-items" 
+      <a href="${process.env.VITE_APP_URL || 'https://blockswap.club'}/my-items" 
          style="background: #0ea5e9; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
         Review Offer
       </a>
@@ -224,7 +224,7 @@ export const emailTemplates = {
   }),
 
   offerAccepted: (buyerName, itemName, acceptedAmount, sellerName) => ({
-    subject: `Offer Accepted - ${itemName} | The Village Way`,
+    subject: `Offer Accepted - ${itemName} | BlockSwap`,
     html: baseEmailTemplate(`
       <div style="background: #d1fae5; border: 1px solid #10b981; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
         <h3 style="color: #065f46; margin: 0 0 10px 0;">🎉 Offer Accepted!</h3>
@@ -251,7 +251,7 @@ export const emailTemplates = {
         Great news! The seller has accepted your offer. You can now proceed to complete the purchase.
       </p>
     `, `
-      <a href="${process.env.VITE_APP_URL || 'https://thevillageway.com'}/cart" 
+      <a href="${process.env.VITE_APP_URL || 'https://blockswap.club'}/cart" 
          style="background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
         Complete Purchase
       </a>
@@ -264,7 +264,7 @@ export const emailTemplates = {
   // ============================================
   
   accountSuspended: (userName, reason, suspensionEndDate) => ({
-    subject: 'Account Suspended - The Village Way',
+    subject: 'Account Suspended - BlockSwap',
     html: baseEmailTemplate(`
       <div style="background: #fee2e2; border: 1px solid #ef4444; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
         <h3 style="color: #dc2626; margin: 0 0 10px 0;">⚠️ Account Suspended</h3>
@@ -288,7 +288,7 @@ export const emailTemplates = {
         Please review our terms of service and contact support if you have questions.
       </p>
     `, `
-      <a href="${process.env.VITE_APP_URL || 'https://thevillageway.com'}/contact" 
+      <a href="${process.env.VITE_APP_URL || 'https://blockswap.club'}/contact" 
          style="background: #ef4444; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
         Contact Support
       </a>
@@ -321,7 +321,7 @@ export const emailTemplates = {
         This restriction will be lifted once all confirmations are completed.
       </p>
     `, `
-      <a href="${process.env.VITE_APP_URL || 'https://thevillageway.com'}/payment-confirmations" 
+      <a href="${process.env.VITE_APP_URL || 'https://blockswap.club'}/payment-confirmations" 
          style="background: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
         Confirm Payments
       </a>
@@ -334,7 +334,7 @@ export const emailTemplates = {
   // ============================================
   
   newMessage: (recipientName, senderName, messagePreview, itemName) => ({
-    subject: `New Message from ${senderName} | The Village Way`,
+    subject: `New Message from ${senderName} | BlockSwap`,
     html: baseEmailTemplate(`
       <div style="background: #f0f9ff; border: 1px solid #0ea5e9; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
         <h3 style="color: #0c4a6e; margin: 0 0 10px 0;">💬 New Message</h3>
@@ -363,7 +363,7 @@ export const emailTemplates = {
         Reply to this message to continue the conversation with ${senderName}.
       </p>
     `, `
-      <a href="${process.env.VITE_APP_URL || 'https://thevillageway.com'}/messages" 
+      <a href="${process.env.VITE_APP_URL || 'https://blockswap.club'}/messages" 
          style="background: #0ea5e9; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
         View Message
       </a>
@@ -372,7 +372,7 @@ export const emailTemplates = {
   }),
 
   itemSold: (sellerName, itemName, amount, buyerName) => ({
-    subject: `Item Sold - ${itemName} | The Village Way`,
+    subject: `Item Sold - ${itemName} | BlockSwap`,
     html: baseEmailTemplate(`
       <div style="background: #d1fae5; border: 1px solid #10b981; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
         <h3 style="color: #065f46; margin: 0 0 10px 0;">🎉 Item Sold!</h3>
@@ -399,7 +399,7 @@ export const emailTemplates = {
         Great job! Your item has been successfully sold. The buyer has been notified and will arrange pickup or delivery.
       </p>
     `, `
-      <a href="${process.env.VITE_APP_URL || 'https://thevillageway.com'}/my-items" 
+      <a href="${process.env.VITE_APP_URL || 'https://blockswap.club'}/my-items" 
          style="background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
         View My Items
       </a>
@@ -412,7 +412,7 @@ export const emailTemplates = {
   // ============================================
   
   testEmail: (recipientEmail) => ({
-    subject: 'The Village Way Test Email - Success!',
+    subject: 'BlockSwap Test Email - Success!',
     html: baseEmailTemplate(`
       <div style="background: #dbeafe; border: 1px solid #3b82f6; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
         <h3 style="color: #1e40af; margin: 0 0 10px 0;">✅ Test Email Successful!</h3>
@@ -442,7 +442,7 @@ export const emailTemplates = {
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #06b6d4; font-size: 32px; margin: 0;">🏪 The Village Way</h1>
+          <h1 style="color: #06b6d4; font-size: 32px; margin: 0;">🏪 BlockSwap</h1>
         </div>
         
         <div style="background: #fef3c7; border: 2px solid #f59e0b; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
@@ -482,7 +482,7 @@ export const emailTemplates = {
         </div>
         
         <div style="text-align: center; margin-top: 30px;">
-          <a href="${process.env.VITE_APP_URL || 'https://thevillageway.com'}/PaymentConfirmations" 
+          <a href="${process.env.VITE_APP_URL || 'https://blockswap.club'}/PaymentConfirmations" 
              style="background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
             Confirm Payment Received
           </a>
@@ -495,7 +495,7 @@ export const emailTemplates = {
         </div>
       </div>
     `,
-    text: `Payment Confirmation Required - Action Needed\n\nA buyer has confirmed payment for your item. Please verify receipt within the deadline.\n\nTransaction Details:\n- Item: ${itemName}\n- Buyer: ${buyerName}\n- Amount: $${amount}\n- Confirm by: ${new Date(confirmationDeadline).toLocaleString()}\n\nWhat You Need to Do:\n1. Verify that you have received the payment\n2. Click "Confirm Payment Received" in your dashboard\n3. Complete the transaction within the deadline\n\nConfirm Payment: ${process.env.VITE_APP_URL || 'https://thevillageway.com'}/PaymentConfirmations\n\nImportant: If you don't confirm payment within the deadline, your account will be restricted.`
+    text: `Payment Confirmation Required - Action Needed\n\nA buyer has confirmed payment for your item. Please verify receipt within the deadline.\n\nTransaction Details:\n- Item: ${itemName}\n- Buyer: ${buyerName}\n- Amount: $${amount}\n- Confirm by: ${new Date(confirmationDeadline).toLocaleString()}\n\nWhat You Need to Do:\n1. Verify that you have received the payment\n2. Click "Confirm Payment Received" in your dashboard\n3. Complete the transaction within the deadline\n\nConfirm Payment: ${process.env.VITE_APP_URL || 'https://blockswap.club'}/PaymentConfirmations\n\nImportant: If you don't confirm payment within the deadline, your account will be restricted.`
   }),
 
   // Order confirmation email for buyers
@@ -504,7 +504,7 @@ export const emailTemplates = {
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #06b6d4; font-size: 32px; margin: 0;">🏪 The Village Way</h1>
+          <h1 style="color: #06b6d4; font-size: 32px; margin: 0;">🏪 BlockSwap</h1>
         </div>
         
         <div style="background: #ecfdf5; border: 2px solid #10b981; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
@@ -540,14 +540,14 @@ export const emailTemplates = {
         </div>
         
         <div style="text-align: center; margin-top: 30px;">
-          <a href="${process.env.VITE_APP_URL || 'https://thevillageway.com'}/MyOrders" 
+          <a href="${process.env.VITE_APP_URL || 'https://blockswap.club'}/MyOrders" 
              style="background: #06b6d4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
             View My Orders
           </a>
         </div>
       </div>
     `,
-    text: `Order Confirmed - Payment Details\n\nYour order has been confirmed. Please complete payment to the seller.\n\nOrder Details:\n- Item: ${itemName}\n- Seller: ${sellerName}\n- Amount: $${amount}\n\nNext Steps:\n1. Contact the seller to arrange payment and pickup\n2. Complete payment within 24 hours\n3. Arrange item pickup or delivery\n\nView My Orders: ${process.env.VITE_APP_URL || 'https://thevillageway.com'}/MyOrders`
+    text: `Order Confirmed - Payment Details\n\nYour order has been confirmed. Please complete payment to the seller.\n\nOrder Details:\n- Item: ${itemName}\n- Seller: ${sellerName}\n- Amount: $${amount}\n\nNext Steps:\n1. Contact the seller to arrange payment and pickup\n2. Complete payment within 24 hours\n3. Arrange item pickup or delivery\n\nView My Orders: ${process.env.VITE_APP_URL || 'https://blockswap.club'}/MyOrders`
   }),
 
   // Account restriction warning
@@ -556,7 +556,7 @@ export const emailTemplates = {
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #06b6d4; font-size: 32px; margin: 0;">🏪 The Village Way</h1>
+          <h1 style="color: #06b6d4; font-size: 32px; margin: 0;">🏪 BlockSwap</h1>
         </div>
         
         <div style="background: #fef2f2; border: 2px solid #dc2626; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
@@ -589,14 +589,14 @@ export const emailTemplates = {
         </div>
         
         <div style="text-align: center; margin-top: 30px;">
-          <a href="${process.env.VITE_APP_URL || 'https://thevillageway.com'}/PaymentConfirmations" 
+          <a href="${process.env.VITE_APP_URL || 'https://blockswap.club'}/PaymentConfirmations" 
              style="background: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
             Confirm Pending Payments
           </a>
         </div>
       </div>
     `,
-    text: `Account Restricted - Payment Confirmations Required\n\nYour account has been restricted due to pending payment confirmations.\n\nRestriction Details:\n- Reason: ${restrictionReason}\n- Pending Confirmations: ${pendingCount}\n\nWhat This Means:\n- You cannot access the marketplace\n- All your listings are hidden\n- You cannot create new listings\n- Restrictions will be lifted once you confirm all pending payments\n\nConfirm Pending Payments: ${process.env.VITE_APP_URL || 'https://thevillageway.com'}/PaymentConfirmations`
+    text: `Account Restricted - Payment Confirmations Required\n\nYour account has been restricted due to pending payment confirmations.\n\nRestriction Details:\n- Reason: ${restrictionReason}\n- Pending Confirmations: ${pendingCount}\n\nWhat This Means:\n- You cannot access the marketplace\n- All your listings are hidden\n- You cannot create new listings\n- Restrictions will be lifted once you confirm all pending payments\n\nConfirm Pending Payments: ${process.env.VITE_APP_URL || 'https://blockswap.club'}/PaymentConfirmations`
   })
 };
 
@@ -702,7 +702,7 @@ export async function sendAccountRestrictionEmail(userEmail, userName, restricti
 export async function sendTestEmail(testEmail) {
   return await sendEmail({
     to: testEmail,
-    subject: '🧪 The Village Way Email Test',
+    subject: '🧪 BlockSwap Email Test',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <h1 style="color: #06b6d4;">Email Test Successful! ✅</h1>

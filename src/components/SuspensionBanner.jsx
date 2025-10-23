@@ -85,7 +85,7 @@ export default function SuspensionBanner({ userStatus, onLogout }) {
             </div>
 
             <p className="text-center text-gray-500 text-sm mt-6">
-              If you believe this ban was issued in error, please contact support at support@garagesale.com
+              If you believe this ban was issued in error, please contact support at support@blockswap.club
             </p>
           </div>
         </Card>
@@ -170,7 +170,7 @@ export default function SuspensionBanner({ userStatus, onLogout }) {
             </div>
 
             <p className="text-center text-gray-500 text-sm mt-6">
-              If you believe this suspension was issued in error, please contact support at support@garagesale.com
+              If you believe this suspension was issued in error, please contact support at support@blockswap.club
             </p>
           </div>
         </Card>

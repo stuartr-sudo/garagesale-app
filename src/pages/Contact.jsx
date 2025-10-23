@@ -27,7 +27,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-stone-900">Email</h3>
-                    <p className="text-stone-600">support@garagesale.app</p>
+                    <p className="text-stone-600">support@blockswap.club</p>
                   </div>
                 </div>
 
