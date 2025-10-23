@@ -134,6 +134,7 @@ export default function MyItems() {
                   Add New Item
                 </Button>
               </Link>
+              {/* Create Bundle Button */}
               <Button 
                 onClick={() => setShowBundleCreator(true)}
                 className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all duration-300 h-12 px-6 rounded-xl w-full sm:w-auto"
