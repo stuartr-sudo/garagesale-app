@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,8 +23,38 @@ export default function BundleCard({
   const primaryImage = bundle.bundle_items?.[0]?.items?.image_urls?.[0] || 
     "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop";
 
+  // Load theme from localStorage (same as ItemCard)
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('marketplace-theme');
+    return saved ? JSON.parse(saved) : {
+      cardFrom: '#1e3a8a',  // blue-900
+      cardTo: '#581c87',    // purple-900
+      buttonFrom: '#a855f7', // purple-500
+      buttonTo: '#db2777',  // pink-600
+      accentColor: '#22d3ee' // cyan-400
+    };
+  });
+
+  // Listen for theme changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem('marketplace-theme');
+      if (saved) {
+        setTheme(JSON.parse(saved));
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   return (
-    <Card className="rounded-2xl shadow-2xl shadow-green-500/20 hover:shadow-green-500/40 transition-all duration-300 border-2 border-green-500/30 hover:border-green-400/60 overflow-hidden group hover:scale-[1.02] flex flex-col h-full ring-1 ring-green-400/20 hover:ring-green-400/40">
+    <Card 
+      className="rounded-2xl shadow-2xl shadow-green-500/20 hover:shadow-green-500/40 transition-all duration-300 border-2 border-green-500/30 hover:border-green-400/60 overflow-hidden group hover:scale-[1.02] flex flex-col h-full ring-1 ring-green-400/20 hover:ring-green-400/40"
+      style={{
+        background: `linear-gradient(to bottom right, ${theme.cardFrom}, ${theme.cardTo})`
+      }}
+    >
       {/* Image Section - 4:3 aspect ratio like ItemCard */}
       <div className="relative overflow-hidden aspect-[4/3]">
         <img
@@ -57,7 +87,14 @@ export default function BundleCard({
       
       <CardContent className="p-5 flex flex-col flex-grow">
         <div className="flex-grow">
-          <h3 className="font-bold text-lg text-white line-clamp-2 leading-tight hover:text-green-400 transition-colors cursor-pointer">
+          <h3 
+            className="font-bold text-lg text-white line-clamp-2 leading-tight transition-colors cursor-pointer"
+            style={{ 
+              '--hover-color': theme.accentColor 
+            }}
+            onMouseEnter={(e) => e.target.style.color = theme.accentColor}
+            onMouseLeave={(e) => e.target.style.color = 'white'}
+          >
             {bundle.title}
           </h3>
           
@@ -81,7 +118,10 @@ export default function BundleCard({
           </div>
 
           <div className="flex items-center justify-between mt-3">
-            <div className="text-2xl font-bold text-green-400">
+            <div 
+              className="text-2xl font-bold"
+              style={{ color: theme.accentColor }}
+            >
               ${parseFloat(bundle.bundle_price).toFixed(2)}
             </div>
             <div className="text-right">
@@ -98,7 +138,10 @@ export default function BundleCard({
         <div className="mt-4 space-y-2">
           <Button
             onClick={() => onBuyNow(bundle)}
-            className="w-full h-10 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-xl font-semibold"
+            className="w-full h-10 hover:opacity-90 rounded-xl font-semibold"
+            style={{
+              background: `linear-gradient(to right, ${theme.buttonFrom}, ${theme.buttonTo})`
+            }}
           >
             <ShoppingCart className="w-4 h-4 mr-2" />
             Buy Bundle
