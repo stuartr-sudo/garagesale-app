@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import VoiceInputField from "@/components/additem/VoiceInputField";
+import { useIsMobile } from "@/hooks/use-mobile";
+import MobileCameraCapture from "@/components/camera/MobileCameraCapture";
 import { 
   Plus, 
   Trash2, 
@@ -18,7 +20,11 @@ import {
   Palette,
   FileText,
   Mic,
-  Eye
+  Eye,
+  Upload,
+  Camera,
+  Loader2,
+  ImageIcon
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -35,8 +41,14 @@ export default function BaggagePage() {
   const [formData, setFormData] = useState({
     color: "",
     weight: "",
-    contents: ""
+    contents: "",
+    image_urls: []
   });
+  const [isUploading, setIsUploading] = useState(false);
+  const [showMobileCamera, setShowMobileCamera] = useState(false);
+  const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     loadBaggageItems();
@@ -88,6 +100,7 @@ export default function BaggagePage() {
             color: formData.color.trim(),
             weight: parseFloat(formData.weight),
             contents: formData.contents.trim(),
+            image_urls: formData.image_urls,
             updated_at: new Date().toISOString()
           })
           .eq('id', editingId);
@@ -109,7 +122,8 @@ export default function BaggagePage() {
           .insert({
             color: formData.color.trim(),
             weight: parseFloat(formData.weight),
-            contents: formData.contents.trim()
+            contents: formData.contents.trim(),
+            image_urls: formData.image_urls
           })
           .select()
           .single();
@@ -120,7 +134,7 @@ export default function BaggagePage() {
       }
 
       // Reset form
-      setFormData({ color: "", weight: "", contents: "" });
+      setFormData({ color: "", weight: "", contents: "", image_urls: [] });
       setIsAdding(false);
     } catch (error) {
       console.error('Error saving baggage item:', error);
@@ -132,7 +146,8 @@ export default function BaggagePage() {
     setFormData({
       color: item.color,
       weight: item.weight.toString(),
-      contents: item.contents
+      contents: item.contents,
+      image_urls: item.image_urls || []
     });
     setEditingId(item.id);
     setIsAdding(true);
@@ -209,7 +224,7 @@ export default function BaggagePage() {
   };
 
   const handleCancel = () => {
-    setFormData({ color: "", weight: "", contents: "" });
+    setFormData({ color: "", weight: "", contents: "", image_urls: [] });
     setIsAdding(false);
     setEditingId(null);
   };
@@ -232,6 +247,80 @@ export default function BaggagePage() {
 
   const handleViewItem = (item) => {
     setViewingItem(item);
+  };
+
+  // Photo upload functions
+  const handleFileSelect = async (event) => {
+    const files = Array.from(event.target.files);
+    if (files.length === 0) return;
+
+    setIsUploading(true);
+    try {
+      const uploadPromises = files.map(async (file) => {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('item-images')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data } = supabase.storage
+          .from('item-images')
+          .getPublicUrl(filePath);
+
+        return data.publicUrl;
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+      setFormData(prev => ({
+        ...prev,
+        image_urls: [...prev.image_urls, ...uploadedUrls]
+      }));
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      alert('Error uploading images. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleMobileCameraCapture = async (imageFile) => {
+    setIsUploading(true);
+    try {
+      const fileExt = 'jpg';
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('item-images')
+        .upload(filePath, imageFile);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('item-images')
+        .getPublicUrl(filePath);
+
+      setFormData(prev => ({
+        ...prev,
+        image_urls: [...prev.image_urls, data.publicUrl]
+      }));
+    } catch (error) {
+      console.error('Error uploading camera image:', error);
+      alert('Error uploading image. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const removeImage = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      image_urls: prev.image_urls.filter((_, i) => i !== index)
+    }));
   };
 
   if (loading) {
@@ -348,6 +437,82 @@ export default function BaggagePage() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Photo Upload Section */}
+                  <div>
+                    <Label className="text-sm font-medium text-gray-300 mb-2 block">
+                      <ImageIcon className="w-4 h-4 inline mr-2" />
+                      Photos
+                    </Label>
+                    <div className="space-y-4">
+                      {/* Image Preview Grid */}
+                      {formData.image_urls.length > 0 && (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          {formData.image_urls.map((imageUrl, index) => (
+                            <div key={index} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
+                              <img
+                                src={imageUrl}
+                                alt={`Baggage photo ${index + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="absolute top-2 right-2 w-6 h-6 rounded-full"
+                                onClick={() => removeImage(index)}
+                              >
+                                <X className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Upload Buttons */}
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isUploading}
+                          variant="outline"
+                          className="border-blue-500 text-blue-400 hover:bg-blue-900/20 rounded-lg"
+                        >
+                          {isUploading ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Uploading...
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="w-4 h-4 mr-2" />
+                              Add from Library
+                            </>
+                          )}
+                        </Button>
+                        
+                        {isMobile && (
+                          <Button
+                            type="button"
+                            onClick={() => setShowMobileCamera(true)}
+                            disabled={isUploading}
+                            variant="outline"
+                            className="border-green-500 text-green-400 hover:bg-green-900/20 rounded-lg"
+                          >
+                            <Camera className="w-4 h-4 mr-2" />
+                            Take Photo
+                          </Button>
+                        )}
+                      </div>
+
+                      <p className="text-xs text-gray-500">
+                        {isMobile 
+                          ? "Upload photos from your library or take new photos with your camera"
+                          : "Upload photos from your library"
+                        }
+                      </p>
+                    </div>
+                  </div>
                   
                   <div className="flex gap-3">
                     <Button
@@ -370,6 +535,24 @@ export default function BaggagePage() {
                 </form>
               </CardContent>
             </Card>
+          )}
+
+          {/* Hidden File Input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+
+          {/* Mobile Camera Modal */}
+          {showMobileCamera && (
+            <MobileCameraCapture
+              onCapture={handleMobileCameraCapture}
+              onClose={() => setShowMobileCamera(false)}
+            />
           )}
 
           {/* Voice Input Modal */}
@@ -446,6 +629,27 @@ export default function BaggagePage() {
                     </div>
                   </div>
                   
+                  {/* Images Section */}
+                  {viewingItem.image_urls && viewingItem.image_urls.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <ImageIcon className="w-4 h-4 text-green-400" />
+                        <Label className="text-sm font-medium text-gray-300">Photos</Label>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {viewingItem.image_urls.map((imageUrl, index) => (
+                          <div key={index} className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                            <img
+                              src={imageUrl}
+                              alt={`Baggage photo ${index + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
                   <div className="pt-4 border-t border-gray-700">
                     <div className="flex items-center justify-between text-sm text-gray-400">
                       <span>Added {format(new Date(viewingItem.created_at), 'MMM d, yyyy \'at\' h:mm a')}</span>
@@ -491,6 +695,7 @@ export default function BaggagePage() {
                     <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Color</th>
                     <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Weight</th>
                     <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Contents</th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Images</th>
                     <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Date Added</th>
                     <th className="px-6 py-4 text-center text-sm font-medium text-gray-300">Actions</th>
                   </tr>
@@ -557,6 +762,28 @@ export default function BaggagePage() {
                               {item.contents}
                             </p>
                           </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        {item.image_urls && item.image_urls.length > 0 ? (
+                          <div className="flex gap-1">
+                            {item.image_urls.slice(0, 3).map((imageUrl, index) => (
+                              <div key={index} className="w-8 h-8 rounded-lg overflow-hidden bg-gray-100">
+                                <img
+                                  src={imageUrl}
+                                  alt={`Baggage photo ${index + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            ))}
+                            {item.image_urls.length > 3 && (
+                              <div className="w-8 h-8 rounded-lg bg-gray-700 flex items-center justify-center">
+                                <span className="text-xs text-gray-300">+{item.image_urls.length - 3}</span>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-500 text-sm">No images</span>
                         )}
                       </td>
                       <td className="px-6 py-4">
