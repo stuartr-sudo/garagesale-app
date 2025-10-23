@@ -77,81 +77,56 @@ export default function ImageUpload({ images = [], onUpload, onRemove, onSetMain
         ))}
         
         {safeImages.length < 8 && (
-          <div 
-            className="aspect-square border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center space-y-2 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <Plus className="w-8 h-8 text-gray-400" />
-            <span className="text-sm text-gray-500">Add Photo</span>
+          <div className="aspect-square border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center space-y-3 bg-gray-50">
+            <div className="flex gap-2 w-full px-4">
+              <Button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                className="flex-1 h-10 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+              >
+                {isUploading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Add from library
+                  </>
+                )}
+              </Button>
+              
+              {isMobile && (
+                <Button
+                  type="button"
+                  onClick={() => setShowMobileCamera(true)}
+                  disabled={isUploading}
+                  className="flex-1 h-10 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold"
+                >
+                  <Camera className="w-4 h-4 mr-2" />
+                  Take photo
+                </Button>
+              )}
+            </div>
           </div>
         )}
       </div>
 
-      <div className="flex gap-3">
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={handleFileSelect}
-          className="hidden"
-        />
-
-        {isMobile ? (
-          <Button
-            type="button"
-            onClick={() => setShowMobileCamera(true)}
-            disabled={isUploading}
-            className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold"
-          >
-            {isUploading ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Uploading...
-              </>
-            ) : (
-              <>
-                <Camera className="w-4 h-4 mr-2" />
-                Take Photo
-              </>
-            )}
-          </Button>
-        ) : (
-          <>
-            <input
-              ref={cameraInputRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-            <Button
-              type="button"
-              onClick={() => cameraInputRef.current?.click()}
-              disabled={isUploading}
-              className="w-full h-12 rounded-xl bg-white hover:bg-gray-100 text-gray-900 border-2 border-gray-300 font-semibold"
-            >
-              {isUploading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Uploading...
-                </>
-              ) : (
-                <>
-                  <Camera className="w-4 h-4 mr-2" />
-                  Take Photo
-                </>
-              )}
-            </Button>
-          </>
-        )}
-      </div>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        onChange={handleFileSelect}
+        className="hidden"
+      />
 
       <p className="text-sm text-gray-500 text-center">
         {isMobile 
-          ? "Add up to 8 photos. Tap the placeholder to choose from gallery or 'Take Photo' for camera. Use 'Set as Main' to choose your main image."
-          : "Add up to 8 photos. Click the placeholder to upload or 'Take Photo' for camera. Use 'Set as Main' to choose your main image."
+          ? "Add up to 8 photos. Use 'Add from library' or 'Take photo' buttons. Use 'Set as Main' to choose your main image."
+          : "Add up to 8 photos. Use 'Add from library' button to upload images. Use 'Set as Main' to choose your main image."
         }
       </p>
 
