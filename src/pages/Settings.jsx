@@ -321,6 +321,7 @@ export default function Settings() {
                     <MapPin className="w-5 h-5" />
                     Collection Details
                   </h3>
+                  {console.log('Collection Details section rendering')}
                   
                   <div className="space-y-2">
                     <Label htmlFor="collection_address" className="text-gray-300">Default Collection Address</Label>
