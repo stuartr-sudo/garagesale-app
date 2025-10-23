@@ -99,7 +99,7 @@ export default function Announcements() {
               <h1 className="text-4xl font-bold text-white mb-2">Community Announcements</h1>
               <p className="text-lg text-gray-400">Stay connected with local events and happenings</p>
             </div>
-            {currentUser?.role === 'admin' && (
+            {(currentUser?.role === 'admin' || currentUser?.role === 'super_admin') && (
               <Link to={createPageUrl("AnnouncementEditor")}>
                 <Button className="bg-gradient-to-r from-pink-500 to-fuchsia-600 hover:from-pink-600 hover:to-fuchsia-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
                   <Plus className="w-4 h-4 mr-2" />
@@ -187,7 +187,7 @@ export default function Announcements() {
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">No Active Announcements</h3>
               <p className="text-gray-400 mb-6">Check back later for community events and local happenings.</p>
-              {currentUser?.role === 'admin' && (
+              {(currentUser?.role === 'admin' || currentUser?.role === 'super_admin') && (
                 <Link to={createPageUrl("AnnouncementEditor")}>
                   <Button className="bg-gradient-to-r from-pink-500 to-fuchsia-600 hover:from-pink-600 hover:to-fuchsia-700">
                     <Plus className="w-4 h-4 mr-2" />
