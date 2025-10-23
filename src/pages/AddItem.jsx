@@ -781,42 +781,31 @@ Return only the description, nothing else.`
               </Button>
             </div>
 
-            {/* Voice-to-Text Capability Question */}
+            {/* Voice Input Buttons */}
             {!hasVoiceInput && (
-              <div className="mb-4 p-3 bg-gradient-to-r from-purple-900/20 to-pink-900/20 border border-purple-500/30 rounded-lg">
-                <div className="text-center">
-                  <h3 className="text-base font-semibold text-white mb-1">🎤 Voice-to-Text Available!</h3>
-                  <p className="text-gray-300 text-sm mb-3">
-                    Can you speak to describe your item? This will help AI generate better content.
-                  </p>
-                  <div className="flex gap-2 justify-center">
-                    <Button
-                      type="button"
-                      onClick={() => {
-                        setVoiceTargetField('intelligent');
-                        openVoiceInput('intelligent');
-                      }}
-                      variant="outline"
-                      size="sm"
-                      className="border-purple-500 text-purple-400 hover:bg-purple-500/20 hover:text-purple-300 hover:border-purple-400 hover:shadow-md hover:shadow-purple-500/20 transition-all duration-200"
-                    >
-                      <Mic className="w-3 h-3 mr-1" />
-                      Yes, describe my item
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => setHasVoiceInput(false)}
-                      variant="ghost"
-                      size="sm"
-                      className="text-gray-400 hover:text-white"
-                    >
-                      Skip
-                    </Button>
-                  </div>
-                  <p className="text-gray-400 text-xs text-center mt-2">
-                    AI will intelligently extract title and description from your voice
-                  </p>
-                </div>
+              <div className="mb-4 flex gap-2 justify-center">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setVoiceTargetField('intelligent');
+                    openVoiceInput('intelligent');
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="border-purple-500 text-purple-400 hover:bg-purple-500/20 hover:text-purple-300 hover:border-purple-400 hover:shadow-md hover:shadow-purple-500/20 transition-all duration-200"
+                >
+                  <Mic className="w-3 h-3 mr-1" />
+                  Yes, describe my item
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => setHasVoiceInput(false)}
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-400 hover:text-white"
+                >
+                  Skip
+                </Button>
               </div>
             )}
 
