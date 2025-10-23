@@ -118,7 +118,7 @@ export default async function handler(req, res) {
               id,
               title,
               price,
-              image_url,
+              image_urls,
               status
             )
           ),
