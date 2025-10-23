@@ -48,7 +48,7 @@ export default function UsersPage() {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      console.log("Loading users from Supabase profiles table...");
+      console.log("Loading users from Supabase profiles table... [v1.0.1 - " + new Date().toISOString() + "]");
       
       // Use direct Supabase query to bypass any entity issues
       const { data, error } = await supabase
@@ -57,7 +57,8 @@ export default function UsersPage() {
         .order('created_date', { ascending: false });
       
       if (error) {
-        console.error("Supabase query failed:", error);
+        console.error("🚨 SUPABASE QUERY FAILED:", error);
+        console.error("Error details:", error.message, error.code, error.details);
         throw error;
       }
       
