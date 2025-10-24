@@ -481,9 +481,17 @@ export default function Marketplace() {
       <div className="p-6 md:p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="mb-8">
+          <div className="mb-6">
             <h1 className="text-4xl font-bold text-white mb-2">Local Marketplace</h1>
             <p className="text-lg text-gray-400">Discover unique items from your community</p>
+          </div>
+
+          {/* Search and Filters - Moved to top */}
+          <div className="mb-8" data-tour="filters">
+            <SearchFilters 
+              onFilterChange={handleFilterChange}
+              itemCount={filteredItems.length}
+            />
           </div>
 
           {/* Top Banner Ad */}
@@ -496,14 +504,6 @@ export default function Marketplace() {
             limit={6}
             showViewAll={false}
           />
-
-          {/* Search and Filters - New Component */}
-          <div className="mb-8" data-tour="filters">
-            <SearchFilters 
-              onFilterChange={handleFilterChange}
-              itemCount={filteredItems.length}
-            />
-          </div>
 
           {/* Main Items Grid - 4 columns */}
           <div>
