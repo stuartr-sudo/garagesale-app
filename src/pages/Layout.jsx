@@ -151,6 +151,11 @@ const navigationItems = [
     icon: MessageSquare,
   },
   {
+    title: "Wish Lists",
+    url: createPageUrl("WishLists"),
+    icon: Heart,
+  },
+  {
     title: "Advertisements",
     url: createPageUrl("Advertisements"),
     icon: BarChart3,
