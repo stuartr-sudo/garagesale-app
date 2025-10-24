@@ -108,13 +108,22 @@ const PaymentForm = ({ item, onComplete, onPaymentIntent }) => {
       base: {
         fontSize: '16px',
         color: '#ffffff',
+        fontFamily: 'Inter, system-ui, sans-serif',
         '::placeholder': {
           color: '#9ca3af',
         },
         backgroundColor: '#1f2937',
+        border: '1px solid #374151',
+        borderRadius: '8px',
+        padding: '12px',
       },
       invalid: {
         color: '#ef4444',
+        iconColor: '#ef4444',
+      },
+      complete: {
+        color: '#10b981',
+        iconColor: '#10b981',
       },
     },
     hidePostalCode: true,
@@ -155,9 +164,12 @@ const PaymentForm = ({ item, onComplete, onPaymentIntent }) => {
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Card Details
                 </label>
-                <div className="p-4 border border-gray-600 rounded-lg bg-gray-700/50">
+                <div className="p-4 border-2 border-gray-500 rounded-lg bg-gray-800/80 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20">
                   <CardElement options={cardElementOptions} />
                 </div>
+                <p className="text-xs text-gray-400 mt-2">
+                  Enter your card number, expiry date, and CVV
+                </p>
               </div>
 
               <div className="bg-green-900/20 border border-green-700 rounded-lg p-4">
@@ -221,7 +233,7 @@ const PaymentForm = ({ item, onComplete, onPaymentIntent }) => {
       </div>
 
       {/* Secure Payment Icons */}
-      <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
+      <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 mt-4">
         <div className="text-center mb-4">
           <h3 className="text-white font-medium mb-2">Secure Payment Methods</h3>
           <p className="text-gray-400 text-sm">We accept all major credit and debit cards</p>
@@ -229,12 +241,12 @@ const PaymentForm = ({ item, onComplete, onPaymentIntent }) => {
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           {/* Visa */}
-          <div className="bg-white rounded-lg p-3 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-3 flex items-center justify-center shadow-md hover:shadow-lg transition-shadow">
             <div className="text-blue-600 font-bold text-lg">VISA</div>
           </div>
           
           {/* Mastercard */}
-          <div className="bg-white rounded-lg p-3 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-3 flex items-center justify-center shadow-md hover:shadow-lg transition-shadow">
             <div className="flex items-center space-x-1">
               <div className="w-6 h-6 bg-red-500 rounded-full"></div>
               <div className="w-6 h-6 bg-yellow-500 rounded-full -ml-2"></div>
@@ -242,12 +254,12 @@ const PaymentForm = ({ item, onComplete, onPaymentIntent }) => {
           </div>
           
           {/* American Express */}
-          <div className="bg-white rounded-lg p-3 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-3 flex items-center justify-center shadow-md hover:shadow-lg transition-shadow">
             <div className="text-blue-600 font-bold text-sm">AMEX</div>
           </div>
           
           {/* Discover */}
-          <div className="bg-white rounded-lg p-3 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-3 flex items-center justify-center shadow-md hover:shadow-lg transition-shadow">
             <div className="text-orange-600 font-bold text-sm">DISCOVER</div>
           </div>
         </div>

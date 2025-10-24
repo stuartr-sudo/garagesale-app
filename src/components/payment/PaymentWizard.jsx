@@ -306,7 +306,7 @@ export default function PaymentWizard({
               <Button
                 onClick={handleBack}
                 variant="outline"
-                className="border-gray-700 text-gray-300 hover:bg-gray-700 rounded-xl"
+                className="border-gray-700 text-white hover:bg-gray-700 hover:text-white rounded-xl"
                 disabled={isProcessing}
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
