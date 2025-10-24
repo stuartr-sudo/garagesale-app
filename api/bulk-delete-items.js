@@ -81,21 +81,38 @@ export default async function handler(req, res) {
       });
     }
 
-    // Delete the items
-    const { error: deleteError } = await supabase
-      .from('items')
-      .delete()
-      .in('id', itemIds)
-      .eq('seller_id', userId);
+    // Delete the items one by one to avoid RLS issues
+    let deletedCount = 0;
+    const deleteErrors = [];
+    
+    for (const itemId of itemIds) {
+      const { error: deleteError } = await supabase
+        .from('items')
+        .delete()
+        .eq('id', itemId)
+        .eq('seller_id', userId);
 
-    if (deleteError) {
-      console.error('Error deleting items:', deleteError);
-      return res.status(500).json({ error: 'Failed to delete items' });
+      if (deleteError) {
+        console.error(`Error deleting item ${itemId}:`, deleteError);
+        deleteErrors.push({ itemId, error: deleteError.message });
+      } else {
+        deletedCount++;
+      }
+    }
+
+    if (deleteErrors.length > 0) {
+      console.error('Some items failed to delete:', deleteErrors);
+      return res.status(500).json({ 
+        error: 'Some items failed to delete',
+        deletedCount,
+        failedItems: deleteErrors,
+        totalRequested: itemIds.length
+      });
     }
 
     return res.status(200).json({ 
-      message: `Successfully deleted ${itemIds.length} item(s)`,
-      deletedCount: itemIds.length,
+      message: `Successfully deleted ${deletedCount} item(s)`,
+      deletedCount: deletedCount,
       deletedIds: itemIds
     });
 
