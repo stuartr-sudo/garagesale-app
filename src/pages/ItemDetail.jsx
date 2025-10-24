@@ -39,6 +39,8 @@ export default function ItemDetail() {
   const [negotiatedPrice, setNegotiatedPrice] = useState(null);
   const [offerAccepted, setOfferAccepted] = useState(false);
   const [theme, setTheme] = useState({});
+  const [itemUnavailable, setItemUnavailable] = useState(false);
+  const [availabilityStatus, setAvailabilityStatus] = useState('available');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -56,6 +58,61 @@ export default function ItemDetail() {
       }
     }
   }, [id]);
+
+  // Real-time availability check - polls every 5 seconds
+  useEffect(() => {
+    if (!id) return;
+
+    const checkAvailability = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('items')
+          .select('status, reserved_until')
+          .eq('id', id)
+          .single();
+
+        if (error) throw error;
+
+        if (data) {
+          setAvailabilityStatus(data.status || 'available');
+          
+          // Check if item is no longer available
+          if (data.status === 'sold' || data.status === 'pending_payment') {
+            setItemUnavailable(true);
+            if (data.status === 'sold') {
+              toast({
+                title: "Item Sold",
+                description: "This item was just sold to another buyer.",
+                variant: "destructive"
+              });
+            }
+          } else if (data.status === 'reserved') {
+            // Check if reservation has expired
+            const reservedUntil = new Date(data.reserved_until);
+            if (reservedUntil < new Date()) {
+              // Reservation expired, should be cleaned up
+              setAvailabilityStatus('available');
+              setItemUnavailable(false);
+            } else {
+              setItemUnavailable(true);
+            }
+          } else {
+            setItemUnavailable(false);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking availability:', error);
+      }
+    };
+
+    // Initial check
+    checkAvailability();
+
+    // Poll every 5 seconds
+    const interval = setInterval(checkAvailability, 5000);
+
+    return () => clearInterval(interval);
+  }, [id, toast]);
 
   const trackItemView = async () => {
     try {
@@ -518,15 +575,43 @@ export default function ItemDetail() {
           {/* Action Buttons - Below AI Agent - Hide when offer is accepted */}
           {!offerAccepted && (
             <div className="space-y-2">
+              {/* Availability Status Badge */}
+              {itemUnavailable && (
+                <div className="p-3 rounded-lg bg-red-900/30 border border-red-800">
+                  <p className="text-red-200 text-sm font-semibold">
+                    {availabilityStatus === 'sold' && '❌ This item has been sold'}
+                    {availabilityStatus === 'reserved' && '⏱️ This item is currently reserved'}
+                    {availabilityStatus === 'pending_payment' && '💳 Payment is being processed'}
+                  </p>
+                  {availabilityStatus === 'sold' && (
+                    <Button
+                      variant="outline"
+                      className="w-full mt-2 bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
+                      onClick={() => {
+                        // TODO: Implement "Notify Me" feature
+                        toast({
+                          title: "Coming Soon",
+                          description: "We'll notify you when similar items are listed!"
+                        });
+                      }}
+                    >
+                      🔔 Notify Me When Similar Items Are Listed
+                    </Button>
+                  )}
+                </div>
+              )}
+
               <Button
                 onClick={handleAddToCart}
-                disabled={isAddingToCart || isInCart}
+                disabled={isAddingToCart || isInCart || itemUnavailable}
                 className={`w-full h-10 md:h-12 text-white font-semibold text-sm md:text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] ${
                   isInCart
                     ? 'bg-green-600 hover:bg-green-600'
+                    : itemUnavailable
+                    ? 'opacity-50 cursor-not-allowed'
                     : ''
                 }`}
-                style={!isInCart ? {
+                style={!isInCart && !itemUnavailable ? {
                   background: `linear-gradient(to right, ${theme?.addToCartFrom || '#a855f7'}, ${theme?.addToCartTo || '#db2777'})`
                 } : undefined}
               >
@@ -545,11 +630,14 @@ export default function ItemDetail() {
 
               <Button
                 onClick={() => setShowPurchaseModal(true)}
-                className="w-full h-10 md:h-12 text-white font-semibold text-sm md:text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
-                style={{
+                disabled={itemUnavailable}
+                className={`w-full h-10 md:h-12 text-white font-semibold text-sm md:text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] ${
+                  itemUnavailable ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                style={!itemUnavailable ? {
                   background: `linear-gradient(to right, ${theme?.buyNowFrom || '#10b981'}, ${theme?.buyNowTo || '#059669'})`,
                   animation: 'subtle-pulse 3s ease-in-out infinite'
-                }}
+                } : undefined}
               >
                 <ShoppingCart className="w-4 h-4 mr-1" />
                 {item.price === 0 ? 'Claim' : 'Buy Now'}
