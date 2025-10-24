@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlockSwap Mobile Tester</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 2em;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 1.1em;
+    }
+
+    .device-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .device-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .device-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .device-btn .icon {
+      font-size: 24px;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .info-box {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      border-left: 4px solid #667eea;
+    }
+
+    .info-box h3 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 1.2em;
+    }
+
+    .info-box p {
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .info-box code {
+      background: #e9ecef;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      color: #d63384;
+    }
+
+    .quick-links {
+      display: grid;
+      gap: 10px;
+    }
+
+    .quick-link {
+      background: #667eea;
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.3s ease;
+    }
+
+    .quick-link:hover {
+      background: #764ba2;
+      transform: translateX(5px);
+    }
+
+    .quick-link .arrow {
+      font-size: 20px;
+    }
+
+    .footer {
+      margin-top: 30px;
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 25px;
+      }
+
+      h1 {
+        font-size: 1.5em;
+      }
+
+      .device-grid {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      }
+
+      .device-btn {
+        padding: 15px;
+        font-size: 12px;
+      }
+
+      .device-btn .icon {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📱 BlockSwap Mobile Tester</h1>
+    <p class="subtitle">Choose a device preset to test your site responsively</p>
+
+    <div class="device-grid">
+      <button class="device-btn" onclick="setDevice(375, 812, 3)">
+        <span class="icon">📱</span>
+        iPhone 14
+      </button>
+      <button class="device-btn" onclick="setDevice(393, 852, 3)">
+        <span class="icon">📱</span>
+        iPhone 14 Pro
+      </button>
+      <button class="device-btn" onclick="setDevice(360, 800, 3)">
+        <span class="icon">📱</span>
+        Galaxy S22
+      </button>
+      <button class="device-btn" onclick="setDevice(412, 915, 3)">
+        <span class="icon">📱</span>
+        Pixel 7
+      </button>
+      <button class="device-btn" onclick="setDevice(820, 1180, 2)">
+        <span class="icon">📱</span>
+        iPad Air
+      </button>
+      <button class="device-btn" onclick="setDevice(1024, 1366, 2)">
+        <span class="icon">📱</span>
+        iPad Pro
+      </button>
+    </div>
+
+    <div class="info-box">
+      <h3>🎯 Quick Start</h3>
+      <p>
+        <strong>Chrome DevTools:</strong> Press <code>Cmd + Option + I</code> (Mac) or <code>F12</code> (Windows), 
+        then click the device toggle icon or press <code>Cmd + Shift + M</code>
+      </p>
+    </div>
+
+    <div class="info-box">
+      <h3>💡 Current Device Info</h3>
+      <p>
+        <strong>Screen:</strong> <span id="screenSize"></span><br>
+        <strong>Viewport:</strong> <span id="viewportSize"></span><br>
+        <strong>Device Pixel Ratio:</strong> <span id="dpr"></span><br>
+        <strong>Touch:</strong> <span id="touch"></span><br>
+        <strong>Orientation:</strong> <span id="orientation"></span>
+      </p>
+    </div>
+
+    <div class="quick-links">
+      <a href="https://www.blockswap.club" class="quick-link" target="_blank">
+        <span>🏠 BlockSwap Home</span>
+        <span class="arrow">→</span>
+      </a>
+      <a href="https://www.blockswap.club/marketplace" class="quick-link" target="_blank">
+        <span>🛍️ Marketplace</span>
+        <span class="arrow">→</span>
+      </a>
+      <a href="https://www.blockswap.club/additem" class="quick-link" target="_blank">
+        <span>➕ Add Item</span>
+        <span class="arrow">→</span>
+      </a>
+      <a href="https://responsively.app" class="quick-link" target="_blank">
+        <span>⚡ Download Responsively App (Recommended)</span>
+        <span class="arrow">↗</span>
+      </a>
+    </div>
+
+    <div class="footer">
+      <p>💻 For full mobile emulator guide, see MOBILE_EMULATOR_GUIDE.md</p>
+    </div>
+  </div>
+
+  <script>
+    // Update device info
+    function updateDeviceInfo() {
+      document.getElementById('screenSize').textContent = 
+        `${screen.width} x ${screen.height}`;
+      
+      document.getElementById('viewportSize').textContent = 
+        `${window.innerWidth} x ${window.innerHeight}`;
+      
+      document.getElementById('dpr').textContent = 
+        window.devicePixelRatio;
+      
+      document.getElementById('touch').textContent = 
+        'ontouchstart' in window ? '✅ Supported' : '❌ Not Supported';
+      
+      document.getElementById('orientation').textContent = 
+        screen.orientation?.type || window.orientation !== undefined ? 
+          (window.innerWidth > window.innerHeight ? 'Landscape' : 'Portrait') : 
+          'Unknown';
+    }
+
+    // Set device dimensions (for Chrome DevTools users)
+    function setDevice(width, height, dpr) {
+      alert(
+        `📱 To emulate this device in Chrome DevTools:\n\n` +
+        `1. Open DevTools (F12 or Cmd+Option+I)\n` +
+        `2. Click device toggle (Cmd+Shift+M)\n` +
+        `3. Click "Edit" in device dropdown\n` +
+        `4. Add Custom Device:\n` +
+        `   • Width: ${width}\n` +
+        `   • Height: ${height}\n` +
+        `   • Device Pixel Ratio: ${dpr}\n\n` +
+        `✅ Then select your custom device from the dropdown!`
+      );
+    }
+
+    // Update on load and resize
+    updateDeviceInfo();
+    window.addEventListener('resize', updateDeviceInfo);
+    window.addEventListener('orientationchange', updateDeviceInfo);
+
+    // Test touch events
+    if ('ontouchstart' in window) {
+      console.log('✅ Touch events are supported');
+    } else {
+      console.log('ℹ️ Touch events not supported (use DevTools device mode)');
+    }
+
+    // Log user agent
+    console.log('User Agent:', navigator.userAgent);
+    console.log('Platform:', navigator.platform);
+    console.log('Viewport:', window.innerWidth + 'x' + window.innerHeight);
+  </script>
+</body>
+</html>
+
