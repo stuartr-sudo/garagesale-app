@@ -46,5 +46,6 @@ CREATE POLICY "analytics_insert_system" ON negotiation_analytics
 
 -- Add comments for clarity
 COMMENT ON TABLE negotiation_analytics IS 'Tracks negotiation success metrics and analytics for AI agent conversations';
-COMMENT ON COLUMN negotiation_analytics.buyer_momentum IS 'Whether the buyer increased their offer during negotiation';
+COMMENT ON COLUMN negotiation_analytics.buyer_increased_offer IS 'Whether the buyer increased their offer during negotiation';
 COMMENT ON COLUMN negotiation_analytics.time_to_close_minutes IS 'Time from start to close of negotiation in minutes';
+COMMENT ON COLUMN agent_conversations.buyer_momentum IS 'JSONB tracking buyer behavior patterns and momentum during negotiation';
