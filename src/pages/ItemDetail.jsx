@@ -645,9 +645,11 @@ export default function ItemDetail() {
                     ? 'opacity-50 cursor-not-allowed'
                     : ''
                 }`}
-                style={!isInCart && !itemUnavailable ? {
-                  background: `linear-gradient(to right, ${theme?.addToCartFrom || '#a855f7'}, ${theme?.addToCartTo || '#db2777'})`
-                } : undefined}
+                style={
+                  !isInCart && !itemUnavailable
+                    ? { background: `linear-gradient(to right, ${theme?.addToCartFrom || '#a855f7'}, ${theme?.addToCartTo || '#db2777'})` }
+                    : undefined
+                }
               >
                 {isInCart ? (
                   <>
@@ -668,10 +670,14 @@ export default function ItemDetail() {
                 className={`w-full h-10 md:h-12 text-white font-semibold text-sm md:text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] ${
                   itemUnavailable ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
-                style={!itemUnavailable ? {
-                  background: `linear-gradient(to right, ${theme?.buyNowFrom || '#10b981'}, ${theme?.buyNowTo || '#059669'})`,
-                  animation: 'subtle-pulse 3s ease-in-out infinite'
-                } : undefined}
+                style={
+                  !itemUnavailable
+                    ? {
+                        background: `linear-gradient(to right, ${theme?.buyNowFrom || '#10b981'}, ${theme?.buyNowTo || '#059669'})`,
+                        animation: 'subtle-pulse 3s ease-in-out infinite'
+                      }
+                    : undefined
+                }
               >
                 <ShoppingCart className="w-4 h-4 mr-1" />
                 {item.price === 0 ? 'Claim' : 'Buy Now'}
