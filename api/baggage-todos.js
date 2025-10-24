@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.NEW_SUPABASE_SERVICE_KEY;
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   throw new Error('Missing Supabase environment variables');
@@ -21,7 +21,9 @@ export default async function handler(req, res) {
 
   try {
     const { method } = req;
-    const { user_id } = req.query;
+    
+    // Get user_id from query params or body
+    let user_id = req.query.user_id || req.body?.user_id;
 
     if (!user_id) {
       return res.status(400).json({ error: 'User ID is required' });
@@ -45,7 +47,10 @@ export default async function handler(req, res) {
 
       case 'POST':
         // Create a new todo
-        const { title, description, priority = 'medium', due_date } = req.body;
+        const { title, description, priority = 'medium', due_date, user_id: bodyUserId } = req.body;
+        
+        // Use user_id from body if provided, otherwise use from query
+        user_id = bodyUserId || user_id;
 
         if (!title) {
           return res.status(400).json({ error: 'Title is required' });

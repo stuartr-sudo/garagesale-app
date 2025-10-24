@@ -83,6 +83,7 @@ export default function TodoList({ userId }) {
         },
         body: JSON.stringify({
           ...newTodo,
+          user_id: userId,
           due_date: newTodo.due_date || null
         }),
       });
