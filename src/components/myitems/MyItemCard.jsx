@@ -116,16 +116,16 @@ export default function MyItemCard({ item, onDelete, onStatusChange }) {
         <div className="space-y-3">
           <div>
             <h3 className="font-bold text-lg text-white line-clamp-1">
-              {item.title}
+              {item.title || 'Untitled Item'}
             </h3>
             <p className="text-gray-400 text-sm line-clamp-2 mt-1">
-              {item.description}
+              {item.description || 'No description'}
             </p>
           </div>
 
           <div className="flex items-center justify-between">
             <div className="text-2xl font-bold text-cyan-400">
-              ${item.price}
+              ${item.price || '0.00'}
             </div>
             <div className="text-sm text-gray-500">
               Listed {format(new Date(item.created_at), 'MMM d')}
