@@ -15,6 +15,8 @@ const PaymentForm = ({ item, onComplete, onPaymentIntent }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [clientSecret, setClientSecret] = useState(null);
   const [paymentIntent, setPaymentIntent] = useState(null);
+  const [paymentError, setPaymentError] = useState(null);
+  const [feeBreakdown, setFeeBreakdown] = useState(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -23,7 +25,7 @@ const PaymentForm = ({ item, onComplete, onPaymentIntent }) => {
 
   const createPaymentIntent = async () => {
     try {
-      const response = await fetch('/api/stripe/create-payment-intent', {
+      const response = await fetch('/api/stripe/create-payment-intent-with-fee', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -42,6 +44,7 @@ const PaymentForm = ({ item, onComplete, onPaymentIntent }) => {
       const data = await response.json();
       setClientSecret(data.clientSecret);
       setPaymentIntent(data.paymentIntent);
+      setFeeBreakdown(data.feeBreakdown);
       onPaymentIntent(data.paymentIntent);
     } catch (error) {
       console.error('Error creating payment intent:', error);
@@ -73,12 +76,45 @@ const PaymentForm = ({ item, onComplete, onPaymentIntent }) => {
 
       if (error) {
         console.error('Payment failed:', error);
+        
+        // Set detailed error state for display in modal
+        setPaymentError({
+          type: error.type || 'payment_error',
+          code: error.code || 'unknown',
+          message: error.message || "Your payment could not be processed.",
+          declineCode: error.decline_code,
+          shouldRetry: error.shouldRetry || false
+        });
+        
+        // Enhanced toast with specific error details
+        let errorTitle = "Payment Failed";
+        let errorDescription = error.message || "Your payment could not be processed.";
+        
+        if (error.code === 'card_declined') {
+          errorTitle = "Card Declined";
+          if (error.decline_code === 'insufficient_funds') {
+            errorDescription = "Your card has insufficient funds. Please try a different card or add funds to your account.";
+          } else if (error.decline_code === 'expired_card') {
+            errorDescription = "Your card has expired. Please use a different card.";
+          } else if (error.decline_code === 'incorrect_cvc') {
+            errorDescription = "The security code (CVC) you entered is incorrect. Please check and try again.";
+          } else {
+            errorDescription = "Your card was declined. Please try a different card or contact your bank.";
+          }
+        } else if (error.code === 'processing_error') {
+          errorTitle = "Processing Error";
+          errorDescription = "There was an error processing your payment. Please try again.";
+        }
+        
         toast({
-          title: "Payment Failed",
-          description: error.message || "Your payment could not be processed.",
+          title: errorTitle,
+          description: errorDescription,
           variant: "destructive",
         });
       } else if (paymentIntent.status === 'succeeded') {
+        // Clear any previous errors
+        setPaymentError(null);
+        
         toast({
           title: "Payment Successful",
           description: "Your payment has been processed successfully.",
@@ -159,6 +195,32 @@ const PaymentForm = ({ item, onComplete, onPaymentIntent }) => {
               </div>
             </div>
 
+            {/* Fee Breakdown */}
+            {feeBreakdown && (
+              <div className="bg-gray-800/50 border border-gray-600 rounded-lg p-4">
+                <h3 className="text-white font-medium mb-3">Payment Breakdown</h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-400">Item Price:</span>
+                    <span className="text-white">${(feeBreakdown.originalAmount / 100).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-400">Processing Fee ({(feeBreakdown.feeRate * 100).toFixed(1)}% + ${(feeBreakdown.feeFixed / 100).toFixed(2)}):</span>
+                    <span className="text-yellow-400">+${(feeBreakdown.processingFee / 100).toFixed(2)}</span>
+                  </div>
+                  <div className="border-t border-gray-600 pt-2">
+                    <div className="flex justify-between font-medium">
+                      <span className="text-white">Total:</span>
+                      <span className="text-green-400">${(feeBreakdown.totalAmount / 100).toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  Processing fee covers secure payment processing and fraud protection.
+                </p>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -196,6 +258,39 @@ const PaymentForm = ({ item, onComplete, onPaymentIntent }) => {
                   </div>
                 </div>
               </div>
+
+              {/* Payment Error Display */}
+              {paymentError && (
+                <div className="bg-red-900/20 border border-red-700 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h3 className="text-red-400 font-medium mb-1">
+                        {paymentError.code === 'card_declined' ? 'Card Declined' : 'Payment Error'}
+                      </h3>
+                      <p className="text-red-200 text-sm mb-2">
+                        {paymentError.message}
+                      </p>
+                      {paymentError.declineCode === 'insufficient_funds' && (
+                        <div className="text-red-300 text-xs">
+                          <p className="font-medium mb-1">What you can do:</p>
+                          <ul className="list-disc list-inside space-y-1">
+                            <li>Try a different card with sufficient funds</li>
+                            <li>Add funds to your current card</li>
+                            <li>Contact your bank to increase your limit</li>
+                          </ul>
+                        </div>
+                      )}
+                      <button
+                        onClick={() => setPaymentError(null)}
+                        className="text-red-300 hover:text-red-200 text-xs underline mt-2"
+                      >
+                        Dismiss
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <Button
                 type="submit"
