@@ -223,7 +223,8 @@ export default function AnnouncementEditor() {
                     type="datetime-local"
                     value={formData.event_date}
                     onChange={handleInputChange}
-                    className="bg-gray-800 border-gray-700 text-white"
+                    className="bg-gray-800 border-gray-700 text-white [color-scheme:dark] text-lg h-14 font-medium"
+                    style={{ colorScheme: 'dark' }}
                   />
                 </div>
 
@@ -276,7 +277,8 @@ export default function AnnouncementEditor() {
                     type="datetime-local"
                     value={formData.expires_at}
                     onChange={handleInputChange}
-                    className="bg-gray-800 border-gray-700 text-white"
+                    className="bg-gray-800 border-gray-700 text-white [color-scheme:dark] text-lg h-14 font-medium"
+                    style={{ colorScheme: 'dark' }}
                   />
                   <p className="text-sm text-gray-500">Optional: Set when this announcement should expire</p>
                 </div>

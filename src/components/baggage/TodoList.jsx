@@ -298,7 +298,8 @@ export default function TodoList({ userId }) {
                     type="date"
                     value={newTodo.due_date}
                     onChange={(e) => setNewTodo({ ...newTodo, due_date: e.target.value })}
-                    className="bg-gray-700 border-gray-600 text-white"
+                    className="bg-gray-700 border-gray-600 text-white [color-scheme:dark] text-lg h-12 font-medium"
+                    style={{ colorScheme: 'dark' }}
                   />
                 </div>
               </div>

@@ -688,7 +688,8 @@ export default function Advertisements() {
                   type="date"
                   value={formData.start_date}
                   onChange={(e) => setFormData(prev => ({ ...prev, start_date: e.target.value }))}
-                  className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white focus:border-pink-500 focus:ring-pink-500"
+                  className="h-14 rounded-xl bg-gray-800 border-gray-700 text-white focus:border-pink-500 focus:ring-pink-500 [color-scheme:dark] text-lg font-medium"
+                  style={{ colorScheme: 'dark' }}
                 />
               </div>
               <div className="space-y-2">
@@ -698,7 +699,8 @@ export default function Advertisements() {
                   type="date"
                   value={formData.end_date}
                   onChange={(e) => setFormData(prev => ({ ...prev, end_date: e.target.value }))}
-                  className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white focus:border-pink-500 focus:ring-pink-500"
+                  className="h-14 rounded-xl bg-gray-800 border-gray-700 text-white focus:border-pink-500 focus:ring-pink-500 [color-scheme:dark] text-lg font-medium"
+                  style={{ colorScheme: 'dark' }}
                 />
               </div>
             </div>

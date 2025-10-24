@@ -1018,7 +1018,10 @@ Return only the description, nothing else.`
                   type="datetime-local"
                   value={itemData.collection_date}
                   onChange={(e) => setItemData(prev => ({ ...prev, collection_date: e.target.value }))}
-                  className="bg-gray-800 border-gray-700 text-white"
+                  className="bg-gray-800 border-gray-700 text-white [color-scheme:dark] text-lg h-14 font-medium"
+                  style={{
+                    colorScheme: 'dark',
+                  }}
                   min={new Date().toISOString().slice(0, 16)}
                   max={new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16)}
                 />

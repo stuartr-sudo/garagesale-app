@@ -318,7 +318,8 @@ export default function MyOrders() {
                             ...prev,
                             [order.id]: { ...prev[order.id], date: e.target.value }
                           }))}
-                          className="bg-gray-900 border-gray-700 text-white"
+                          className="bg-gray-900 border-gray-700 text-white [color-scheme:dark] text-lg h-12 font-medium"
+                          style={{ colorScheme: 'dark' }}
                         />
                       </div>
                       <div>

@@ -424,7 +424,8 @@ export default function SpecialOffers() {
                       type="datetime-local"
                       value={formData.starts_at}
                       onChange={(e) => setFormData(prev => ({ ...prev, starts_at: e.target.value }))}
-                      className="bg-gray-900 border-gray-700 text-white"
+                      className="bg-gray-900 border-gray-700 text-white [color-scheme:dark] text-lg h-14 font-medium"
+                      style={{ colorScheme: 'dark' }}
                     />
                   </div>
                   <div className="space-y-2">
@@ -433,7 +434,8 @@ export default function SpecialOffers() {
                       type="datetime-local"
                       value={formData.ends_at}
                       onChange={(e) => setFormData(prev => ({ ...prev, ends_at: e.target.value }))}
-                      className="bg-gray-900 border-gray-700 text-white"
+                      className="bg-gray-900 border-gray-700 text-white [color-scheme:dark] text-lg h-14 font-medium"
+                      style={{ colorScheme: 'dark' }}
                     />
                   </div>
                 </div>
