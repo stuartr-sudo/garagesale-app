@@ -221,10 +221,10 @@ export default function ProposeTradeModal({ targetItem, currentUserId, onClose, 
                             )}
                             <div className="flex-1 min-w-0">
                               <h4 className="font-semibold text-white text-sm truncate">
-                                {item.title}
+                                {item.title || 'Untitled Item'}
                               </h4>
                               <p className="text-green-400 font-bold text-sm">
-                                ${item.price?.toFixed(2)}
+                                ${item.price?.toFixed(2) || '0.00'}
                               </p>
                               {item.condition && (
                                 <Badge variant="outline" className="text-xs mt-1">
@@ -250,10 +250,10 @@ export default function ProposeTradeModal({ targetItem, currentUserId, onClose, 
               <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 space-y-2">
                 {selectedItems.map((item) => (
                   <div key={item.id} className="flex items-center justify-between">
-                    <span className="text-gray-300 text-sm">{item.title}</span>
+                    <span className="text-gray-300 text-sm">{item.title || 'Untitled Item'}</span>
                     <div className="flex items-center gap-2">
                       <span className="text-green-400 font-semibold text-sm">
-                        ${item.price?.toFixed(2)}
+                        ${item.price?.toFixed(2) || '0.00'}
                       </span>
                       <button
                         type="button"
