@@ -33,7 +33,7 @@ export default function ProposeTradeModal({ targetItem, currentUserId, onClose, 
         .from('items')
         .select('*')
         .eq('seller_id', currentUserId)
-        .eq('status', 'available')
+        .eq('status', 'active')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -134,18 +134,19 @@ export default function ProposeTradeModal({ targetItem, currentUserId, onClose, 
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="bg-gray-900 border-gray-800 text-white max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-2xl">
-            <RefreshCw className="w-6 h-6 text-blue-500" />
+      <DialogContent className="bg-gray-900 border-gray-800 text-white max-w-4xl h-[85vh] flex flex-col overflow-hidden">
+        <DialogHeader className="flex-shrink-0">
+          <DialogTitle className="flex items-center gap-2 text-xl">
+            <RefreshCw className="w-5 h-5 text-blue-500" />
             Propose Trade
           </DialogTitle>
-          <p className="text-gray-400 text-sm">
+          <p className="text-gray-400 text-xs">
             Offer your items in exchange for "{targetItem.title}"
           </p>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 overflow-y-auto space-y-4 pr-2">
           {/* Target Item */}
           <div>
             <h3 className="text-sm font-semibold text-gray-300 mb-2">They're Offering:</h3>
@@ -188,7 +189,7 @@ export default function ProposeTradeModal({ targetItem, currentUserId, onClose, 
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto p-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-2 border border-gray-700 rounded-lg">
                 {myItems.map((item) => {
                   const isSelected = selectedItems.find(i => i.id === item.id);
                   return (
@@ -352,14 +353,15 @@ export default function ProposeTradeModal({ targetItem, currentUserId, onClose, 
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Tell them why this is a great trade..."
-              className="bg-gray-800 border-gray-700 text-white min-h-[100px]"
+              className="bg-gray-800 border-gray-700 text-white h-20 resize-none"
               maxLength={500}
             />
             <p className="text-xs text-gray-500">{message.length}/500 characters</p>
           </div>
+          </div>
 
-          {/* Actions */}
-          <div className="flex gap-3">
+          {/* Actions - Fixed at bottom */}
+          <div className="flex-shrink-0 flex gap-3 pt-4 border-t border-gray-800">
             <Button
               type="button"
               variant="outline"
