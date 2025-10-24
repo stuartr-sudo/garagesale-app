@@ -372,7 +372,7 @@ export default function ItemDetail() {
                           e.stopPropagation();
                           setSelectedImage(selectedImage - 1);
                         }}
-                        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 w-12 h-12 bg-green-500 hover:bg-green-600 text-white rounded-full border-2 border-yellow-400 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 flex items-center justify-center"
+                        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 flex items-center justify-center backdrop-blur-sm"
                       >
                         <ChevronLeft className="w-6 h-6" />
                       </button>
@@ -385,7 +385,7 @@ export default function ItemDetail() {
                           e.stopPropagation();
                           setSelectedImage(selectedImage + 1);
                         }}
-                        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 w-12 h-12 bg-green-500 hover:bg-green-600 text-white rounded-full border-2 border-yellow-400 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 flex items-center justify-center"
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 flex items-center justify-center backdrop-blur-sm"
                       >
                         <ChevronRight className="w-6 h-6" />
                       </button>
