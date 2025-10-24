@@ -1,12 +1,13 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
-// Eager load Layout (needed immediately)
+// Eager load critical pages (Layout + frequently accessed pages)
 import Layout from "./Layout.jsx";
+import Marketplace from "./Marketplace"; // Eager load - most visited page
+import ItemDetail from "./ItemDetail"; // Eager load - frequently accessed
+import MyItems from "./MyItems"; // Eager load - seller's main page
 
-// Lazy load all pages for code splitting
-const Marketplace = lazy(() => import("./Marketplace"));
-const MyItems = lazy(() => import("./MyItems"));
+// Lazy load less frequently accessed pages for code splitting
 const AddItem = lazy(() => import("./AddItem"));
 const EditItem = lazy(() => import("./EditItem"));
 const Users = lazy(() => import("./Users"));
@@ -33,7 +34,6 @@ const BusinessSignup = lazy(() => import("./BusinessSignup"));
 const AccountTypeSelection = lazy(() => import("./AccountTypeSelection"));
 const TradeOffers = lazy(() => import("./TradeOffers"));
 const SignIn = lazy(() => import("./SignIn"));
-const ItemDetail = lazy(() => import("./ItemDetail"));
 const MyOrders = lazy(() => import("./MyOrders"));
 const Cart = lazy(() => import("./Cart"));
 const SpecialOffers = lazy(() => import("./SpecialOffers"));
@@ -46,12 +46,19 @@ const Messages = lazy(() => import("./Messages"));
 const WishLists = lazy(() => import("./WishLists"));
 const PromoteItem = lazy(() => import("./PromoteItem"));
 
-// Loading component
+// Loading component - Minimal, non-intrusive loader
 const PageLoader = () => (
   <div className="min-h-screen bg-gradient-to-br from-gray-950 to-gray-900 flex items-center justify-center">
     <div className="text-center">
-      <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-pink-500 mx-auto mb-4"></div>
-      <p className="text-gray-400 text-sm">Loading...</p>
+      <div className="animate-pulse space-y-4 w-full max-w-4xl px-4">
+        {/* Skeleton loader instead of spinner - less jarring */}
+        <div className="h-12 bg-gray-800 rounded-lg w-full"></div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="h-64 bg-gray-800 rounded-lg"></div>
+          <div className="h-64 bg-gray-800 rounded-lg"></div>
+          <div className="h-64 bg-gray-800 rounded-lg"></div>
+        </div>
+      </div>
     </div>
   </div>
 );

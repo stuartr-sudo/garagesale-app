@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { getItemSpecialOffers, formatOfferText, getOfferBadgeColor } from '@/api/offers';
 import { getItemReservation } from '@/api/functions';
 
-export default function ItemCard({ item, seller, isSold = false, currentUser = null }) {
+const ItemCard = memo(function ItemCard({ item, seller, isSold = false, currentUser = null }) {
   const primaryImage = item.image_urls?.[0] || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop";
   
   // Load theme from localStorage (now using hex colors)
@@ -245,4 +245,6 @@ export default function ItemCard({ item, seller, isSold = false, currentUser = n
     </Card>
     </Link>
   );
-}
+});
+
+export default ItemCard;
