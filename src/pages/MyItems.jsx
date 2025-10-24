@@ -147,39 +147,40 @@ export default function MyItems() {
   const confirmBulkDelete = async () => {
     setIsBulkDeleting(true);
     try {
-      const response = await fetch('/api/bulk-delete-items', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          itemIds: selectedItems.map(item => item.id),
-          userId: currentUser.id
-        }),
-      });
+      console.log('Starting bulk delete for items:', selectedItems.map(item => item.id));
+      
+      // Use direct Supabase client instead of API endpoint
+      const { data, error } = await supabase
+        .from('items')
+        .delete()
+        .in('id', selectedItems.map(item => item.id))
+        .eq('seller_id', currentUser.id);
 
-      const data = await response.json();
+      console.log('Bulk delete result:', { data, error });
 
-      if (response.ok) {
-        toast({
-          title: "Items Deleted",
-          description: `Successfully deleted ${data.deletedCount} item(s).`,
-        });
-        
-        // Refresh the items list
-        await loadUserItems();
-        
-        // Reset bulk selection
-        setSelectedItems([]);
-        setBulkSelectMode(false);
-        setShowBulkDeleteModal(false);
-      } else {
+      if (error) {
+        console.error('Bulk delete error:', error);
         toast({
           title: "Delete Failed",
-          description: data.error || "Failed to delete items.",
+          description: error.message || "Failed to delete items.",
           variant: "destructive"
         });
+        return;
       }
+
+      toast({
+        title: "Items Deleted",
+        description: `Successfully deleted ${selectedItems.length} item(s).`,
+      });
+      
+      // Refresh the items list
+      await loadUserItems();
+      
+      // Reset bulk selection
+      setSelectedItems([]);
+      setBulkSelectMode(false);
+      setShowBulkDeleteModal(false);
+      
     } catch (error) {
       console.error('Error deleting items:', error);
       toast({
