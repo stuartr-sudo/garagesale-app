@@ -32,7 +32,7 @@ export default function RequestCard({ request, requester, onContact }) {
   return (
     <Card className="group bg-gradient-to-br from-slate-700 to-slate-600 rounded-2xl shadow-2xl shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-500 border-2 border-cyan-500/30 hover:border-cyan-400/60 overflow-hidden hover:scale-[1.02] flex flex-col h-full ring-1 ring-cyan-400/20 hover:ring-cyan-400/40">
       {primaryImage && (
-        <div className="relative aspect-video overflow-hidden">
+        <div className="relative aspect-square overflow-hidden">
           <img
             src={primaryImage}
             alt={request.title}

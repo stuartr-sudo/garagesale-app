@@ -43,6 +43,8 @@ export default function ItemDetail() {
   const [itemUnavailable, setItemUnavailable] = useState(false);
   const [availabilityStatus, setAvailabilityStatus] = useState('available');
   const [showTradeModal, setShowTradeModal] = useState(false);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -237,6 +239,33 @@ export default function ItemDetail() {
     setShowPurchaseModal(true);
   };
 
+  // Swipe gesture handlers
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && selectedImage < validImages.length - 1) {
+      setSelectedImage(selectedImage + 1);
+    }
+    if (isRightSwipe && selectedImage > 0) {
+      setSelectedImage(selectedImage - 1);
+    }
+  };
+
   const handleAddToCart = async () => {
     setIsAddingToCart(true);
     try {
@@ -320,6 +349,9 @@ export default function ItemDetail() {
               <div 
                 className="relative h-80 md:h-96 lg:h-[500px] cursor-pointer"
                 onClick={() => setIsImageFullscreen(true)}
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
               >
                 <img
                   src={primaryImage}
