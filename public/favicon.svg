@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ec4899;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="48" fill="url(#grad)"/>
+  
+  <!-- Exchange arrows icon (simplified) -->
+  <!-- Top arrow pointing right -->
+  <path d="M 30 35 L 55 35 L 55 30 L 65 37.5 L 55 45 L 55 40 L 30 40 Z" fill="white" opacity="0.95"/>
+  
+  <!-- Bottom arrow pointing left -->
+  <path d="M 70 65 L 45 65 L 45 70 L 35 62.5 L 45 55 L 45 60 L 70 60 Z" fill="white" opacity="0.95"/>
+</svg>
+
