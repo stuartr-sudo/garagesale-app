@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User as UserIcon, Save, MapPin, Globe, Bot, CreditCard, DollarSign, TrendingUp, Calendar } from "lucide-react";
+import { User as UserIcon, Save, MapPin, Globe, Bot, CreditCard, DollarSign, TrendingUp, Calendar, RefreshCw } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { formatDistanceToNow } from "date-fns";
 
@@ -34,7 +34,9 @@ export default function Settings() {
     collection_address: "",
     negotiation_aggressiveness: "balanced",
     accepted_payment_methods: ["bank_transfer", "stripe", "crypto"],
-    open_to_trades: false
+    open_to_trades: false,
+    enable_ai_upsell: false,
+    upsell_commission_rate: 15.00
   });
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -120,7 +122,9 @@ export default function Settings() {
         collection_address: formData.collection_address,
         negotiation_aggressiveness: formData.negotiation_aggressiveness,
         accepted_payment_methods: formData.accepted_payment_methods,
-        open_to_trades: formData.open_to_trades
+        open_to_trades: formData.open_to_trades,
+        enable_ai_upsell: formData.enable_ai_upsell,
+        upsell_commission_rate: formData.upsell_commission_rate
       });
       
       setShowSuccess(true);
@@ -402,6 +406,102 @@ export default function Settings() {
                         Choose how your AI agent negotiates with buyers. You can change this anytime.
                       </p>
                     </div>
+                  </div>
+                )}
+
+                {/* AI Upsell Settings - Only for sellers */}
+                {currentUser?.account_type === 'seller' && (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5" />
+                      AI-Powered Cross-Selling & Upselling
+                    </h3>
+                    
+                    <div className="flex items-start space-x-3 p-4 rounded-xl bg-gray-800 border border-gray-700">
+                      <input
+                        type="checkbox"
+                        id="enable_ai_upsell"
+                        checked={formData.enable_ai_upsell || false}
+                        onChange={(e) => {
+                          setFormData(prev => ({
+                            ...prev,
+                            enable_ai_upsell: e.target.checked
+                          }));
+                        }}
+                        className="w-4 h-4 text-pink-600 bg-gray-700 border-gray-600 rounded focus:ring-pink-500 mt-1"
+                      />
+                      <div className="flex-1">
+                        <Label htmlFor="enable_ai_upsell" className="text-white font-medium">Enable AI Upselling</Label>
+                        <p className="text-xs text-gray-400 mt-1">
+                          Let our AI suggest your items to buyers who are viewing similar products. 
+                          You only pay when they buy additional items from you.
+                        </p>
+                      </div>
+                    </div>
+
+                    {formData.enable_ai_upsell && (
+                      <div className="space-y-4 p-4 rounded-xl bg-green-900/20 border border-green-800">
+                        <div className="space-y-2">
+                          <Label htmlFor="upsell_commission_rate" className="text-white font-medium">
+                            Your Commission Rate (Becomes Buyer's Discount)
+                          </Label>
+                          <div className="flex items-center gap-4">
+                            <input
+                              type="range"
+                              id="upsell_commission_rate"
+                              min="10"
+                              max="20"
+                              step="1"
+                              value={formData.upsell_commission_rate}
+                              onChange={(e) => {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  upsell_commission_rate: parseFloat(e.target.value)
+                                }));
+                              }}
+                              className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-pink-600"
+                            />
+                            <div className="text-2xl font-bold text-pink-500 min-w-[60px] text-right">
+                              {formData.upsell_commission_rate}%
+                            </div>
+                          </div>
+                          <p className="text-xs text-gray-400">
+                            Buyers see your items with a <span className="text-green-400 font-semibold">{formData.upsell_commission_rate}% discount</span> when suggested by our AI.
+                            You pay this percentage only on additional sales generated by AI.
+                          </p>
+                        </div>
+
+                        <div className="p-3 rounded-lg bg-gray-800/50 border border-gray-700">
+                          <h4 className="text-sm font-semibold text-white mb-2">Example Scenario:</h4>
+                          <div className="space-y-1 text-xs text-gray-300">
+                            <div className="flex justify-between">
+                              <span>Item Price:</span>
+                              <span className="font-mono">$100.00</span>
+                            </div>
+                            <div className="flex justify-between text-green-400">
+                              <span>Buyer Sees (with {formData.upsell_commission_rate}% discount):</span>
+                              <span className="font-mono">${(100 * (1 - formData.upsell_commission_rate / 100)).toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between border-t border-gray-700 pt-1 mt-1">
+                              <span>You Receive:</span>
+                              <span className="font-mono">${(100 * (1 - formData.upsell_commission_rate / 100)).toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between text-pink-400">
+                              <span>Platform Commission:</span>
+                              <span className="font-mono">-${(100 * (formData.upsell_commission_rate / 100)).toFixed(2)}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-900/20 border border-blue-800">
+                          <Bot className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                          <div className="text-xs text-blue-300">
+                            <strong>Smart Upselling:</strong> Our AI suggests your items to buyers based on their cart contents, 
+                            browsing history, and preferences. This increases your sales volume while offering buyers great deals!
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 

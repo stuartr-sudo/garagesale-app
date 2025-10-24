@@ -23,6 +23,7 @@ import {
   getTimeRemaining,
   markItemSold 
 } from '@/utils/cart';
+import UpsellSection from '@/components/cart/UpsellSection';
 
 const RESERVATION_DURATION_MINUTES = 10;
 
@@ -646,6 +647,16 @@ export default function Cart() {
               </Card>
             </div>
           </div>
+
+          {/* AI-Powered Upsell Section - Only show if cart has items */}
+          {cartItems.length > 0 && currentUser && (
+            <div className="mt-8">
+              <UpsellSection 
+                cartItems={cartItems.map(ci => ci.item)} 
+                currentUserId={currentUser.id}
+              />
+            </div>
+          )}
         )}
       </div>
     </div>
