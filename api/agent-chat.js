@@ -197,9 +197,10 @@ export default async function handler(req, res) {
         
         const negotiationHistory = conversation.negotiation_history || [];
         
-        // Determine if this is the second negotiation
-        const previousCounter = negotiationHistory.find(h => h.counter_offer && h.response === 'countered');
-        isSecondNegotiation = !!previousCounter;
+        // Determine if this is a subsequent negotiation (not the first)
+        const allCounters = negotiationHistory.filter(h => h.counter_offer && h.response === 'countered');
+        const previousCounter = allCounters[allCounters.length - 1]; // Get the most recent counter
+        isSecondNegotiation = allCounters.length > 0;
         
         console.log('💰 NEGOTIATION STATE:', {
           offerAmount: offerAmount.toFixed(2),
@@ -227,10 +228,11 @@ export default async function handler(req, res) {
         }
         
         // ----------------------------------------
-        // CASE 3: SECOND Negotiation → Final Counter (15% down)
+        // CASE 3: SUBSEQUENT Negotiation → Progressive Counter
         // ----------------------------------------
         else if (isSecondNegotiation && previousCounter) {
           const previousCounterAmount = parseFloat(previousCounter.counter_offer);
+          const negotiationRound = allCounters.length + 1; // Track which round this is
           
           // Sub-case: User met or exceeded previous counter
           if (offerAmount >= previousCounterAmount) {
@@ -238,35 +240,44 @@ export default async function handler(req, res) {
             negotiationStrategy = `✅ ACCEPT - User's offer ($${offerAmount.toFixed(2)}) meets or exceeds your previous counter ($${previousCounterAmount.toFixed(2)}). Accept this offer warmly.`;
             console.log('✅ CASE 3A: Accept - met previous counter');
           }
-          // Sub-case: User came back lower - Make FINAL counter
+          // Sub-case: User came back with a new offer - Make progressive counter
           else {
-            // FORMULA: Final Counter = Previous Counter × 0.85 (reduce by 15%)
-            const rawFinalCounter = previousCounterAmount * 0.85;
+            // Progressive reduction: Each round reduces by 10-15%
+            const reductionPercentage = Math.min(0.15, 0.05 + (negotiationRound * 0.02)); // 5% + 2% per round
+            const rawCounter = previousCounterAmount * (1 - reductionPercentage);
             
             // Round to nearest dollar (ceiling for precision)
-            let finalCounter = Math.ceil(rawFinalCounter);
+            let newCounter = Math.ceil(rawCounter);
             
             // Safety checks:
             // 1. Must be at least minimum
             // 2. Must be above user's current offer (otherwise no point)
-            finalCounter = Math.max(minimumPrice, finalCounter);
+            newCounter = Math.max(minimumPrice, newCounter);
             
-            if (finalCounter <= offerAmount) {
+            if (newCounter <= offerAmount) {
               // Edge case: calculation brought us at/below their offer
               // Set to minimum or slightly above their offer, whichever is higher
-              finalCounter = Math.max(minimumPrice, Math.ceil(offerAmount + 1));
+              newCounter = Math.max(minimumPrice, Math.ceil(offerAmount + 1));
             }
             
-            counterOfferAmount = finalCounter;
+            // If this is the 3rd+ round, make it the final offer
+            const isFinalOffer = negotiationRound >= 3;
             
-            negotiationStrategy = `🔄 FINAL COUNTER (Second Negotiation) - Previous counter was $${previousCounterAmount.toFixed(2)}, user offered $${offerAmount.toFixed(2)}. Make your FINAL counter at $${counterOfferAmount.toFixed(2)} (15% reduction: $${previousCounterAmount.toFixed(2)} × 0.85 = $${rawFinalCounter.toFixed(2)} → rounded to $${counterOfferAmount.toFixed(2)}). This is your last offer. Make it clear this is final and valid for 10 minutes. Be friendly but firm.`;
+            counterOfferAmount = newCounter;
             
-            console.log('🔄 CASE 3B: Final counter', {
+            if (isFinalOffer) {
+              negotiationStrategy = `🔄 FINAL COUNTER (Round ${negotiationRound}) - Previous counter was $${previousCounterAmount.toFixed(2)}, user offered $${offerAmount.toFixed(2)}. Make your FINAL counter at $${counterOfferAmount.toFixed(2)} (${(reductionPercentage * 100).toFixed(1)}% reduction). This is your absolute final offer. Make it clear this is the last chance and valid for 10 minutes. Be friendly but firm.`;
+            } else {
+              negotiationStrategy = `🔄 COUNTER (Round ${negotiationRound}) - Previous counter was $${previousCounterAmount.toFixed(2)}, user offered $${offerAmount.toFixed(2)}. Counter with $${counterOfferAmount.toFixed(2)} (${(reductionPercentage * 100).toFixed(1)}% reduction from previous). Be friendly, emphasize value, and mention the offer is valid for 10 minutes.`;
+            }
+            
+            console.log(`🔄 CASE 3B: ${isFinalOffer ? 'Final' : 'Progressive'} counter (Round ${negotiationRound})`, {
               previousCounter: previousCounterAmount.toFixed(2),
-              reduction: (previousCounterAmount * 0.15).toFixed(2),
-              rawCalculation: rawFinalCounter.toFixed(2),
-              finalCounter: counterOfferAmount.toFixed(2),
-              ensuredAboveMinimum: counterOfferAmount >= minimumPrice
+              reduction: (reductionPercentage * 100).toFixed(1) + '%',
+              rawCalculation: rawCounter.toFixed(2),
+              newCounter: counterOfferAmount.toFixed(2),
+              ensuredAboveMinimum: counterOfferAmount >= minimumPrice,
+              isFinalOffer
             });
           }
         }
@@ -395,10 +406,13 @@ ${negotiationStrategy}
           .eq('id', conversation.id);
       } else if (counterOfferAmount) {
         // Counter-offer made
+        const negotiationRound = (negotiationHistory.filter(h => h.counter_offer && h.response === 'countered').length) + 1;
+        const isFinalOffer = negotiationRound >= 3;
+        
         await supabase
           .from('agent_conversations')
           .update({
-            status: 'negotiating',
+            status: isFinalOffer ? 'final_offer' : 'negotiating',
             current_offer: offerAmount,
             negotiation_history: [
               ...negotiationHistory,
@@ -407,7 +421,8 @@ ${negotiationStrategy}
                 user_offer: offerAmount,
                 counter_offer: counterOfferAmount,
                 response: 'countered',
-                is_final: isSecondNegotiation
+                round: negotiationRound,
+                is_final: isFinalOffer
               }
             ]
           })
