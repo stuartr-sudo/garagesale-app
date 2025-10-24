@@ -2,8 +2,53 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Bot, Send, Loader2, CheckCircle, Sparkles } from 'lucide-react';
+import { Bot, Send, Loader2, CheckCircle, Sparkles, Clock, TrendingUp } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+
+// Countdown Timer Component
+function CountdownTimer({ expiresAt }) {
+  const [timeLeft, setTimeLeft] = useState('');
+  const [isExpired, setIsExpired] = useState(false);
+  
+  useEffect(() => {
+    const updateTimer = () => {
+      const now = new Date();
+      const expiry = new Date(expiresAt);
+      const diff = expiry - now;
+      
+      if (diff <= 0) {
+        setTimeLeft('EXPIRED');
+        setIsExpired(true);
+        return true; // Signal to stop
+      } else {
+        const minutes = Math.floor(diff / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+        setTimeLeft(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+        setIsExpired(false);
+        return false;
+      }
+    };
+    
+    // Initial update
+    const expired = updateTimer();
+    if (expired) return;
+    
+    // Update every second
+    const interval = setInterval(() => {
+      const expired = updateTimer();
+      if (expired) clearInterval(interval);
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [expiresAt]);
+  
+  return (
+    <div className={`mt-2 text-xs flex items-center gap-1 ${isExpired ? 'text-red-400' : 'text-yellow-400'}`}>
+      <Clock className="w-3 h-3" />
+      <span>{isExpired ? 'Offer expired' : `Offer expires in: ${timeLeft}`}</span>
+    </div>
+  );
+}
 
 export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer }) {
   const [messages, setMessages] = useState([]);
@@ -11,6 +56,7 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
   const [loading, setLoading] = useState(false);
   const [conversationId, setConversationId] = useState(null);
   const [offerAccepted, setOfferAccepted] = useState(false);
+  const [negotiationRound, setNegotiationRound] = useState(0); // NEW
   const [theme, setTheme] = useState({});
   const messagesEndRef = useRef(null);
 
@@ -114,24 +160,25 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
 
       if (data.success) {
         // Add a thoughtful delay (2-3 seconds) before showing the response
-        const delayMs = 2000 + Math.random() * 1000; // Random 2-3 seconds
+        const delayMs = 2000 + Math.random() * 1000;
         await new Promise(resolve => setTimeout(resolve, delayMs));
 
-        // Set conversation ID for future messages
+        // Set conversation ID and negotiation round
         if (data.conversation_id) {
           setConversationId(data.conversation_id);
         }
+        if (data.negotiation_round !== undefined) {
+          setNegotiationRound(data.negotiation_round);
+        }
 
-        // Extract counter-offer or accepted offer amount from AI response
+        // Extract counter-offer or accepted offer amount
         const responseLower = data.response.toLowerCase();
-        
-        // Find ALL dollar amounts in the response
         const allPriceMatches = [...data.response.matchAll(/\$(\d+(?:,\d{3})*(?:\.\d{2})?)/g)];
         
         let counterOfferAmount = null;
         let acceptedOfferAmount = null;
         
-        // Check for rejection/decline phrases FIRST (highest priority)
+        // Check for rejection/decline phrases
         const isRejection = responseLower.includes("can't accept") ||
                            responseLower.includes("cannot accept") ||
                            responseLower.includes("can not accept") ||
@@ -139,30 +186,24 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
                            responseLower.includes("too low") ||
                            responseLower.includes("below") ||
                            responseLower.includes("minimum") ||
-                           responseLower.includes("appreciate your offer") ||
-                           responseLower.includes("appreciate your interest") ||
-                           responseLower.includes("thank you for your interest") ||
                            (responseLower.includes('however') && responseLower.includes('can')) ||
                            (responseLower.includes('while') && responseLower.includes('appreciate'));
         
-        // If offer was accepted by the API, extract the accepted amount
+        // If offer was accepted by API
         if (data.offer_accepted && allPriceMatches.length > 0) {
           acceptedOfferAmount = parseFloat(allPriceMatches[0][1].replace(/,/g, ''));
         } else if (!isRejection && allPriceMatches.length > 0) {
-          // Only check for acceptance/counter if NOT a rejection
-          
-          // Check if AI is accepting the user's offer (not the API flag, but the text)
+          // Check if AI is accepting
           const isAcceptingOffer = (responseLower.includes('i can absolutely accept') ||
                                     responseLower.includes('i can accept') ||
-                                    (responseLower.includes('absolutely') && responseLower.includes('accept') && !responseLower.includes("can't")) ||
+                                    (responseLower.includes('absolutely') && responseLower.includes('accept')) ||
                                     (responseLower.includes('happy to accept')) ||
                                     (responseLower.includes('great') && responseLower.includes('offer') && responseLower.includes('accept')));
           
           if (isAcceptingOffer) {
-            // AI is accepting the user's offer - treat as accepted offer
             acceptedOfferAmount = parseFloat(allPriceMatches[0][1].replace(/,/g, ''));
           } else {
-            // Check if it's a counter-offer
+            // Check for counter-offer
             const isCounterOffer = (responseLower.includes('counter') && responseLower.includes('at')) || 
                                    responseLower.includes('how about') || 
                                    responseLower.includes('would you consider') ||
@@ -170,26 +211,26 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
                                    (responseLower.includes('meet') && responseLower.includes('at')) ||
                                    responseLower.includes('i can offer') ||
                                    responseLower.includes('settle at') ||
-                                   (responseLower.includes('happy to') && responseLower.includes('counter'));
+                                   responseLower.includes('final offer');
             
             if (isCounterOffer) {
-              // If there are multiple prices, the LAST one is usually the counter-offer
-              // The first one is usually the user's rejected offer
               const lastPriceMatch = allPriceMatches[allPriceMatches.length - 1];
               counterOfferAmount = parseFloat(lastPriceMatch[1].replace(/,/g, ''));
             }
           }
         }
 
-        // Add AI response
+        // Add AI response with metadata
         setMessages(prev => [...prev, {
           sender: 'ai',
           content: data.response,
           timestamp: new Date().toISOString(),
           offer_accepted: data.offer_accepted,
-          counter_offer: data.counter_offer_amount || counterOfferAmount, // Use backend value first
+          counter_offer: counterOfferAmount,
           accepted_offer: acceptedOfferAmount,
-          is_final: data.is_final_counter
+          is_final_counter: data.is_final_counter,
+          is_second_counter: data.is_second_counter,
+          expires_at: data.expires_at
         }]);
       } else {
         throw new Error(data.error || 'Failed to send message');
@@ -274,16 +315,47 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
                   <div className="text-sm leading-relaxed whitespace-pre-wrap">
                     {msg.content}
                   </div>
+                  
+                  {/* Success indicator */}
                   {msg.offer_accepted && (
                     <div className="flex items-center gap-1 mt-2 text-green-400 text-xs">
                       <CheckCircle className="w-4 h-4" />
                       <span>Offer Accepted!</span>
                     </div>
                   )}
-                  {msg.counter_offer && msg.is_final && (
-                    <div className="flex items-center gap-1 mt-2 text-yellow-400 text-xs">
+                  
+                  {/* Countdown timer for counter-offers */}
+                  {msg.counter_offer && msg.expires_at && (
+                    <CountdownTimer expiresAt={msg.expires_at} />
+                  )}
+                  
+                  {/* Final counter warning */}
+                  {msg.counter_offer && msg.is_final_counter && (
+                    <div className="flex items-center gap-1 mt-2 text-orange-400 text-xs font-semibold">
                       <Sparkles className="w-4 h-4" />
-                      <span>⚠️ Final Offer - This is the last counter!</span>
+                      <span>⚠️ FINAL OFFER - Last chance to negotiate!</span>
+                    </div>
+                  )}
+                  
+                  {/* Second counter indicator */}
+                  {msg.counter_offer && msg.is_second_counter && (
+                    <div className="flex items-center gap-1 mt-2 text-yellow-400 text-xs">
+                      <TrendingUp className="w-4 h-4" />
+                      <span>Moving closer to a deal...</span>
+                    </div>
+                  )}
+                  
+                  {/* Negotiation progress bar */}
+                  {msg.counter_offer && negotiationRound > 0 && (
+                    <div className="mt-2 flex gap-1">
+                      {[1, 2, 3].map(i => (
+                        <div 
+                          key={i}
+                          className={`h-1 flex-1 rounded ${
+                            i <= negotiationRound ? 'bg-yellow-400' : 'bg-gray-600'
+                          }`}
+                        />
+                      ))}
                     </div>
                   )}
                 </div>
