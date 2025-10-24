@@ -72,6 +72,7 @@ import Baggage from "./Baggage";
 import PaymentWizardDemo from "./PaymentWizardDemo";
 import Messages from "./Messages";
 import WishLists from "./WishLists";
+import PromoteItem from "./PromoteItem";
 
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
@@ -150,6 +151,8 @@ const PAGES = {
     Messages: Messages,
     
     WishLists: WishLists,
+    
+    PromoteItem: PromoteItem,
     
 }
 

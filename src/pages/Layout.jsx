@@ -117,7 +117,11 @@ const navigationItems = [
     title: "Trade Offers",
     url: createPageUrl("TradeOffers"),
     icon: RefreshCw,
-    adminOnly: true,
+  },
+  {
+    title: "Promote Items",
+    url: createPageUrl("PromoteItem"),
+    icon: TrendingUp,
   },
   {
     title: "Requests",
