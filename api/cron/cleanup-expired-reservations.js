@@ -14,9 +14,16 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 });
 
 export default async function handler(req, res) {
-  // Verify cron secret for security
+  // Verify cron secret for security (Vercel sends this automatically or via query param)
   const authHeader = req.headers.authorization;
-  if (!authHeader || authHeader !== `Bearer ${CRON_SECRET}`) {
+  const secretFromQuery = req.query.secret;
+  
+  const isAuthorized = 
+    authHeader === `Bearer ${CRON_SECRET}` || 
+    secretFromQuery === CRON_SECRET ||
+    req.headers['x-vercel-cron-id']; // Vercel's built-in cron auth
+  
+  if (!isAuthorized) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 

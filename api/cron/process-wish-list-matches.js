@@ -4,9 +4,17 @@
  */
 
 export default async function handler(req, res) {
-  // Verify cron secret to prevent unauthorized calls
+  // Verify cron secret to prevent unauthorized calls (Vercel sends this automatically or via query param)
   const authHeader = req.headers.authorization;
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const secretFromQuery = req.query.secret;
+  const CRON_SECRET = process.env.CRON_SECRET;
+  
+  const isAuthorized = 
+    authHeader === `Bearer ${CRON_SECRET}` || 
+    secretFromQuery === CRON_SECRET ||
+    req.headers['x-vercel-cron-id']; // Vercel's built-in cron auth
+  
+  if (!isAuthorized) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 

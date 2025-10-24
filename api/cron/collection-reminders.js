@@ -2,13 +2,21 @@ import { supabase } from '@/lib/supabase';
 import { sendEmail } from '@/lib/emailService';
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
+  if (req.method !== 'POST' && req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Verify this is a legitimate cron job request
+  // Verify this is a legitimate cron job request (Vercel sends this automatically or via query param)
   const authHeader = req.headers.authorization;
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const secretFromQuery = req.query.secret;
+  const CRON_SECRET = process.env.CRON_SECRET;
+  
+  const isAuthorized = 
+    authHeader === `Bearer ${CRON_SECRET}` || 
+    secretFromQuery === CRON_SECRET ||
+    req.headers['x-vercel-cron-id']; // Vercel's built-in cron auth
+  
+  if (!isAuthorized) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
