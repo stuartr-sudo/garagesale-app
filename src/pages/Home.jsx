@@ -94,6 +94,15 @@ export default function HomePage() {
     navigate(createPageUrl(destinationPage));
   };
 
+  const handleDashboardClick = () => {
+    // Check if user is a seller, redirect to MyItems, otherwise to Marketplace
+    if (currentUser?.account_type === 'seller') {
+      navigate(createPageUrl('MyItems'));
+    } else {
+      navigate(createPageUrl('Marketplace'));
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 to-gray-900 text-gray-200 overflow-x-hidden">
       {/* Header */}
@@ -114,7 +123,7 @@ export default function HomePage() {
             ) : currentUser ? (
               // User is logged in - show Dashboard button
               <Button
-                onClick={() => handleAuthAction('Marketplace')}
+                onClick={handleDashboardClick}
                 className="bg-gradient-to-r from-pink-500 to-fuchsia-600 hover:from-pink-600 hover:to-fuchsia-700 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl"
               >
                 Go to Dashboard
