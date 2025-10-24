@@ -258,6 +258,8 @@ function PagesContent() {
                 <Route path="/Messages" element={<Messages />} />
                 <Route path="/Messages/:conversationId" element={<Messages />} />
                 <Route path="/WishLists" element={<WishLists />} />
+                
+                <Route path="/PromoteItem" element={<PromoteItem />} />
             </Routes>
             </Suspense>
         </Layout>
