@@ -3,7 +3,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { CreditCard, Shield, AlertCircle, CheckCircle } from 'lucide-react';
+import { CreditCard, Shield, AlertCircle, CheckCircle, Lock, Zap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 // Initialize Stripe
@@ -162,13 +162,25 @@ const PaymentForm = ({ item, onComplete, onPaymentIntent }) => {
 
               <div className="bg-green-900/20 border border-green-700 rounded-lg p-4">
                 <div className="flex items-start gap-3">
-                  <Shield className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
+                  <div className="p-2 bg-green-500/20 rounded-lg">
+                    <Shield className="w-5 h-5 text-green-400" />
+                  </div>
                   <div>
                     <h3 className="text-green-400 font-medium mb-1">Secure Payment</h3>
                     <p className="text-green-200 text-sm">
                       Your payment is processed securely by Stripe. We never store your 
                       card details on our servers.
                     </p>
+                    <div className="flex items-center gap-4 mt-2">
+                      <div className="flex items-center gap-1">
+                        <Lock className="w-3 h-3 text-green-400" />
+                        <span className="text-green-300 text-xs">Encrypted</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Zap className="w-3 h-3 text-green-400" />
+                        <span className="text-green-300 text-xs">3D Secure</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -204,6 +216,57 @@ const PaymentForm = ({ item, onComplete, onPaymentIntent }) => {
               Your payment is protected by Stripe's fraud detection and 3D Secure 
               authentication. You can dispute unauthorized charges through your bank.
             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Secure Payment Icons */}
+      <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
+        <div className="text-center mb-4">
+          <h3 className="text-white font-medium mb-2">Secure Payment Methods</h3>
+          <p className="text-gray-400 text-sm">We accept all major credit and debit cards</p>
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          {/* Visa */}
+          <div className="bg-white rounded-lg p-3 flex items-center justify-center">
+            <div className="text-blue-600 font-bold text-lg">VISA</div>
+          </div>
+          
+          {/* Mastercard */}
+          <div className="bg-white rounded-lg p-3 flex items-center justify-center">
+            <div className="flex items-center space-x-1">
+              <div className="w-6 h-6 bg-red-500 rounded-full"></div>
+              <div className="w-6 h-6 bg-yellow-500 rounded-full -ml-2"></div>
+            </div>
+          </div>
+          
+          {/* American Express */}
+          <div className="bg-white rounded-lg p-3 flex items-center justify-center">
+            <div className="text-blue-600 font-bold text-sm">AMEX</div>
+          </div>
+          
+          {/* Discover */}
+          <div className="bg-white rounded-lg p-3 flex items-center justify-center">
+            <div className="text-orange-600 font-bold text-sm">DISCOVER</div>
+          </div>
+        </div>
+
+        {/* Security Badges */}
+        <div className="flex flex-wrap justify-center gap-4">
+          <div className="flex items-center gap-2 bg-green-900/20 border border-green-700 rounded-lg px-3 py-2">
+            <Shield className="w-4 h-4 text-green-400" />
+            <span className="text-green-400 text-sm font-medium">SSL Secured</span>
+          </div>
+          
+          <div className="flex items-center gap-2 bg-blue-900/20 border border-blue-700 rounded-lg px-3 py-2">
+            <Lock className="w-4 h-4 text-blue-400" />
+            <span className="text-blue-400 text-sm font-medium">PCI Compliant</span>
+          </div>
+          
+          <div className="flex items-center gap-2 bg-purple-900/20 border border-purple-700 rounded-lg px-3 py-2">
+            <Zap className="w-4 h-4 text-purple-400" />
+            <span className="text-purple-400 text-sm font-medium">3D Secure</span>
           </div>
         </div>
       </div>
