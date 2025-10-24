@@ -55,11 +55,12 @@ export default function ProposeTradeModal({ targetItem, currentUserId, onClose, 
   const handleToggleItem = (item) => {
     setSelectedItems(prev => {
       const exists = prev.find(i => i.id === item.id);
-      if (exists) {
-        return prev.filter(i => i.id !== item.id);
-      } else {
-        return [...prev, item];
-      }
+      const newSelection = exists 
+        ? prev.filter(i => i.id !== item.id)
+        : [...prev, item];
+      
+      console.log('Toggle item:', item.title, 'New selection count:', newSelection.length);
+      return newSelection;
     });
   };
 
@@ -191,10 +192,11 @@ export default function ProposeTradeModal({ targetItem, currentUserId, onClose, 
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-2 border border-gray-700 rounded-lg">
                 {myItems.map((item) => {
-                  const isSelected = selectedItems.find(i => i.id === item.id);
+                  const isSelected = !!selectedItems.find(i => i.id === item.id);
                   return (
-                    <label
+                    <div
                       key={item.id}
+                      onClick={() => handleToggleItem(item)}
                       className={`cursor-pointer transition-all ${
                         isSelected ? 'ring-2 ring-blue-500' : ''
                       }`}
@@ -207,6 +209,7 @@ export default function ProposeTradeModal({ targetItem, currentUserId, onClose, 
                             <Checkbox
                               checked={isSelected}
                               onCheckedChange={() => handleToggleItem(item)}
+                              onClick={(e) => e.stopPropagation()}
                               className="border-gray-600"
                             />
                             {item.image_urls?.[0] && (
@@ -230,7 +233,7 @@ export default function ProposeTradeModal({ targetItem, currentUserId, onClose, 
                           </div>
                         </CardContent>
                       </Card>
-                    </label>
+                    </div>
                   );
                 })}
               </div>
@@ -361,33 +364,53 @@ export default function ProposeTradeModal({ targetItem, currentUserId, onClose, 
           </div>
 
           {/* Actions - Fixed at bottom */}
-          <div className="flex-shrink-0 flex gap-3 pt-4 border-t border-gray-800">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={loading}
-              className="flex-1 bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={loading || selectedItems.length === 0}
-              className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Sending...
-                </>
+          <div className="flex-shrink-0 space-y-3 pt-4 border-t border-gray-800">
+            {/* Selection Status */}
+            <div className="text-center text-sm">
+              {selectedItems.length === 0 ? (
+                <p className="text-orange-400">⚠️ Select at least one item to trade</p>
               ) : (
-                <>
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Propose Trade
-                </>
+                <p className="text-green-400">✓ {selectedItems.length} item{selectedItems.length !== 1 ? 's' : ''} selected</p>
               )}
-            </Button>
+            </div>
+            
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={loading}
+                className="flex-1 bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={loading || selectedItems.length === 0}
+                className={`flex-1 ${
+                  selectedItems.length === 0 
+                    ? 'bg-gray-600 cursor-not-allowed opacity-50' 
+                    : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700'
+                }`}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Sending...
+                  </>
+                ) : selectedItems.length === 0 ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Select Items First
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Propose Trade
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </form>
       </DialogContent>
