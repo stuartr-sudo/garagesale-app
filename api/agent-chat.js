@@ -118,6 +118,13 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: 'Item not found', success: false });
     }
 
+    // Get seller's profile to access negotiation preferences
+    const { data: sellerProfile } = await supabase
+      .from('profiles')
+      .select('negotiation_aggressiveness')
+      .eq('id', item.seller_id)
+      .single();
+
     // Get agent knowledge (including minimum price and voice data)
     const { data: knowledge } = await supabase
       .from('item_knowledge')
@@ -349,36 +356,74 @@ export default async function handler(req, res) {
             marginBelowAsking: marginBelowAsking.toFixed(1) + '%'
           });
           
-          // Only accept WITHOUT negotiating in these RARE cases:
-          // 1. Offer is within 3% of asking price (extremely close)
-          // 2. Offer is within 1% above minimum (edge case - take it before they reconsider)
-          if (marginBelowAsking <= 3) {
+          // Get seller's negotiation aggressiveness preference
+          const aggressiveness = sellerProfile?.negotiation_aggressiveness || 'balanced';
+          console.log('🎯 SELLER PREFERENCE:', aggressiveness);
+          
+          // Define acceptance thresholds based on seller preference
+          let acceptThresholdAsking, acceptThresholdMinimum;
+          switch (aggressiveness) {
+            case 'passive':
+              acceptThresholdAsking = 15; // Accept within 15% of asking
+              acceptThresholdMinimum = 5; // Accept within 5% above minimum
+              break;
+            case 'balanced':
+              acceptThresholdAsking = 3; // Accept within 3% of asking
+              acceptThresholdMinimum = 1; // Accept within 1% above minimum
+              break;
+            case 'aggressive':
+              acceptThresholdAsking = 1; // Accept within 1% of asking
+              acceptThresholdMinimum = 0.5; // Accept within 0.5% above minimum
+              break;
+            case 'very_aggressive':
+              acceptThresholdAsking = 0.5; // Accept within 0.5% of asking
+              acceptThresholdMinimum = 0.1; // Accept within 0.1% above minimum
+              break;
+            default:
+              acceptThresholdAsking = 3;
+              acceptThresholdMinimum = 1;
+          }
+          
+          // Only accept WITHOUT negotiating based on seller preference
+          if (marginBelowAsking <= acceptThresholdAsking) {
             offerAccepted = true;
-            negotiationStrategy = `✅ SMART ACCEPT - Offer of $${offerAmount.toFixed(2)} is within 3% of asking price ($${askingPrice.toFixed(2)}). This is excellent - accept immediately!`;
-            console.log('✅ EXCEPTIONAL: Within 3% of asking - accepting');
-          } else if (marginAboveMinimum <= 1) {
+            negotiationStrategy = `✅ SMART ACCEPT - Offer of $${offerAmount.toFixed(2)} is within ${acceptThresholdAsking}% of asking price ($${askingPrice.toFixed(2)}). This is excellent - accept immediately!`;
+            console.log(`✅ EXCEPTIONAL: Within ${acceptThresholdAsking}% of asking - accepting`);
+          } else if (marginAboveMinimum <= acceptThresholdMinimum) {
             offerAccepted = true;
-            negotiationStrategy = `✅ SMART ACCEPT - Offer of $${offerAmount.toFixed(2)} is barely above minimum ($${minimumPrice.toFixed(2)}). Accept before they change their mind!`;
-            console.log('✅ EDGE CASE: Within 1% of minimum - accepting');
+            negotiationStrategy = `✅ SMART ACCEPT - Offer of $${offerAmount.toFixed(2)} is within ${acceptThresholdMinimum}% above minimum ($${minimumPrice.toFixed(2)}). Accept before they change their mind!`;
+            console.log(`✅ EDGE CASE: Within ${acceptThresholdMinimum}% of minimum - accepting`);
           } else {
-            // DEFAULT: Always negotiate to maximize value
+            // DEFAULT: Always negotiate to maximize value based on seller preference
             // Calculate strategic counter-offer
             const gapToAsking = askingPrice - offerAmount;
             
-            // Counter strategy depends on where the offer sits in the range
+            // Counter strategy depends on seller aggressiveness and offer position
             let counterPercentage;
-            if (marginBelowAsking > 40) {
-              // Offer is far from asking (>40% away) - be aggressive
-              counterPercentage = 0.75; // Counter at 75% of the way to asking
-              console.log('🎯 AGGRESSIVE COUNTER: Offer far below asking');
-            } else if (marginBelowAsking > 20) {
-              // Offer is moderately below asking (20-40%) - standard counter
-              counterPercentage = 0.60; // Counter at 60% of the way to asking
-              console.log('🔄 STANDARD COUNTER: Moderate gap to asking');
-            } else {
-              // Offer is close to asking (0-20%) - gentle counter
-              counterPercentage = 0.40; // Counter at 40% of the way to asking
-              console.log('💼 GENTLE COUNTER: Offer close to asking');
+            if (aggressiveness === 'passive') {
+              // Passive: More likely to accept, lower counters
+              if (marginBelowAsking > 30) counterPercentage = 0.40;
+              else if (marginBelowAsking > 15) counterPercentage = 0.30;
+              else counterPercentage = 0.20;
+              console.log('😊 PASSIVE COUNTER: Lower counters, more accepting');
+            } else if (aggressiveness === 'balanced') {
+              // Balanced: Standard negotiation
+              if (marginBelowAsking > 40) counterPercentage = 0.75;
+              else if (marginBelowAsking > 20) counterPercentage = 0.60;
+              else counterPercentage = 0.40;
+              console.log('🔄 BALANCED COUNTER: Standard negotiation');
+            } else if (aggressiveness === 'aggressive') {
+              // Aggressive: Higher counters, firm negotiation
+              if (marginBelowAsking > 30) counterPercentage = 0.85;
+              else if (marginBelowAsking > 15) counterPercentage = 0.70;
+              else counterPercentage = 0.50;
+              console.log('💪 AGGRESSIVE COUNTER: Higher counters, firm negotiation');
+            } else if (aggressiveness === 'very_aggressive') {
+              // Very aggressive: Maximum value extraction
+              if (marginBelowAsking > 20) counterPercentage = 0.90;
+              else if (marginBelowAsking > 10) counterPercentage = 0.80;
+              else counterPercentage = 0.60;
+              console.log('🔥 VERY AGGRESSIVE COUNTER: Maximum value extraction');
             }
             
             // Calculate the counter-offer
@@ -394,11 +439,23 @@ export default async function handler(req, res) {
               counterOfferAmount = Math.ceil(offerAmount + minimumIncrease);
             }
             
-            const tone = marginBelowAsking > 40 ? 
-              'Be confident and emphasize the item\'s true value. This is a premium item worth much more.' :
-              marginBelowAsking > 20 ?
-              'Be friendly but firm. Explain why the item is worth more than their offer.' :
-              'Be warm and encouraging. You\'re close to a deal - just need to meet in the middle.';
+            // Set tone based on seller's aggressiveness preference
+            let tone;
+            if (aggressiveness === 'passive') {
+              tone = 'Be warm and friendly. You appreciate their interest and want to work something out. Be encouraging and flexible.';
+            } else if (aggressiveness === 'balanced') {
+              tone = marginBelowAsking > 40 ? 
+                'Be confident and emphasize the item\'s true value. This is a premium item worth much more.' :
+                marginBelowAsking > 20 ?
+                'Be friendly but firm. Explain why the item is worth more than their offer.' :
+                'Be warm and encouraging. You\'re close to a deal - just need to meet in the middle.';
+            } else if (aggressiveness === 'aggressive') {
+              tone = 'Be confident and firm. Emphasize the item\'s exceptional value and quality. You know what it\'s worth and won\'t undersell.';
+            } else if (aggressiveness === 'very_aggressive') {
+              tone = 'Be very confident and assertive. This is a premium item with exceptional value. You\'re not desperate to sell and know its true worth.';
+            } else {
+              tone = 'Be friendly but firm. Explain why the item is worth more than their offer.';
+            }
             
             negotiationStrategy = `🎯 COUNTER OFFER - User offered $${offerAmount.toFixed(2)} (${marginBelowAsking.toFixed(1)}% below asking of $${askingPrice.toFixed(2)}). Counter with $${counterOfferAmount.toFixed(2)} to capture more value. ${tone} Mention the 10-minute validity.`;
             

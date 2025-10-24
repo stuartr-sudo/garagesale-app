@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User as UserIcon, Save, MapPin, Globe } from "lucide-react";
+import { User as UserIcon, Save, MapPin, Globe, Bot } from "lucide-react";
 
 const countries = [
   { code: "US", name: "United States", states: ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"] },
@@ -29,7 +29,8 @@ export default function Settings() {
     city: "",
     postcode: "",
     phone: "",
-    collection_address: ""
+    collection_address: "",
+    negotiation_aggressiveness: "balanced"
   });
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -103,7 +104,8 @@ export default function Settings() {
         city: formData.city,
         postcode: formData.postcode,
         phone: formData.phone,
-        collection_address: formData.collection_address
+        collection_address: formData.collection_address,
+        negotiation_aggressiveness: formData.negotiation_aggressiveness
       });
       
       setShowSuccess(true);
@@ -336,6 +338,57 @@ export default function Settings() {
                     </p>
                   </div>
                 </div>
+
+                {/* AI Agent Negotiation Settings - Only for sellers */}
+                {currentUser?.account_type === 'seller' && (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                      <Bot className="w-5 h-5" />
+                      AI Agent Negotiation Settings
+                    </h3>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="negotiation_aggressiveness" className="text-gray-300">Negotiation Style</Label>
+                      <Select
+                        value={formData.negotiation_aggressiveness}
+                        onValueChange={(value) => setFormData(prev => ({ ...prev, negotiation_aggressiveness: value }))}
+                      >
+                        <SelectTrigger className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white">
+                          <SelectValue placeholder="Select negotiation style" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-gray-800 border-gray-700">
+                          <SelectItem value="passive" className="text-white hover:bg-gray-700">
+                            <div className="flex flex-col">
+                              <span className="font-medium">Passive - Quick to Accept</span>
+                              <span className="text-xs text-gray-400">Accepts offers close to minimum price</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="balanced" className="text-white hover:bg-gray-700">
+                            <div className="flex flex-col">
+                              <span className="font-medium">Balanced - Standard Negotiation</span>
+                              <span className="text-xs text-gray-400">Moderate counter-offers, good for most sellers</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="aggressive" className="text-white hover:bg-gray-700">
+                            <div className="flex flex-col">
+                              <span className="font-medium">Aggressive - Firm Negotiator</span>
+                              <span className="text-xs text-gray-400">Higher counter-offers, maximizes value</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="very_aggressive" className="text-white hover:bg-gray-700">
+                            <div className="flex flex-col">
+                              <span className="font-medium">Very Aggressive - Maximum Value</span>
+                              <span className="text-xs text-gray-400">Highest counter-offers, only accepts near asking price</span>
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-gray-500">
+                        Choose how your AI agent negotiates with buyers. You can change this anytime.
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex items-center justify-end gap-4 pt-4">
                   {showSuccess && <p className="text-sm text-green-400">Profile updated successfully!</p>}
