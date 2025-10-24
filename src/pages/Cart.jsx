@@ -646,17 +646,17 @@ export default function Cart() {
                 </CardContent>
               </Card>
             </div>
-          </div>
 
-          {/* AI-Powered Upsell Section - Only show if cart has items */}
-          {cartItems.length > 0 && currentUser && (
-            <div className="mt-8">
-              <UpsellSection 
-                cartItems={cartItems.map(ci => ci.item)} 
-                currentUserId={currentUser.id}
-              />
-            </div>
-          )}
+            {/* AI-Powered Upsell Section - Only show if cart has items */}
+            {currentUser && (
+              <div className="mt-8">
+                <UpsellSection 
+                  cartItems={cartItems.map(ci => ci.item)} 
+                  currentUserId={currentUser.id}
+                />
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>
