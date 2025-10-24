@@ -28,7 +28,10 @@ export default function AccountTypeSelection() {
 
   const handleSelect = async (accountType) => {
     try {
-      await UserEntity.updateMyUserData({ account_type: accountType });
+      console.log('Setting account type:', accountType);
+      const result = await UserEntity.updateMyUserData({ account_type: accountType });
+      console.log('Account type set successfully:', result);
+      
       if (accountType === 'individual') {
         navigate(createPageUrl('Onboarding'));
       } else {
@@ -36,7 +39,13 @@ export default function AccountTypeSelection() {
       }
     } catch (error) {
       console.error("Error setting account type:", error);
-      alert("Could not set account type. Please try again.");
+      console.error("Error details:", {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint
+      });
+      alert(`Could not set account type. Please try again.\n\nError: ${error.message}`);
     }
   };
 
