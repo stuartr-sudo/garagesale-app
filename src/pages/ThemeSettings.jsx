@@ -21,6 +21,13 @@ const THEME_PRESETS = {
     addToCartTo: '#db2777',   // pink-600
     buyNowFrom: '#10b981',    // emerald-500
     buyNowTo: '#059669',      // emerald-600
+    // AI Agent Colors
+    agentBackgroundFrom: '#581c87', // purple-900
+    agentBackgroundTo: '#be185d',   // pink-700
+    agentHeaderFrom: '#7c3aed',    // violet-600
+    agentHeaderTo: '#ec4899',      // pink-500
+    agentIconFrom: '#a855f7',      // purple-500
+    agentIconTo: '#ec4899',        // pink-500
     // Bundle Card Colors
     bundleCardFrom: '#059669', // emerald-600
     bundleCardTo: '#047857',   // emerald-700
@@ -576,6 +583,122 @@ export default function ThemeSettings() {
                         value={theme.buyNowTo || '#059669'}
                         onChange={(e) => updateThemeField('buyNowTo', e.target.value)}
                         placeholder="e.g., #059669"
+                        className="bg-gray-800 border-gray-700 text-white mt-2"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* AI Agent Colors */}
+              <div className="space-y-6">
+                <h3 className="text-xl font-bold text-white mb-4">AI Agent Colors</h3>
+                
+                {/* Agent Background */}
+                <div className="space-y-3">
+                  <Label className="text-white text-lg">Agent Background</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-gray-300 text-sm">From Color</Label>
+                      <Input
+                        type="color"
+                        value={theme.agentBackgroundFrom || '#581c87'}
+                        onChange={(e) => updateThemeField('agentBackgroundFrom', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.agentBackgroundFrom || '#581c87'}
+                        onChange={(e) => updateThemeField('agentBackgroundFrom', e.target.value)}
+                        placeholder="e.g., #581c87"
+                        className="bg-gray-800 border-gray-700 text-white mt-2"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-300 text-sm">To Color</Label>
+                      <Input
+                        type="color"
+                        value={theme.agentBackgroundTo || '#be185d'}
+                        onChange={(e) => updateThemeField('agentBackgroundTo', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.agentBackgroundTo || '#be185d'}
+                        onChange={(e) => updateThemeField('agentBackgroundTo', e.target.value)}
+                        placeholder="e.g., #be185d"
+                        className="bg-gray-800 border-gray-700 text-white mt-2"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Agent Header */}
+                <div className="space-y-3">
+                  <Label className="text-white text-lg">Agent Header</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-gray-300 text-sm">From Color</Label>
+                      <Input
+                        type="color"
+                        value={theme.agentHeaderFrom || '#7c3aed'}
+                        onChange={(e) => updateThemeField('agentHeaderFrom', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.agentHeaderFrom || '#7c3aed'}
+                        onChange={(e) => updateThemeField('agentHeaderFrom', e.target.value)}
+                        placeholder="e.g., #7c3aed"
+                        className="bg-gray-800 border-gray-700 text-white mt-2"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-300 text-sm">To Color</Label>
+                      <Input
+                        type="color"
+                        value={theme.agentHeaderTo || '#ec4899'}
+                        onChange={(e) => updateThemeField('agentHeaderTo', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.agentHeaderTo || '#ec4899'}
+                        onChange={(e) => updateThemeField('agentHeaderTo', e.target.value)}
+                        placeholder="e.g., #ec4899"
+                        className="bg-gray-800 border-gray-700 text-white mt-2"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Agent Icon */}
+                <div className="space-y-3">
+                  <Label className="text-white text-lg">Agent Icon Background</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-gray-300 text-sm">From Color</Label>
+                      <Input
+                        type="color"
+                        value={theme.agentIconFrom || '#a855f7'}
+                        onChange={(e) => updateThemeField('agentIconFrom', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.agentIconFrom || '#a855f7'}
+                        onChange={(e) => updateThemeField('agentIconFrom', e.target.value)}
+                        placeholder="e.g., #a855f7"
+                        className="bg-gray-800 border-gray-700 text-white mt-2"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-300 text-sm">To Color</Label>
+                      <Input
+                        type="color"
+                        value={theme.agentIconTo || '#ec4899'}
+                        onChange={(e) => updateThemeField('agentIconTo', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.agentIconTo || '#ec4899'}
+                        onChange={(e) => updateThemeField('agentIconTo', e.target.value)}
+                        placeholder="e.g., #ec4899"
                         className="bg-gray-800 border-gray-700 text-white mt-2"
                       />
                     </div>

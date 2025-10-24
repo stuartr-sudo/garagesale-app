@@ -11,6 +11,7 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
   const [loading, setLoading] = useState(false);
   const [conversationId, setConversationId] = useState(null);
   const [offerAccepted, setOfferAccepted] = useState(false);
+  const [theme, setTheme] = useState({});
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -39,6 +40,18 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
       timestamp: new Date().toISOString()
     }]);
   }, [itemTitle]);
+
+  useEffect(() => {
+    // Load theme from localStorage
+    const savedTheme = localStorage.getItem('marketplace-theme');
+    if (savedTheme) {
+      try {
+        setTheme(JSON.parse(savedTheme));
+      } catch (error) {
+        console.error('Error parsing theme:', error);
+      }
+    }
+  }, []);
 
   const sendMessage = async (customMessage = null) => {
     // Handle case where event object is passed instead of string
@@ -200,15 +213,31 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
   };
 
   return (
-    <Card className="bg-gradient-to-br from-purple-900/90 to-pink-900/90 border-2 border-purple-500/50 shadow-2xl ring-2 ring-purple-400/20">
-      <CardHeader className="border-b border-purple-400/30 bg-gradient-to-r from-purple-600/30 to-pink-600/30">
+    <Card 
+      className="border-4 border-white shadow-2xl ring-4 ring-white/30"
+      style={{
+        background: `linear-gradient(to bottom right, ${theme?.agentBackgroundFrom || '#581c87'}, ${theme?.agentBackgroundTo || '#be185d'})`,
+        boxShadow: '0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.1)'
+      }}
+    >
+      <CardHeader 
+        className="border-b border-white/30"
+        style={{
+          background: `linear-gradient(to right, ${theme?.agentHeaderFrom || '#7c3aed'}, ${theme?.agentHeaderTo || '#ec4899'})`
+        }}
+      >
         <CardTitle className="flex items-center justify-center">
-          <div className="p-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl shadow-xl ring-2 ring-white/20">
+          <div 
+            className="p-4 rounded-2xl shadow-xl ring-2 ring-white/30"
+            style={{
+              background: `linear-gradient(to right, ${theme?.agentIconFrom || '#a855f7'}, ${theme?.agentIconTo || '#ec4899'})`
+            }}
+          >
             <Bot className="w-8 h-8 text-white animate-pulse" />
           </div>
           <div className="ml-3">
             <div className="text-white font-bold text-lg">AI Assistant</div>
-            <div className="text-purple-200 text-sm">Ask me anything!</div>
+            <div className="text-white/80 text-sm">Ask me anything!</div>
           </div>
         </CardTitle>
       </CardHeader>
