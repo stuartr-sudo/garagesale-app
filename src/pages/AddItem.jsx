@@ -55,7 +55,8 @@ export default function AddItem() {
     tags: [],
     image_urls: [],
     collection_date: "",
-    collection_address: ""
+    collection_address: "",
+    collection_flexible: false
   });
   
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
@@ -614,7 +615,22 @@ Return only the description, nothing else.`
       case 2: return itemData.title.trim() && itemData.description.trim();
       case 3: return itemData.price;
       case 4: return itemData.category && itemData.condition && itemData.postcode;
-      case 5: return itemData.collection_date && itemData.collection_address.trim();
+      case 5: {
+        // Collection address is always required
+        if (!itemData.collection_address.trim()) return false;
+        
+        // If flexible collection, no date validation needed
+        if (itemData.collection_flexible) return true;
+        
+        // If specific date, validate it's set and within 14 days
+        if (!itemData.collection_date) return false;
+        
+        const collectionDate = new Date(itemData.collection_date);
+        const now = new Date();
+        const maxDate = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+        
+        return collectionDate >= now && collectionDate <= maxDate;
+      }
       case 6: return true;
       case 7: return ownershipConfirmed;
       default: return false;
@@ -651,8 +667,9 @@ Return only the description, nothing else.`
         image_urls: itemData.image_urls,
         seller_id: currentUser.id,
         status: 'active',
-        collection_date: itemData.collection_date,
-        collection_address: itemData.collection_address
+        collection_date: itemData.collection_flexible ? null : itemData.collection_date,
+        collection_address: itemData.collection_address,
+        collection_flexible: itemData.collection_flexible
       };
 
       const { data: newItem, error: itemError } = await supabase
@@ -985,20 +1002,81 @@ Return only the description, nothing else.`
               <p className="text-gray-400 text-sm">When and where can buyers collect this item?</p>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="collection_date" className="text-gray-300">Collection Date *</Label>
-              <Input
-                id="collection_date"
-                type="datetime-local"
-                value={itemData.collection_date}
-                onChange={(e) => setItemData(prev => ({ ...prev, collection_date: e.target.value }))}
-                className="bg-gray-800 border-gray-700 text-white"
-                min={new Date().toISOString().slice(0, 16)}
-              />
-              <p className="text-xs text-gray-500">
-                Choose a date and time when buyers can collect the item
-              </p>
+            {/* Collection Type Selection */}
+            <div className="space-y-3">
+              <Label className="text-gray-300">Collection Arrangement *</Label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-3 p-3 bg-gray-800 border border-gray-700 rounded-lg cursor-pointer hover:border-gray-600 transition-colors">
+                  <input
+                    type="radio"
+                    name="collection_type"
+                    checked={!itemData.collection_flexible}
+                    onChange={() => setItemData(prev => ({ ...prev, collection_flexible: false }))}
+                    className="w-4 h-4 text-pink-600 bg-gray-700 border-gray-600 focus:ring-pink-500"
+                  />
+                  <div>
+                    <p className="text-white font-medium">Specific Collection Date</p>
+                    <p className="text-xs text-gray-400">Choose when buyers can collect (within 14 days)</p>
+                  </div>
+                </label>
+                
+                <label className="flex items-center gap-3 p-3 bg-gray-800 border border-gray-700 rounded-lg cursor-pointer hover:border-gray-600 transition-colors">
+                  <input
+                    type="radio"
+                    name="collection_type"
+                    checked={itemData.collection_flexible}
+                    onChange={() => setItemData(prev => ({ ...prev, collection_flexible: true, collection_date: "" }))}
+                    className="w-4 h-4 text-pink-600 bg-gray-700 border-gray-600 focus:ring-pink-500"
+                  />
+                  <div>
+                    <p className="text-white font-medium">Flexible Pickup</p>
+                    <p className="text-xs text-gray-400">Buyer will contact you to arrange collection time</p>
+                  </div>
+                </label>
+              </div>
             </div>
+
+            {/* Specific Date Picker (only show if not flexible) */}
+            {!itemData.collection_flexible && (
+              <div className="space-y-2">
+                <Label htmlFor="collection_date" className="text-gray-300">Collection Date *</Label>
+                <Input
+                  id="collection_date"
+                  type="datetime-local"
+                  value={itemData.collection_date}
+                  onChange={(e) => setItemData(prev => ({ ...prev, collection_date: e.target.value }))}
+                  className="bg-gray-800 border-gray-700 text-white"
+                  min={new Date().toISOString().slice(0, 16)}
+                  max={new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16)}
+                />
+                <p className="text-xs text-gray-500">
+                  Choose a date and time when buyers can collect the item (must be within 14 days of listing)
+                </p>
+                {itemData.collection_date && (() => {
+                  const collectionDate = new Date(itemData.collection_date);
+                  const now = new Date();
+                  const maxDate = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+                  
+                  if (collectionDate < now) {
+                    return (
+                      <p className="text-xs text-red-400 mt-1">
+                        ⚠️ Collection date cannot be in the past
+                      </p>
+                    );
+                  }
+                  
+                  if (collectionDate > maxDate) {
+                    return (
+                      <p className="text-xs text-red-400 mt-1">
+                        ⚠️ Collection date cannot be more than 14 days from today
+                      </p>
+                    );
+                  }
+                  
+                  return null;
+                })()}
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="collection_address" className="text-gray-300">Collection Address *</Label>
@@ -1182,6 +1260,28 @@ Return only the description, nothing else.`
                         <ul className="list-disc list-inside space-y-1">
                           <li>Item sells for $100 → You receive $95 (5% fee deducted)</li>
                           <li>Item sells for $50 → You receive $47.50 (5% fee deducted)</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Credit Card Hold Notice */}
+                <div className="bg-yellow-900/20 border border-yellow-700 rounded-lg p-4 mb-6">
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5">⏰</div>
+                    <div>
+                      <h4 className="text-yellow-200 font-semibold mb-2">Credit Card Payment Hold</h4>
+                      <p className="text-yellow-100 text-sm mb-2">
+                        Credit card payments are held for 14 days to prevent chargebacks and ensure secure transactions.
+                      </p>
+                      <div className="text-yellow-200 text-xs">
+                        <p className="font-medium mb-1">Important Terms:</p>
+                        <ul className="list-disc list-inside space-y-1">
+                          <li>Payments are held for 14 days before release</li>
+                          <li>Any chargebacks will be charged directly to your account</li>
+                          <li>This protects both you and the buyer from fraud</li>
+                          <li>Bank transfers and crypto payments are not subject to holds</li>
                         </ul>
                       </div>
                     </div>
