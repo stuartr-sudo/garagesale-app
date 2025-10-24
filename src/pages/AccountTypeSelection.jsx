@@ -34,7 +34,7 @@ export default function AccountTypeSelection() {
       
       if (accountType === 'individual') {
         navigate(createPageUrl('Onboarding'));
-      } else {
+      } else if (accountType === 'seller') {
         navigate(createPageUrl('BusinessOnboarding'));
       }
     } catch (error) {
@@ -53,7 +53,7 @@ export default function AccountTypeSelection() {
     <div className="min-h-screen bg-slate-950 text-gray-200 flex items-center justify-center p-6">
       <div className="max-w-4xl w-full">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">Welcome to GarageSale!</h1>
+          <h1 className="text-4xl font-bold text-white mb-4">Welcome to BlockSwap!</h1>
           <p className="text-lg text-gray-400">To get started, please tell us what kind of account you'd like to create.</p>
         </div>
 
@@ -61,14 +61,14 @@ export default function AccountTypeSelection() {
           <SelectionCard 
             icon={User}
             title="An Individual"
-            description="Perfect for selling personal items from around your home, finding great local deals, and connecting with your community."
+            description="Perfect for buying and selling personal items from around your home, finding great local deals, and connecting with your community."
             onSelect={() => handleSelect('individual')}
           />
           <SelectionCard 
             icon={Building}
-            title="A Business"
+            title="A Seller"
             description="For professional sellers, local shops, and service providers who need advanced tools to manage listings and reach more customers."
-            onSelect={() => handleSelect('business')}
+            onSelect={() => handleSelect('seller')}
           />
         </div>
 
