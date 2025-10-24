@@ -64,7 +64,7 @@ export default async function handler(req, res) {
       .from('items')
       .select('*')
       .eq('id', target_item_id)
-      .eq('status', 'available')
+      .eq('status', 'active')
       .single();
 
     if (targetError || !targetItem) {
@@ -81,7 +81,7 @@ export default async function handler(req, res) {
       .select('*')
       .in('id', offered_item_ids)
       .eq('seller_id', offeror_id)
-      .eq('status', 'available');
+      .eq('status', 'active');
 
     if (offeredError) throw offeredError;
 
