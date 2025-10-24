@@ -30,7 +30,8 @@ import {
   Clock, // For Payment Confirmations
   Luggage, // For Baggage
   ArrowUpRight, // For Become a Seller
-  MessageSquare // For Messages
+  MessageSquare, // For Messages
+  TrendingUp // For Promote Items
 } from "lucide-react";
 import { User } from "@/api/entities";
 import { Button } from "@/components/ui/button";
