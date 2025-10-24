@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, ShoppingCart, MapPin, Tag, Calendar, Star, Share2, Bot, Settings, Check, Plus, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, MapPin, Tag, Calendar, Star, Share2, Bot, Settings, Check, Plus, X, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 import { Item } from '@/api/entities';
 import { User as UserEntity } from '@/api/entities';
 import { supabase } from '@/lib/supabase';
@@ -15,6 +15,7 @@ import PurchaseModal from '@/components/marketplace/PurchaseModal';
 import MoreFromSeller from '@/components/marketplace/MoreFromSeller';
 import SmartRecommendations from '@/components/recommendations/SmartRecommendations';
 import SpecialOffersSection from '@/components/marketplace/SpecialOffersSection';
+import ProposeTradeModal from '@/components/trading/ProposeTradeModal';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { addToCart } from '@/utils/cart';
@@ -41,6 +42,7 @@ export default function ItemDetail() {
   const [theme, setTheme] = useState({});
   const [itemUnavailable, setItemUnavailable] = useState(false);
   const [availabilityStatus, setAvailabilityStatus] = useState('available');
+  const [showTradeModal, setShowTradeModal] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -643,6 +645,19 @@ export default function ItemDetail() {
                 {item.price === 0 ? 'Claim' : 'Buy Now'}
               </Button>
             </div>
+
+            {/* Propose Trade Button - Only show if not owner */}
+            {!isOwner && currentUser && item.price > 0 && (
+              <Button
+                onClick={() => setShowTradeModal(true)}
+                disabled={itemUnavailable}
+                variant="outline"
+                className="w-full h-10 text-sm md:text-base bg-gray-800 border-blue-500 text-blue-400 hover:bg-blue-900/30 hover:border-blue-400 disabled:opacity-50"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Propose Trade
+              </Button>
+            )}
           )}
 
           <style jsx>{`
@@ -721,6 +736,22 @@ export default function ItemDetail() {
           onClose={() => {
             setShowPurchaseModal(false);
             setNegotiatedPrice(null); // Reset negotiated price when closing
+          }}
+        />
+      )}
+
+      {/* Propose Trade Modal */}
+      {showTradeModal && currentUser && (
+        <ProposeTradeModal
+          targetItem={item}
+          currentUserId={currentUser.id}
+          onClose={() => setShowTradeModal(false)}
+          onSuccess={() => {
+            toast({
+              title: "Trade Offer Sent!",
+              description: "Your trade offer has been sent successfully."
+            });
+            setShowTradeModal(false);
           }}
         />
       )}
