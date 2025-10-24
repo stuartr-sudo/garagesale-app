@@ -28,7 +28,8 @@ import {
   DollarSign, // For Connect page
   Tag, // For Special Offers
   Clock, // For Payment Confirmations
-  Luggage // For Baggage
+  Luggage, // For Baggage
+  ArrowUpRight // For Become a Seller
 } from "lucide-react";
 import { User } from "@/api/entities";
 import { Button } from "@/components/ui/button";
@@ -98,6 +99,12 @@ const navigationItems = [
     title: "Add Item",
     url: createPageUrl("AddItem"),
     icon: Plus,
+  },
+  {
+    title: "Become a Seller",
+    url: createPageUrl("AccountTypeSelection"),
+    icon: ArrowUpRight,
+    individualOnly: true, // Only show to individual users
   },
   {
     title: "Seller Hub",
@@ -273,9 +280,20 @@ export default function Layout({ children, currentPageName }) {
 
   // Show sidebar even when not authenticated, but with limited navigation
   // Allow admin and super_admin to see admin-only items
-  const visibleNavItems = navigationItems.filter(item => 
-    !item.adminOnly || (currentUser?.role === 'admin' || currentUser?.role === 'super_admin')
-  );
+  // Show individual-only items only to individual users
+  const visibleNavItems = navigationItems.filter(item => {
+    // Filter out admin-only items unless user is admin/super_admin
+    if (item.adminOnly && !(currentUser?.role === 'admin' || currentUser?.role === 'super_admin')) {
+      return false;
+    }
+    
+    // Filter out individual-only items unless user is individual
+    if (item.individualOnly && currentUser?.account_type !== 'individual') {
+      return false;
+    }
+    
+    return true;
+  });
 
   return (
     <SidebarProvider defaultOpen={false}>

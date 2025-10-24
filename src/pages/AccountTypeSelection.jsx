@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User as UserEntity } from '@/api/entities';
 import { createPageUrl } from '@/utils';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { User, Building, ArrowRight } from 'lucide-react';
+import { User, Building, ArrowRight, ArrowLeft } from 'lucide-react';
 
 const SelectionCard = ({ icon: Icon, title, description, onSelect }) => (
   <Card 
@@ -25,6 +25,27 @@ const SelectionCard = ({ icon: Icon, title, description, onSelect }) => (
 
 export default function AccountTypeSelection() {
   const navigate = useNavigate();
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isUpgrade, setIsUpgrade] = useState(false);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      setLoading(true);
+      try {
+        const user = await UserEntity.me();
+        setCurrentUser(user);
+        setIsUpgrade(user.account_type === 'individual');
+      } catch (error) {
+        // User not logged in, this is initial signup
+        setCurrentUser(null);
+        setIsUpgrade(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUser();
+  }, []);
 
   const handleSelect = async (accountType) => {
     try {
@@ -49,21 +70,54 @@ export default function AccountTypeSelection() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-gray-200 flex items-center justify-center p-6">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-pink-500"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 text-gray-200 flex items-center justify-center p-6">
       <div className="max-w-4xl w-full">
+        {/* Back button for upgrades */}
+        {isUpgrade && (
+          <div className="mb-8">
+            <Button
+              variant="ghost"
+              onClick={() => navigate(createPageUrl('Marketplace'))}
+              className="text-gray-400 hover:text-white hover:bg-gray-800"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Marketplace
+            </Button>
+          </div>
+        )}
+
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">Welcome to BlockSwap!</h1>
-          <p className="text-lg text-gray-400">To get started, please tell us what kind of account you'd like to create.</p>
+          {isUpgrade ? (
+            <>
+              <h1 className="text-4xl font-bold text-white mb-4">Upgrade to Seller Account</h1>
+              <p className="text-lg text-gray-400">Unlock advanced selling features and reach more customers.</p>
+            </>
+          ) : (
+            <>
+              <h1 className="text-4xl font-bold text-white mb-4">Welcome to BlockSwap!</h1>
+              <p className="text-lg text-gray-400">To get started, please tell us what kind of account you'd like to create.</p>
+            </>
+          )}
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
-          <SelectionCard 
-            icon={User}
-            title="An Individual"
-            description="Perfect for buying and selling personal items from around your home, finding great local deals, and connecting with your community."
-            onSelect={() => handleSelect('individual')}
-          />
+          {!isUpgrade && (
+            <SelectionCard 
+              icon={User}
+              title="An Individual"
+              description="Perfect for buying and selling personal items from around your home, finding great local deals, and connecting with your community."
+              onSelect={() => handleSelect('individual')}
+            />
+          )}
           <SelectionCard 
             icon={Building}
             title="A Seller"
