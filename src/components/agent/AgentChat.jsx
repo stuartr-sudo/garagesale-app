@@ -5,26 +5,37 @@ import { Input } from '@/components/ui/input';
 import { Bot, Send, Loader2, CheckCircle, Sparkles, Clock, TrendingUp } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
-// Countdown Timer Component
+// Countdown Timer Component with Animated Progress Bar
 function CountdownTimer({ expiresAt }) {
   const [timeLeft, setTimeLeft] = useState('');
   const [isExpired, setIsExpired] = useState(false);
+  const [progress, setProgress] = useState(100);
   
   useEffect(() => {
+    const TOTAL_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
+    const startTime = new Date(expiresAt).getTime() - TOTAL_DURATION;
+    
     const updateTimer = () => {
-      const now = new Date();
-      const expiry = new Date(expiresAt);
+      const now = new Date().getTime();
+      const expiry = new Date(expiresAt).getTime();
       const diff = expiry - now;
       
       if (diff <= 0) {
         setTimeLeft('EXPIRED');
         setIsExpired(true);
+        setProgress(0);
         return true; // Signal to stop
       } else {
         const minutes = Math.floor(diff / 60000);
         const seconds = Math.floor((diff % 60000) / 1000);
         setTimeLeft(`${minutes}:${seconds.toString().padStart(2, '0')}`);
         setIsExpired(false);
+        
+        // Calculate progress percentage (100% at start, 0% at expiry)
+        const elapsed = now - startTime;
+        const progressPercent = Math.max(0, Math.min(100, ((TOTAL_DURATION - elapsed) / TOTAL_DURATION) * 100));
+        setProgress(progressPercent);
+        
         return false;
       }
     };
@@ -43,9 +54,23 @@ function CountdownTimer({ expiresAt }) {
   }, [expiresAt]);
   
   return (
-    <div className={`mt-2 text-xs flex items-center gap-1 ${isExpired ? 'text-red-400' : 'text-yellow-400'}`}>
-      <Clock className="w-3 h-3" />
-      <span>{isExpired ? 'Offer expired' : `Offer expires in: ${timeLeft}`}</span>
+    <div className="mt-2">
+      <div className={`text-xs flex items-center gap-1 mb-1 ${isExpired ? 'text-red-400' : 'text-yellow-400'}`}>
+        <Clock className="w-3 h-3" />
+        <span>{isExpired ? 'Offer expired' : `Offer expires in: ${timeLeft}`}</span>
+      </div>
+      {/* Animated countdown bar */}
+      <div className="w-full h-1 bg-gray-700 rounded-full overflow-hidden">
+        <div 
+          className={`h-full transition-all duration-1000 ease-linear ${
+            isExpired ? 'bg-red-500' : 
+            progress < 20 ? 'bg-red-400' : 
+            progress < 50 ? 'bg-yellow-400' : 
+            'bg-green-400'
+          }`}
+          style={{ width: `${progress}%` }}
+        />
+      </div>
     </div>
   );
 }

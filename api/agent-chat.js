@@ -464,15 +464,21 @@ export default async function handler(req, res) {
               tone = 'Be friendly but firm.';
             }
             
-            negotiationStrategy = `🎯 COUNTER (${aggressiveness.toUpperCase()}) - User offered $${offerAmount.toFixed(2)} (${marginBelowAsking.toFixed(1)}% below asking). Counter with $${counterOfferAmount.toFixed(2)}. ${tone} Mention the 10-minute validity.`;
+            negotiationStrategy = `🎯 COUNTER (${aggressiveness.toUpperCase()}) - User offered $${offerAmount.toFixed(2)} (${marginBelowAsking.toFixed(1)}% below asking). 
+            
+**CRITICAL: You MUST counter at EXACTLY $${counterOfferAmount.toFixed(2)} - DO NOT use $${askingPrice.toFixed(2)} or any other amount.**
+
+${tone} Explain why the item is worth more than their offer, and mention this counter-offer is valid for the next 10 minutes.`;
             
             console.log('🎯 NEGOTIATING:', {
               aggressiveness,
               userOffer: offerAmount.toFixed(2),
+              askingPrice: askingPrice.toFixed(2),
               marginBelow: marginBelowAsking.toFixed(1) + '%',
               counterPct: (counterPercentage * 100).toFixed(0) + '%',
-              counterAmount: counterOfferAmount.toFixed(2),
-              gain: (counterOfferAmount - offerAmount).toFixed(2)
+              calculatedCounter: counterOfferAmount.toFixed(2),
+              gain: (counterOfferAmount - offerAmount).toFixed(2),
+              gapToAsking: (askingPrice - counterOfferAmount).toFixed(2)
             });
           }
         }
