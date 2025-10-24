@@ -33,7 +33,8 @@ export default function Settings() {
     phone: "",
     collection_address: "",
     negotiation_aggressiveness: "balanced",
-    accepted_payment_methods: ["bank_transfer", "stripe", "crypto"]
+    accepted_payment_methods: ["bank_transfer", "stripe", "crypto"],
+    open_to_trades: false
   });
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -118,7 +119,8 @@ export default function Settings() {
         phone: formData.phone,
         collection_address: formData.collection_address,
         negotiation_aggressiveness: formData.negotiation_aggressiveness,
-        accepted_payment_methods: formData.accepted_payment_methods
+        accepted_payment_methods: formData.accepted_payment_methods,
+        open_to_trades: formData.open_to_trades
       });
       
       setShowSuccess(true);
@@ -402,6 +404,51 @@ export default function Settings() {
                     </div>
                   </div>
                 )}
+
+                {/* Trading Preferences */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <RefreshCw className="w-5 h-5" />
+                    Trading Preferences
+                  </h3>
+                  
+                  <div className="flex items-center space-x-3 p-4 rounded-xl bg-gray-800 border border-gray-700">
+                    <input
+                      type="checkbox"
+                      id="open_to_trades"
+                      checked={formData.open_to_trades || false}
+                      onChange={(e) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          open_to_trades: e.target.checked
+                        }));
+                      }}
+                      className="w-4 h-4 text-pink-600 bg-gray-700 border-gray-600 rounded focus:ring-pink-500"
+                    />
+                    <div className="flex-1">
+                      <Label htmlFor="open_to_trades" className="text-white font-medium">Enable Item Trading</Label>
+                      <p className="text-xs text-gray-400">Allow other users to propose trading their items for yours</p>
+                    </div>
+                  </div>
+
+                  {formData.open_to_trades && (
+                    <div className="p-4 rounded-xl bg-blue-900/20 border border-blue-800">
+                      <div className="flex items-start gap-3">
+                        <div className="w-5 h-5 text-blue-400 mt-0.5">ℹ️</div>
+                        <div>
+                          <h4 className="text-blue-200 font-semibold mb-2">How Trading Works</h4>
+                          <ul className="text-sm text-blue-100 space-y-1">
+                            <li>• Users can propose trading one or more of their items for yours</li>
+                            <li>• Cash adjustments up to $500 can be included</li>
+                            <li>• Trade offers expire after 7 days</li>
+                            <li>• You can accept, reject, or message about any offer</li>
+                            <li>• Once accepted, arrange collection with the other party</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 {/* Payment Method Preferences - Only for sellers */}
                 {currentUser?.account_type === 'seller' && (
