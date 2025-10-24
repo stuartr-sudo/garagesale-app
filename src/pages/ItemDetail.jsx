@@ -682,20 +682,20 @@ export default function ItemDetail() {
                 <ShoppingCart className="w-4 h-4 mr-1" />
                 {item.price === 0 ? 'Claim' : 'Buy Now'}
               </Button>
-            </div>
 
-            {/* Propose Trade Button - Only show if not owner */}
-            {!isOwner && currentUser && item.price > 0 && (
-              <Button
-                onClick={() => setShowTradeModal(true)}
-                disabled={itemUnavailable}
-                variant="outline"
-                className="w-full h-10 text-sm md:text-base bg-gray-800 border-blue-500 text-blue-400 hover:bg-blue-900/30 hover:border-blue-400 disabled:opacity-50"
-              >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Propose Trade
-              </Button>
-            )}
+              {/* Propose Trade Button - Only show if not owner */}
+              {!isOwner && currentUser && item.price > 0 && (
+                <Button
+                  onClick={() => setShowTradeModal(true)}
+                  disabled={itemUnavailable}
+                  variant="outline"
+                  className="w-full h-10 text-sm md:text-base bg-gray-800 border-blue-500 text-blue-400 hover:bg-blue-900/30 hover:border-blue-400 disabled:opacity-50"
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Propose Trade
+                </Button>
+              )}
+            </div>
           )}
 
           <style jsx>{`
