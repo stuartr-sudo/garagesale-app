@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { User } from "@/api/entities";
 import { Button } from "@/components/ui/button";
+import SellerBalanceWidget from "@/components/store/SellerBalanceWidget";
 import {
   Sidebar,
   SidebarContent,
@@ -355,6 +356,13 @@ function LayoutContent({ currentUser, currentPageName, visibleNavItems, handleLo
           </SidebarHeader>
 
           <SidebarContent className="p-3 flex flex-col justify-between h-[calc(100%-85px)]">
+            {/* Seller Balance Widget */}
+            {currentUser?.account_type === 'seller' && (
+              <div className="mb-3">
+                <SellerBalanceWidget userId={currentUser.id} />
+              </div>
+            )}
+
             <SidebarGroup>
               <SidebarGroupContent>
                 <SidebarMenu className="space-y-1">

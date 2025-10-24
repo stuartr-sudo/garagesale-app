@@ -7,7 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User as UserIcon, Save, MapPin, Globe, Bot, CreditCard } from "lucide-react";
+import { User as UserIcon, Save, MapPin, Globe, Bot, CreditCard, DollarSign, TrendingUp, Calendar } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { formatDistanceToNow } from "date-fns";
 
 const countries = [
   { code: "US", name: "United States", states: ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"] },
@@ -37,11 +39,20 @@ export default function Settings() {
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState(null);
+  const [sellerBalance, setSellerBalance] = useState(0);
+  const [transactions, setTransactions] = useState([]);
+  const [loadingBalance, setLoadingBalance] = useState(false);
   const [isOnboarding, setIsOnboarding] = useState(false);
 
   useEffect(() => {
     loadCurrentUser();
   }, []);
+
+  useEffect(() => {
+    if (currentUser?.account_type === 'seller') {
+      loadSellerBalance();
+    }
+  }, [currentUser]);
 
   const loadCurrentUser = async () => {
     setLoading(true);
