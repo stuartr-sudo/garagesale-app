@@ -20,6 +20,7 @@ import {
   X
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabase';
 import CollectionAcknowledgment from './CollectionAcknowledgment';
 import PaymentMethodSelector from './PaymentMethodSelector';
 import BankTransferDetails from './BankTransferDetails';
@@ -41,9 +42,34 @@ export default function PaymentWizard({
   const [cryptoAmount, setCryptoAmount] = useState(null);
   const [paymentIntent, setPaymentIntent] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [sellerPaymentMethods, setSellerPaymentMethods] = useState(['bank_transfer', 'stripe', 'crypto']);
   const { toast } = useToast();
 
   const totalSteps = 5;
+
+  // Fetch seller's payment method preferences
+  useEffect(() => {
+    const fetchSellerPaymentMethods = async () => {
+      if (seller?.id) {
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('accepted_payment_methods')
+            .eq('id', seller.id)
+            .single();
+          
+          if (profile?.accepted_payment_methods) {
+            setSellerPaymentMethods(profile.accepted_payment_methods);
+          }
+        } catch (error) {
+          console.error('Error fetching seller payment methods:', error);
+          // Keep default payment methods if fetch fails
+        }
+      }
+    };
+
+    fetchSellerPaymentMethods();
+  }, [seller?.id]);
 
   const handleNext = () => {
     if (validateStep(currentStep)) {
@@ -159,6 +185,7 @@ export default function PaymentWizard({
           <PaymentMethodSelector
             onSelect={setPaymentMethod}
             selected={paymentMethod}
+            availableMethods={sellerPaymentMethods}
           />
         );
       

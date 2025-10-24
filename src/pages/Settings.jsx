@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User as UserIcon, Save, MapPin, Globe, Bot } from "lucide-react";
+import { User as UserIcon, Save, MapPin, Globe, Bot, CreditCard } from "lucide-react";
 
 const countries = [
   { code: "US", name: "United States", states: ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"] },
@@ -30,7 +30,8 @@ export default function Settings() {
     postcode: "",
     phone: "",
     collection_address: "",
-    negotiation_aggressiveness: "balanced"
+    negotiation_aggressiveness: "balanced",
+    accepted_payment_methods: ["bank_transfer", "stripe", "crypto"]
   });
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -105,7 +106,8 @@ export default function Settings() {
         postcode: formData.postcode,
         phone: formData.phone,
         collection_address: formData.collection_address,
-        negotiation_aggressiveness: formData.negotiation_aggressiveness
+        negotiation_aggressiveness: formData.negotiation_aggressiveness,
+        accepted_payment_methods: formData.accepted_payment_methods
       });
       
       setShowSuccess(true);
@@ -386,6 +388,139 @@ export default function Settings() {
                       <p className="text-xs text-gray-500">
                         Choose how your AI agent negotiates with buyers. You can change this anytime.
                       </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Payment Method Preferences - Only for sellers */}
+                {currentUser?.account_type === 'seller' && (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                      <CreditCard className="w-5 h-5" />
+                      Payment Method Preferences
+                    </h3>
+                    
+                    <div className="space-y-4">
+                      <Label className="text-gray-300">Accepted Payment Methods</Label>
+                      <p className="text-sm text-gray-400">
+                        Choose which payment methods you want to accept from buyers. You can change this anytime.
+                      </p>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Bank Transfer */}
+                        <div className="flex items-center space-x-3 p-4 rounded-xl bg-gray-800 border border-gray-700">
+                          <input
+                            type="checkbox"
+                            id="bank_transfer"
+                            checked={formData.accepted_payment_methods.includes('bank_transfer')}
+                            onChange={(e) => {
+                              const methods = formData.accepted_payment_methods;
+                              if (e.target.checked) {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  accepted_payment_methods: [...methods, 'bank_transfer']
+                                }));
+                              } else {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  accepted_payment_methods: methods.filter(m => m !== 'bank_transfer')
+                                }));
+                              }
+                            }}
+                            className="w-4 h-4 text-pink-600 bg-gray-700 border-gray-600 rounded focus:ring-pink-500"
+                          />
+                          <div className="flex-1">
+                            <Label htmlFor="bank_transfer" className="text-white font-medium">Bank Transfer</Label>
+                            <p className="text-xs text-gray-400">Direct bank transfer, no fees</p>
+                          </div>
+                        </div>
+
+                        {/* Credit Card */}
+                        <div className="flex items-center space-x-3 p-4 rounded-xl bg-gray-800 border border-gray-700">
+                          <input
+                            type="checkbox"
+                            id="stripe"
+                            checked={formData.accepted_payment_methods.includes('stripe')}
+                            onChange={(e) => {
+                              const methods = formData.accepted_payment_methods;
+                              if (e.target.checked) {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  accepted_payment_methods: [...methods, 'stripe']
+                                }));
+                              } else {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  accepted_payment_methods: methods.filter(m => m !== 'stripe')
+                                }));
+                              }
+                            }}
+                            className="w-4 h-4 text-pink-600 bg-gray-700 border-gray-600 rounded focus:ring-pink-500"
+                          />
+                          <div className="flex-1">
+                            <Label htmlFor="stripe" className="text-white font-medium">Credit Card</Label>
+                            <p className="text-xs text-gray-400">5% fee, 14-day hold</p>
+                          </div>
+                        </div>
+
+                        {/* Crypto */}
+                        <div className="flex items-center space-x-3 p-4 rounded-xl bg-gray-800 border border-gray-700">
+                          <input
+                            type="checkbox"
+                            id="crypto"
+                            checked={formData.accepted_payment_methods.includes('crypto')}
+                            onChange={(e) => {
+                              const methods = formData.accepted_payment_methods;
+                              if (e.target.checked) {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  accepted_payment_methods: [...methods, 'crypto']
+                                }));
+                              } else {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  accepted_payment_methods: methods.filter(m => m !== 'crypto')
+                                }));
+                              }
+                            }}
+                            className="w-4 h-4 text-pink-600 bg-gray-700 border-gray-600 rounded focus:ring-pink-500"
+                          />
+                          <div className="flex-1">
+                            <Label htmlFor="crypto" className="text-white font-medium">Cryptocurrency</Label>
+                            <p className="text-xs text-gray-400">USDT/USDC, instant</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Credit Card Warning */}
+                      {formData.accepted_payment_methods.includes('stripe') && (
+                        <div className="p-4 rounded-xl bg-yellow-900/20 border border-yellow-800">
+                          <div className="flex items-start gap-3">
+                            <div className="w-5 h-5 text-yellow-400 mt-0.5">⚠️</div>
+                            <div>
+                              <h4 className="text-yellow-400 font-semibold mb-2">Credit Card Payment Terms</h4>
+                              <ul className="text-sm text-yellow-200 space-y-1">
+                                <li>• Payments are held for 14 days to prevent chargebacks</li>
+                                <li>• Any chargebacks will be charged directly to your account</li>
+                                <li>• 5% processing fee is deducted from your payout</li>
+                                <li>• Funds are released after the 14-day hold period</li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Minimum Selection Warning */}
+                      {formData.accepted_payment_methods.length === 0 && (
+                        <div className="p-4 rounded-xl bg-red-900/20 border border-red-800">
+                          <div className="flex items-center gap-3">
+                            <div className="w-5 h-5 text-red-400">❌</div>
+                            <p className="text-red-200 text-sm">
+                              You must select at least one payment method to accept payments from buyers.
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

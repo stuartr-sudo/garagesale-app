@@ -2,8 +2,8 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { CreditCard, Banknote, Coins, Shield, Clock } from 'lucide-react';
 
-export default function PaymentMethodSelector({ onSelect, selected }) {
-  const paymentMethods = [
+export default function PaymentMethodSelector({ onSelect, selected, availableMethods = ['bank_transfer', 'stripe', 'crypto'] }) {
+  const allPaymentMethods = [
     {
       id: 'stripe',
       name: 'Credit Card',
@@ -50,6 +50,11 @@ export default function PaymentMethodSelector({ onSelect, selected }) {
     };
     return colors[color] || colors.blue;
   };
+
+  // Filter payment methods based on seller's preferences
+  const paymentMethods = allPaymentMethods.filter(method => 
+    availableMethods.includes(method.id)
+  );
 
   return (
     <div className="space-y-4">
