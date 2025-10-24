@@ -368,11 +368,11 @@ export default async function handler(req, res) {
               acceptThresholdMinimum = 5; // Accept within 5% above minimum
               break;
             case 'balanced':
-              acceptThresholdAsking = 3; // Accept within 3% of asking
-              acceptThresholdMinimum = 1; // Accept within 1% above minimum
+              acceptThresholdAsking = 5; // Accept within 5% of asking (was 3%)
+              acceptThresholdMinimum = 2; // Accept within 2% above minimum (was 1%)
               break;
             case 'aggressive':
-              acceptThresholdAsking = 1; // Accept within 1% of asking
+              acceptThresholdAsking = 2; // Accept within 2% of asking (was 1%)
               acceptThresholdMinimum = 0.5; // Accept within 0.5% above minimum
               break;
             case 'very_aggressive':
@@ -380,8 +380,8 @@ export default async function handler(req, res) {
               acceptThresholdMinimum = 0.1; // Accept within 0.1% above minimum
               break;
             default:
-              acceptThresholdAsking = 3;
-              acceptThresholdMinimum = 1;
+              acceptThresholdAsking = 5;
+              acceptThresholdMinimum = 2;
           }
           
           // Only accept WITHOUT negotiating based on seller preference
@@ -394,36 +394,45 @@ export default async function handler(req, res) {
             negotiationStrategy = `✅ SMART ACCEPT - Offer of $${offerAmount.toFixed(2)} is within ${acceptThresholdMinimum}% above minimum ($${minimumPrice.toFixed(2)}). Accept before they change their mind!`;
             console.log(`✅ EDGE CASE: Within ${acceptThresholdMinimum}% of minimum - accepting`);
           } else {
-            // DEFAULT: Always negotiate to maximize value based on seller preference
-            // Calculate strategic counter-offer
+            // NEGOTIATE based on seller aggressiveness and offer distance
             const gapToAsking = askingPrice - offerAmount;
-            
-            // Counter strategy depends on seller aggressiveness and offer position
             let counterPercentage;
+            
+            // Determine counter strategy based on aggressiveness and offer position
             if (aggressiveness === 'passive') {
-              // Passive: More likely to accept, lower counters
-              if (marginBelowAsking > 30) counterPercentage = 0.40;
-              else if (marginBelowAsking > 15) counterPercentage = 0.30;
-              else counterPercentage = 0.20;
-              console.log('😊 PASSIVE COUNTER: Lower counters, more accepting');
+              // Passive: Gentle negotiation, focus on closing deals
+              if (marginBelowAsking > 40) counterPercentage = 0.30; // 30% toward asking
+              else if (marginBelowAsking > 20) counterPercentage = 0.20; // 20% toward asking
+              else counterPercentage = 0.15; // 15% toward asking
+              console.log('😊 PASSIVE: Gentle counter, buyer-friendly');
+              
             } else if (aggressiveness === 'balanced') {
-              // Balanced: Standard negotiation
-              if (marginBelowAsking > 40) counterPercentage = 0.75;
-              else if (marginBelowAsking > 20) counterPercentage = 0.60;
-              else counterPercentage = 0.40;
-              console.log('🔄 BALANCED COUNTER: Standard negotiation');
+              // Balanced: Standard negotiation, fair but firm
+              if (marginBelowAsking > 40) counterPercentage = 0.60; // 60% toward asking
+              else if (marginBelowAsking > 20) counterPercentage = 0.45; // 45% toward asking
+              else counterPercentage = 0.30; // 30% toward asking
+              console.log('🔄 BALANCED: Standard negotiation');
+              
             } else if (aggressiveness === 'aggressive') {
-              // Aggressive: Higher counters, firm negotiation
-              if (marginBelowAsking > 30) counterPercentage = 0.85;
-              else if (marginBelowAsking > 15) counterPercentage = 0.70;
-              else counterPercentage = 0.50;
-              console.log('💪 AGGRESSIVE COUNTER: Higher counters, firm negotiation');
+              // Aggressive: Strong negotiation, firm on value
+              if (marginBelowAsking > 40) counterPercentage = 0.75; // 75% toward asking
+              else if (marginBelowAsking > 20) counterPercentage = 0.60; // 60% toward asking
+              else counterPercentage = 0.45; // 45% toward asking
+              console.log('💪 AGGRESSIVE: Firm negotiation');
+              
             } else if (aggressiveness === 'very_aggressive') {
-              // Very aggressive: Maximum value extraction
-              if (marginBelowAsking > 20) counterPercentage = 0.90;
-              else if (marginBelowAsking > 10) counterPercentage = 0.80;
-              else counterPercentage = 0.60;
-              console.log('🔥 VERY AGGRESSIVE COUNTER: Maximum value extraction');
+              // Very Aggressive: Maximum value extraction
+              if (marginBelowAsking > 40) counterPercentage = 0.85; // 85% toward asking
+              else if (marginBelowAsking > 20) counterPercentage = 0.75; // 75% toward asking
+              else counterPercentage = 0.60; // 60% toward asking
+              console.log('🔥 VERY AGGRESSIVE: Maximum value');
+              
+            } else {
+              // Default fallback
+              if (marginBelowAsking > 40) counterPercentage = 0.60;
+              else if (marginBelowAsking > 20) counterPercentage = 0.45;
+              else counterPercentage = 0.30;
+              console.log('🔄 DEFAULT: Balanced negotiation');
             }
             
             // Calculate the counter-offer
@@ -433,145 +442,39 @@ export default async function handler(req, res) {
             // Safety: ensure counter is above minimum and below asking
             counterOfferAmount = Math.max(minimumPrice + 1, Math.min(counterOfferAmount, askingPrice - 1));
             
-            // Safety: ensure counter is meaningfully above user's offer (at least $5 or 2% higher)
+            // Safety: ensure counter is meaningfully above user's offer
             const minimumIncrease = Math.max(5, offerAmount * 0.02);
             if (counterOfferAmount - offerAmount < minimumIncrease) {
               counterOfferAmount = Math.ceil(offerAmount + minimumIncrease);
             }
             
-            // Set tone based on seller's aggressiveness preference
+            // Set tone based on aggressiveness
             let tone;
             if (aggressiveness === 'passive') {
               tone = 'Be warm and friendly. You appreciate their interest and want to work something out. Be encouraging and flexible.';
             } else if (aggressiveness === 'balanced') {
               tone = marginBelowAsking > 40 ? 
-                'Be confident and emphasize the item\'s true value. This is a premium item worth much more.' :
-                marginBelowAsking > 20 ?
-                'Be friendly but firm. Explain why the item is worth more than their offer.' :
-                'Be warm and encouraging. You\'re close to a deal - just need to meet in the middle.';
+                'Be confident and emphasize the item\'s true value.' :
+                'Be friendly but firm. Explain why the item is worth more.';
             } else if (aggressiveness === 'aggressive') {
-              tone = 'Be confident and firm. Emphasize the item\'s exceptional value and quality. You know what it\'s worth and won\'t undersell.';
+              tone = 'Be confident and firm. Emphasize the item\'s exceptional value and quality.';
             } else if (aggressiveness === 'very_aggressive') {
-              tone = 'Be very confident and assertive. This is a premium item with exceptional value. You\'re not desperate to sell and know its true worth.';
+              tone = 'Be very confident. This is a premium item with exceptional value. You know its worth.';
             } else {
-              tone = 'Be friendly but firm. Explain why the item is worth more than their offer.';
+              tone = 'Be friendly but firm.';
             }
             
-            negotiationStrategy = `🎯 COUNTER OFFER - User offered $${offerAmount.toFixed(2)} (${marginBelowAsking.toFixed(1)}% below asking of $${askingPrice.toFixed(2)}). Counter with $${counterOfferAmount.toFixed(2)} to capture more value. ${tone} Mention the 10-minute validity.`;
+            negotiationStrategy = `🎯 COUNTER (${aggressiveness.toUpperCase()}) - User offered $${offerAmount.toFixed(2)} (${marginBelowAsking.toFixed(1)}% below asking). Counter with $${counterOfferAmount.toFixed(2)}. ${tone} Mention the 10-minute validity.`;
             
             console.log('🎯 NEGOTIATING:', {
+              aggressiveness,
               userOffer: offerAmount.toFixed(2),
-              counterStrategy: counterPercentage.toFixed(0) + '% to asking',
+              marginBelow: marginBelowAsking.toFixed(1) + '%',
+              counterPct: (counterPercentage * 100).toFixed(0) + '%',
               counterAmount: counterOfferAmount.toFixed(2),
-              potentialGain: (counterOfferAmount - offerAmount).toFixed(2)
+              gain: (counterOfferAmount - offerAmount).toFixed(2)
             });
           }
-        }
-        
-        // ============================================
-        // ENHANCEMENT: Third Counter - Split the Difference
-        // ============================================
-        else if (isFinalNegotiation && previousCounter) {
-          const lastCounterAmount = previousCounter.counter_offer;
-          const splitDifference = Math.ceil((offerAmount + lastCounterAmount) / 2);
-          
-          // Ensure it's still above minimum
-          counterOfferAmount = Math.max(minimumPrice, splitDifference);
-          
-          // If split is too close to user's offer (within $5), just accept
-          if (counterOfferAmount - offerAmount <= 5) {
-            offerAccepted = true;
-            negotiationStrategy = `✅ CLOSE ENOUGH - Your counter would be $${counterOfferAmount.toFixed(2)}, which is within $5 of their offer of $${offerAmount.toFixed(2)}. Accept it to close the deal!`;
-            console.log('✅ SPLIT TOO CLOSE: Accepting instead');
-          } else {
-            negotiationStrategy = `🤝 FINAL SPLIT - This is your absolute last counter (3rd and final). Split the difference between their $${offerAmount.toFixed(2)} and your last offer of $${lastCounterAmount.toFixed(2)}. Counter at $${counterOfferAmount.toFixed(2)}. Use language like "This is my absolute final offer - let's make this deal happen." Emphasize this is the last opportunity and expires in 10 minutes.`;
-            console.log('🤝 CASE 3 (FINAL): Split the difference', {
-              userOffer: offerAmount.toFixed(2),
-              lastCounter: lastCounterAmount.toFixed(2),
-              split: splitDifference.toFixed(2),
-              finalCounter: counterOfferAmount.toFixed(2)
-            });
-          }
-        }
-        
-        // ============================================
-        // ENHANCEMENT: Second Counter - Descending Strategy
-        // ============================================
-        else if (isSecondNegotiation && previousCounter) {
-          const lastCounterAmount = previousCounter.counter_offer;
-          const gapToClose = lastCounterAmount - offerAmount;
-          
-          // Close 40-60% of the remaining gap
-          const percentageToClose = 0.40 + (Math.random() * 0.20);
-          const rawCounter = offerAmount + (gapToClose * percentageToClose);
-          
-          counterOfferAmount = Math.ceil(rawCounter);
-          
-          // Safety: ensure it's above minimum and below previous counter
-          counterOfferAmount = Math.max(minimumPrice, Math.min(counterOfferAmount, lastCounterAmount - 1));
-          
-          // If counter is now too close to user's offer (within $5), just accept
-          if (counterOfferAmount - offerAmount <= 5) {
-            offerAccepted = true;
-            negotiationStrategy = `✅ CLOSE ENOUGH - Counter would be $${counterOfferAmount.toFixed(2)}, which is within $5 of their offer of $${offerAmount.toFixed(2)}. Accept it to secure the sale!`;
-            console.log('✅ TOO CLOSE: Accepting instead of countering');
-          } else {
-            negotiationStrategy = `🔄 SECOND COUNTER - User offered $${offerAmount.toFixed(2)}. Your first counter was $${lastCounterAmount.toFixed(2)}. Move closer by countering at $${counterOfferAmount.toFixed(2)} (closing ${(percentageToClose * 100).toFixed(0)}% of the gap). Be encouraging and mention this is valid for 10 minutes.${userIncreasedOffer ? ' Acknowledge that they increased their offer - good sign!' : ''}`;
-            
-            console.log('🔄 CASE 2 (SECOND): Descending counter', {
-              userOffer: offerAmount.toFixed(2),
-              lastCounter: lastCounterAmount.toFixed(2),
-              gap: gapToClose.toFixed(2),
-              percentageClosed: (percentageToClose * 100).toFixed(0) + '%',
-              rawCounter: rawCounter.toFixed(2),
-              finalCounter: counterOfferAmount.toFixed(2),
-              decreased: (lastCounterAmount - counterOfferAmount).toFixed(2)
-            });
-          }
-        }
-        
-        // ============================================
-        // First Counter - Aggressive Strategy
-        // ============================================
-        else {
-          const gap = askingPrice - minimumPrice;
-          const offerDistanceFromAsking = ((askingPrice - offerAmount) / askingPrice) * 100;
-          
-          let firstCounter;
-          
-          // If offer is very far from asking (more than 30% below), be more aggressive
-          if (offerDistanceFromAsking > 30) {
-            // Start closer to asking price (80-90% of the gap)
-            const aggressivePercentage = 0.80 + (Math.random() * 0.10);
-            firstCounter = Math.ceil(minimumPrice + (gap * aggressivePercentage));
-            console.log('🎯 AGGRESSIVE: Offer is ' + offerDistanceFromAsking.toFixed(1) + '% below asking');
-          } else {
-            // Standard strategy (60-85% of the gap)
-            const randomPercentage = 0.60 + (Math.random() * 0.25);
-            firstCounter = Math.ceil(minimumPrice + (gap * randomPercentage));
-            console.log('🔄 STANDARD: Offer is ' + offerDistanceFromAsking.toFixed(1) + '% below asking');
-          }
-          
-          // Safety checks
-          firstCounter = Math.max(minimumPrice, firstCounter);
-          
-          if (firstCounter <= offerAmount) {
-            firstCounter = Math.ceil(offerAmount + Math.min(10, gap * 0.1));
-          }
-          
-          counterOfferAmount = firstCounter;
-          
-          const tone = offerDistanceFromAsking > 30 ? 
-            'Be confident and emphasize the item\'s true value. This is a premium item worth the asking price.' :
-            'Be friendly, emphasize value, and mention the offer is valid for 10 minutes.';
-          
-          negotiationStrategy = `🔄 FIRST COUNTER - User offered $${offerAmount.toFixed(2)} (${offerDistanceFromAsking.toFixed(1)}% below asking). Counter with $${counterOfferAmount.toFixed(2)}. ${tone}`;
-          
-          console.log('🔄 CASE 1 (FIRST): Initial counter', {
-            offerDistance: offerDistanceFromAsking.toFixed(1) + '%',
-            gap: gap.toFixed(2),
-            finalCounter: counterOfferAmount.toFixed(2)
-          });
         }
       }
     }
