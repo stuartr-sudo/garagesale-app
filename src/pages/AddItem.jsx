@@ -1168,6 +1168,26 @@ Return only the description, nothing else.`
                   </div>
                 </div>
 
+                {/* Processing Fee Notice */}
+                <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4 mb-6">
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5">💳</div>
+                    <div>
+                      <h4 className="text-blue-200 font-semibold mb-2">Payment Processing Fee</h4>
+                      <p className="text-blue-100 text-sm mb-2">
+                        When your item is sold via credit card payment, a 5% processing fee will be deducted from your payout to cover secure payment processing and fraud protection.
+                      </p>
+                      <div className="text-blue-200 text-xs">
+                        <p className="font-medium mb-1">Example:</p>
+                        <ul className="list-disc list-inside space-y-1">
+                          <li>Item sells for $100 → You receive $95 (5% fee deducted)</li>
+                          <li>Item sells for $50 → You receive $47.50 (5% fee deducted)</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="mt-6">
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input

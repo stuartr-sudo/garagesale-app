@@ -16,7 +16,7 @@ const PaymentForm = ({ item, onComplete, onPaymentIntent }) => {
   const [clientSecret, setClientSecret] = useState(null);
   const [paymentIntent, setPaymentIntent] = useState(null);
   const [paymentError, setPaymentError] = useState(null);
-  const [feeBreakdown, setFeeBreakdown] = useState(null);
+  const [sellerFeeInfo, setSellerFeeInfo] = useState(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -44,7 +44,7 @@ const PaymentForm = ({ item, onComplete, onPaymentIntent }) => {
       const data = await response.json();
       setClientSecret(data.clientSecret);
       setPaymentIntent(data.paymentIntent);
-      setFeeBreakdown(data.feeBreakdown);
+      setSellerFeeInfo(data.sellerFeeInfo);
       onPaymentIntent(data.paymentIntent);
     } catch (error) {
       console.error('Error creating payment intent:', error);
@@ -195,31 +195,6 @@ const PaymentForm = ({ item, onComplete, onPaymentIntent }) => {
               </div>
             </div>
 
-            {/* Fee Breakdown */}
-            {feeBreakdown && (
-              <div className="bg-gray-800/50 border border-gray-600 rounded-lg p-4">
-                <h3 className="text-white font-medium mb-3">Payment Breakdown</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">Item Price:</span>
-                    <span className="text-white">${(feeBreakdown.originalAmount / 100).toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">Processing Fee ({(feeBreakdown.feeRate * 100).toFixed(1)}% + ${(feeBreakdown.feeFixed / 100).toFixed(2)}):</span>
-                    <span className="text-yellow-400">+${(feeBreakdown.processingFee / 100).toFixed(2)}</span>
-                  </div>
-                  <div className="border-t border-gray-600 pt-2">
-                    <div className="flex justify-between font-medium">
-                      <span className="text-white">Total:</span>
-                      <span className="text-green-400">${(feeBreakdown.totalAmount / 100).toFixed(2)}</span>
-                    </div>
-                  </div>
-                </div>
-                <p className="text-xs text-gray-500 mt-2">
-                  Processing fee covers secure payment processing and fraud protection.
-                </p>
-              </div>
-            )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
