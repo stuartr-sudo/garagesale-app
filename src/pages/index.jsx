@@ -70,6 +70,7 @@ import PaymentConfirmations from "./PaymentConfirmations";
 import EmailTestPage from "./EmailTestPage";
 import Baggage from "./Baggage";
 import PaymentWizardDemo from "./PaymentWizardDemo";
+import Messages from "./Messages";
 
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
@@ -144,6 +145,8 @@ const PAGES = {
     Baggage: Baggage,
     
     PaymentWizardDemo: PaymentWizardDemo,
+    
+    Messages: Messages,
     
 }
 
@@ -258,6 +261,8 @@ function PagesContent() {
                 <Route path="/EmailTest" element={<EmailTestPage />} />
                 <Route path="/Baggage" element={<Baggage />} />
                 <Route path="/PaymentWizardDemo" element={<PaymentWizardDemo />} />
+                <Route path="/Messages" element={<Messages />} />
+                <Route path="/Messages/:conversationId" element={<Messages />} />
             </Routes>
         </Layout>
     );

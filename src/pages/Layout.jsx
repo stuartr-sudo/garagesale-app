@@ -29,7 +29,8 @@ import {
   Tag, // For Special Offers
   Clock, // For Payment Confirmations
   Luggage, // For Baggage
-  ArrowUpRight // For Become a Seller
+  ArrowUpRight, // For Become a Seller
+  MessageSquare // For Messages
 } from "lucide-react";
 import { User } from "@/api/entities";
 import { Button } from "@/components/ui/button";
@@ -143,6 +144,11 @@ const navigationItems = [
     url: createPageUrl("Baggage"),
     icon: Luggage,
     adminOnly: true,
+  },
+  {
+    title: "Messages",
+    url: createPageUrl("Messages"),
+    icon: MessageSquare,
   },
   {
     title: "Advertisements",
