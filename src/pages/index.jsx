@@ -1,80 +1,60 @@
+import { lazy, Suspense } from 'react';
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+
+// Eager load Layout (needed immediately)
 import Layout from "./Layout.jsx";
 
-import Marketplace from "./Marketplace";
+// Lazy load all pages for code splitting
+const Marketplace = lazy(() => import("./Marketplace"));
+const MyItems = lazy(() => import("./MyItems"));
+const AddItem = lazy(() => import("./AddItem"));
+const EditItem = lazy(() => import("./EditItem"));
+const Users = lazy(() => import("./Users"));
+const Home = lazy(() => import("./Home"));
+const Settings = lazy(() => import("./Settings"));
+const Advertisements = lazy(() => import("./Advertisements"));
+const HomepageEditor = lazy(() => import("./HomepageEditor"));
+const Contact = lazy(() => import("./Contact"));
+const Privacy = lazy(() => import("./Privacy"));
+const Terms = lazy(() => import("./Terms"));
+const Announcements = lazy(() => import("./Announcements"));
+const AnnouncementEditor = lazy(() => import("./AnnouncementEditor"));
+const Donations = lazy(() => import("./Donations"));
+const Requests = lazy(() => import("./Requests"));
+const AddRequest = lazy(() => import("./AddRequest"));
+const MyPurchases = lazy(() => import("./MyPurchases"));
+const Connect = lazy(() => import("./Connect"));
+const AddProduct = lazy(() => import("./AddProduct"));
+const Store = lazy(() => import("./Store"));
+const Success = lazy(() => import("./Success"));
+const Onboarding = lazy(() => import("./Onboarding"));
+const BusinessOnboarding = lazy(() => import("./BusinessOnboarding"));
+const BusinessSignup = lazy(() => import("./BusinessSignup"));
+const AccountTypeSelection = lazy(() => import("./AccountTypeSelection"));
+const TradeOffers = lazy(() => import("./TradeOffers"));
+const SignIn = lazy(() => import("./SignIn"));
+const ItemDetail = lazy(() => import("./ItemDetail"));
+const MyOrders = lazy(() => import("./MyOrders"));
+const Cart = lazy(() => import("./Cart"));
+const SpecialOffers = lazy(() => import("./SpecialOffers"));
+const ThemeSettings = lazy(() => import("./ThemeSettings"));
+const PaymentConfirmations = lazy(() => import("./PaymentConfirmations"));
+const EmailTestPage = lazy(() => import("./EmailTestPage"));
+const Baggage = lazy(() => import("./Baggage"));
+const PaymentWizardDemo = lazy(() => import("./PaymentWizardDemo"));
+const Messages = lazy(() => import("./Messages"));
+const WishLists = lazy(() => import("./WishLists"));
+const PromoteItem = lazy(() => import("./PromoteItem"));
 
-import MyItems from "./MyItems";
-
-import AddItem from "./AddItem";
-
-import EditItem from "./EditItem";
-
-import Users from "./Users";
-
-import Home from "./Home";
-
-import Settings from "./Settings";
-
-import Advertisements from "./Advertisements";
-
-import HomepageEditor from "./HomepageEditor";
-
-import Contact from "./Contact";
-
-import Privacy from "./Privacy";
-
-import Terms from "./Terms";
-
-import Announcements from "./Announcements";
-
-import AnnouncementEditor from "./AnnouncementEditor";
-
-import Donations from "./Donations";
-
-import Requests from "./Requests";
-
-import AddRequest from "./AddRequest";
-
-import MyPurchases from "./MyPurchases";
-
-import Connect from "./Connect";
-
-import AddProduct from "./AddProduct";
-
-import Store from "./Store";
-
-import Success from "./Success";
-
-import Onboarding from "./Onboarding";
-
-import BusinessOnboarding from "./BusinessOnboarding";
-
-import BusinessSignup from "./BusinessSignup";
-
-import AccountTypeSelection from "./AccountTypeSelection";
-
-import TradeOffers from "./TradeOffers";
-
-import SignIn from "./SignIn";
-
-import ItemDetail from "./ItemDetail";
-
-import MyOrders from "./MyOrders";
-
-import Cart from "./Cart";
-
-import SpecialOffers from "./SpecialOffers";
-
-import ThemeSettings from "./ThemeSettings";
-
-import PaymentConfirmations from "./PaymentConfirmations";
-import EmailTestPage from "./EmailTestPage";
-import Baggage from "./Baggage";
-import PaymentWizardDemo from "./PaymentWizardDemo";
-import Messages from "./Messages";
-import WishLists from "./WishLists";
-import PromoteItem from "./PromoteItem";
-
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+// Loading component
+const PageLoader = () => (
+  <div className="min-h-screen bg-gradient-to-br from-gray-950 to-gray-900 flex items-center justify-center">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-pink-500 mx-auto mb-4"></div>
+      <p className="text-gray-400 text-sm">Loading...</p>
+    </div>
+  </div>
+);
 
 const PAGES = {
     
@@ -192,7 +172,8 @@ function PagesContent() {
     
     return (
         <Layout currentPageName={currentPage}>
-            <Routes>            
+            <Suspense fallback={<PageLoader />}>
+                <Routes>            
                 
                     <Route path="/" element={<Home />} />
                 
@@ -271,6 +252,7 @@ function PagesContent() {
                 <Route path="/Messages/:conversationId" element={<Messages />} />
                 <Route path="/WishLists" element={<WishLists />} />
             </Routes>
+            </Suspense>
         </Layout>
     );
 }
