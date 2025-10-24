@@ -318,45 +318,97 @@ export default async function handler(req, res) {
         }
         
         // ============================================
-        // ENHANCEMENT: Smart Auto-Accept (Only for very close offers)
+        // NEGOTIATION DECISION TREE - FIXED
         // ============================================
-        else if (offerAmount >= minimumPrice) {
+        else if (offerAmount >= askingPrice) {
+          // CASE 1: At or above asking price - Always accept
+          offerAccepted = true;
+          negotiationStrategy = `✅ ACCEPT IMMEDIATELY - Offer ($${offerAmount.toFixed(2)}) is at or above asking price ($${askingPrice.toFixed(2)}). Accept enthusiastically!`;
+          console.log('✅ CASE 1: At or above asking');
+        }
+        
+        else if (offerAmount < minimumPrice) {
+          // CASE 2: Below minimum - Always decline
+          const gap = minimumPrice - offerAmount;
+          negotiationStrategy = `❌ DECLINE - User offered $${offerAmount.toFixed(2)}, which is $${gap.toFixed(2)} below your minimum of $${minimumPrice.toFixed(2)}. Politely decline and emphasize the item's value. Encourage them to consider ${allCounters.length > 0 ? 'your last counter-offer' : 'a higher offer'}.`;
+          console.log('❌ CASE 2: Below minimum - declining');
+        }
+        
+        else {
+          // CASE 3: Between minimum and asking - NEGOTIATE!
+          // This is where the magic happens
+          
           const marginAboveMinimum = ((offerAmount - minimumPrice) / minimumPrice) * 100;
           const marginBelowAsking = ((askingPrice - offerAmount) / askingPrice) * 100;
           
-          // Only accept if offer is very close to asking price (within 10%) OR very close to minimum (within 2%)
-          if (offerAmount >= askingPrice) {
+          console.log('📊 NEGOTIATION OPPORTUNITY:', {
+            offer: offerAmount.toFixed(2),
+            minimum: minimumPrice.toFixed(2),
+            asking: askingPrice.toFixed(2),
+            marginAboveMin: marginAboveMinimum.toFixed(1) + '%',
+            marginBelowAsking: marginBelowAsking.toFixed(1) + '%'
+          });
+          
+          // Only accept WITHOUT negotiating in these RARE cases:
+          // 1. Offer is within 3% of asking price (extremely close)
+          // 2. Offer is within 1% above minimum (edge case - take it before they reconsider)
+          if (marginBelowAsking <= 3) {
             offerAccepted = true;
-            negotiationStrategy = `✅ ACCEPT IMMEDIATELY - Offer ($${offerAmount.toFixed(2)}) is at or above asking price ($${askingPrice.toFixed(2)}). Accept enthusiastically!`;
-            console.log('✅ CASE 1: At or above asking');
-          } else if (marginBelowAsking <= 10) {
-            // Within 10% of asking price - accept
+            negotiationStrategy = `✅ SMART ACCEPT - Offer of $${offerAmount.toFixed(2)} is within 3% of asking price ($${askingPrice.toFixed(2)}). This is excellent - accept immediately!`;
+            console.log('✅ EXCEPTIONAL: Within 3% of asking - accepting');
+          } else if (marginAboveMinimum <= 1) {
             offerAccepted = true;
-            negotiationStrategy = `✅ SMART ACCEPT - Offer of $${offerAmount.toFixed(2)} is very close to asking price ($${askingPrice.toFixed(2)}). Accept to secure the sale!`;
-            console.log('✅ SMART ACCEPT: Within 10% of asking');
-          } else if (marginAboveMinimum <= 2) {
-            // Very close to minimum (within 2%) - accept
-            offerAccepted = true;
-            negotiationStrategy = `✅ SMART ACCEPT - Offer of $${offerAmount.toFixed(2)} is very close to your minimum ($${minimumPrice.toFixed(2)}). Accept to secure the sale!`;
-            console.log('✅ SMART ACCEPT: Within 2% of minimum');
+            negotiationStrategy = `✅ SMART ACCEPT - Offer of $${offerAmount.toFixed(2)} is barely above minimum ($${minimumPrice.toFixed(2)}). Accept before they change their mind!`;
+            console.log('✅ EDGE CASE: Within 1% of minimum - accepting');
           } else {
-            // Offer is above minimum but not close enough to asking - NEGOTIATE!
+            // DEFAULT: Always negotiate to maximize value
+            // Calculate strategic counter-offer
             const gapToAsking = askingPrice - offerAmount;
-            const counterOffer = Math.min(askingPrice * 0.85, offerAmount + (gapToAsking * 0.4));
             
-            counterOfferAmount = Math.round(counterOffer);
-            negotiationStrategy = `🎯 COUNTER NEGOTIATION - While $${offerAmount.toFixed(2)} is above your minimum, you can do better! The asking price is $${askingPrice.toFixed(2)}. Counter with $${counterOfferAmount.toFixed(2)} to get closer to the full value. Be confident but friendly.`;
-            console.log('🎯 COUNTER: Above minimum but negotiating for more');
+            // Counter strategy depends on where the offer sits in the range
+            let counterPercentage;
+            if (marginBelowAsking > 40) {
+              // Offer is far from asking (>40% away) - be aggressive
+              counterPercentage = 0.75; // Counter at 75% of the way to asking
+              console.log('🎯 AGGRESSIVE COUNTER: Offer far below asking');
+            } else if (marginBelowAsking > 20) {
+              // Offer is moderately below asking (20-40%) - standard counter
+              counterPercentage = 0.60; // Counter at 60% of the way to asking
+              console.log('🔄 STANDARD COUNTER: Moderate gap to asking');
+            } else {
+              // Offer is close to asking (0-20%) - gentle counter
+              counterPercentage = 0.40; // Counter at 40% of the way to asking
+              console.log('💼 GENTLE COUNTER: Offer close to asking');
+            }
+            
+            // Calculate the counter-offer
+            const calculatedCounter = offerAmount + (gapToAsking * counterPercentage);
+            counterOfferAmount = Math.ceil(calculatedCounter);
+            
+            // Safety: ensure counter is above minimum and below asking
+            counterOfferAmount = Math.max(minimumPrice + 1, Math.min(counterOfferAmount, askingPrice - 1));
+            
+            // Safety: ensure counter is meaningfully above user's offer (at least $5 or 2% higher)
+            const minimumIncrease = Math.max(5, offerAmount * 0.02);
+            if (counterOfferAmount - offerAmount < minimumIncrease) {
+              counterOfferAmount = Math.ceil(offerAmount + minimumIncrease);
+            }
+            
+            const tone = marginBelowAsking > 40 ? 
+              'Be confident and emphasize the item\'s true value. This is a premium item worth much more.' :
+              marginBelowAsking > 20 ?
+              'Be friendly but firm. Explain why the item is worth more than their offer.' :
+              'Be warm and encouraging. You\'re close to a deal - just need to meet in the middle.';
+            
+            negotiationStrategy = `🎯 COUNTER OFFER - User offered $${offerAmount.toFixed(2)} (${marginBelowAsking.toFixed(1)}% below asking of $${askingPrice.toFixed(2)}). Counter with $${counterOfferAmount.toFixed(2)} to capture more value. ${tone} Mention the 10-minute validity.`;
+            
+            console.log('🎯 NEGOTIATING:', {
+              userOffer: offerAmount.toFixed(2),
+              counterStrategy: counterPercentage.toFixed(0) + '% to asking',
+              counterAmount: counterOfferAmount.toFixed(2),
+              potentialGain: (counterOfferAmount - offerAmount).toFixed(2)
+            });
           }
-        }
-        
-        // ============================================
-        // CASE: Below Minimum - Decline
-        // ============================================
-        else if (offerAmount < minimumPrice) {
-          const gap = minimumPrice - offerAmount;
-          negotiationStrategy = `❌ DECLINE - User offered $${offerAmount.toFixed(2)}, which is $${gap.toFixed(2)} below your minimum of $${minimumPrice.toFixed(2)}. Politely decline and emphasize the item's value. Encourage them to consider ${allCounters.length > 0 ? 'your last counter-offer' : 'a higher offer'}.`;
-          console.log('❌ CASE 3: Below minimum - declining');
         }
         
         // ============================================
