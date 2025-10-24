@@ -109,7 +109,7 @@ export default function AccountTypeSelection() {
           )}
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className={isUpgrade ? "max-w-md mx-auto" : "grid md:grid-cols-2 gap-8"}>
           {!isUpgrade && (
             <SelectionCard 
               icon={User}

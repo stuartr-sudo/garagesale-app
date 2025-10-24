@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Heart, DollarSign, Users, Gift } from "lucide-react";
-import { createDonationSession } from "@/api/functions";
 
 const donationAmounts = [10, 25, 50, 100, 250, 500];
 
@@ -34,16 +33,25 @@ export default function Donations() {
 
     setIsProcessing(true);
     try {
-      const { data, error } = await createDonationSession({
-        amount: amount,
-        donor_info: donorInfo
+      const response = await fetch('/api/create-donation-checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: amount,
+          donor_info: donorInfo
+        }),
       });
 
-      if (error) {
-        throw new Error(error.message || 'An unknown error occurred');
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || data.message || 'Failed to create donation checkout');
       }
 
-      if (data && data.checkout_url) {
+      if (data.checkout_url) {
+        // Redirect to Stripe Checkout
         window.location.href = data.checkout_url;
       } else {
         throw new Error('No checkout URL received from server');
