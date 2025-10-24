@@ -164,7 +164,7 @@ export default function ProposeTradeModal({ targetItem, currentUserId, onClose, 
                   <div className="flex-1">
                     <h4 className="font-semibold text-white">{targetItem.title || 'Untitled Item'}</h4>
                     <p className="text-green-400 font-bold mt-1">
-                      Value: ${targetItem.price?.toFixed(2) || '0.00'}
+                      Value: ${(targetItem.price != null ? Number(targetItem.price).toFixed(2) : '0.00')}
                     </p>
                   </div>
                 </div>
@@ -224,14 +224,15 @@ export default function ProposeTradeModal({ targetItem, currentUserId, onClose, 
                                 {item.title || 'Untitled Item'}
                               </h4>
                               <p className="text-green-400 font-bold text-sm">
-                                ${item.price?.toFixed(2) || '0.00'}
+                                ${(item.price != null ? Number(item.price).toFixed(2) : '0.00')}
                               </p>
-                              {item.condition && (
+                              {item.condition && typeof item.condition === 'string' && (
                                 <Badge variant="outline" className="text-xs mt-1">
                                   {item.condition}
                                 </Badge>
                               )}
-                            </div>                          </div>
+                            </div>
+                          </div>
                         </CardContent>
                       </Card>
                     </div>
@@ -253,7 +254,7 @@ export default function ProposeTradeModal({ targetItem, currentUserId, onClose, 
                     <span className="text-gray-300 text-sm">{item.title || 'Untitled Item'}</span>
                     <div className="flex items-center gap-2">
                       <span className="text-green-400 font-semibold text-sm">
-                        ${item.price?.toFixed(2) || '0.00'}
+                        ${(item.price != null ? Number(item.price).toFixed(2) : '0.00')}
                       </span>
                       <button
                         type="button"
