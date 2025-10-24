@@ -25,6 +25,66 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 
 const openai = new OpenAI({ apiKey: openaiApiKey });
 
+/**
+ * Calculate buyer momentum from offer history
+ */
+function calculateBuyerMomentum(negotiationHistory, conversationStartTime) {
+  const offerProgression = negotiationHistory
+    .filter(h => h.user_offer)
+    .map(h => h.user_offer);
+  
+  if (offerProgression.length === 0) {
+    return { total_offers: 0, is_increasing: false, avg_increase: 0, time_in_conversation_minutes: 0 };
+  }
+  
+  const isIncreasing = offerProgression.length >= 2 && 
+                       offerProgression[offerProgression.length - 1] > offerProgression[offerProgression.length - 2];
+  
+  const avgIncrease = offerProgression.length >= 2 ? 
+                      (offerProgression[offerProgression.length - 1] - offerProgression[0]) / (offerProgression.length - 1) : 0;
+  
+  const timeInMinutes = Math.round((Date.now() - new Date(conversationStartTime).getTime()) / 60000);
+  
+  return {
+    total_offers: offerProgression.length,
+    is_increasing: isIncreasing,
+    avg_increase: avgIncrease,
+    time_in_conversation_minutes: timeInMinutes,
+    last_offer: offerProgression[offerProgression.length - 1],
+    first_offer: offerProgression[0]
+  };
+}
+
+/**
+ * Create or update negotiation analytics
+ */
+async function updateNegotiationAnalytics(supabase, conversation, item, knowledge, outcome, finalPrice = null) {
+  const negotiationHistory = conversation.negotiation_history || [];
+  const firstOffer = negotiationHistory.find(h => h.user_offer)?.user_offer;
+  const numCounters = negotiationHistory.filter(h => h.response === 'countered').length;
+  
+  const timeToClose = outcome === 'accepted' ? 
+    Math.round((Date.now() - new Date(conversation.created_at).getTime()) / 60000) : null;
+  
+  const offerProgression = negotiationHistory.filter(h => h.user_offer).map(h => h.user_offer);
+  const buyerIncreasedOffer = offerProgression.length >= 2 && 
+                              offerProgression[offerProgression.length - 1] > offerProgression[0];
+  
+  await supabase.from('negotiation_analytics').insert({
+    item_id: item.id,
+    conversation_id: conversation.id,
+    closed_at: new Date().toISOString(),
+    outcome,
+    initial_offer: firstOffer,
+    final_price: finalPrice,
+    num_counters: numCounters,
+    time_to_close_minutes: timeToClose,
+    seller_minimum: knowledge?.minimum_price,
+    seller_asking: item.price,
+    buyer_increased_offer: buyerIncreasedOffer
+  });
+}
+
 export default async function handler(req, res) {
   try {
     if (req.method !== 'POST') {
@@ -140,12 +200,13 @@ export default async function handler(req, res) {
     }
 
     // ============================================
-    // NEGOTIATION LOGIC - MATHEMATICALLY PERFECT
+    // NEGOTIATION LOGIC - ENHANCED WITH ALL IMPROVEMENTS
     // ============================================
     let negotiationStrategy = '';
     let counterOfferAmount = null;
     let offerAccepted = false;
     let isSecondNegotiation = false;
+    let isFinalNegotiation = false;
     
     console.log('🔍 NEGOTIATION DEBUG:', {
       isOffer,
@@ -157,28 +218,6 @@ export default async function handler(req, res) {
     
     if (isOffer && offerAmount !== null) {
       const askingPrice = parseFloat(item.price);
-      
-      // ============================================
-      // CRITICAL: CHECK IF AGENT HAS ALREADY MADE 3 COUNTERS
-      // ============================================
-      const allCounters = (conversation.negotiation_history || [])
-        .filter(h => h.counter_offer && h.response === 'countered');
-      
-      if (allCounters.length >= 3) {
-        // Agent has already made 3 counters - either accept or decline, no more counters
-        const minimumPrice = knowledge?.minimum_price ? parseFloat(knowledge.minimum_price) : null;
-        
-        if (minimumPrice && offerAmount >= minimumPrice) {
-          offerAccepted = true;
-          negotiationStrategy = `✅ FINAL ACCEPTANCE - You've made 3 counter-offers. This offer of $${offerAmount.toFixed(2)} meets your minimum of $${minimumPrice.toFixed(2)}. Accept it now.`;
-          console.log('✅ FINAL ACCEPTANCE: 3 counters reached, accepting');
-        } else {
-          negotiationStrategy = `❌ FINAL DECLINE - You've made 3 counter-offers already. This offer of $${offerAmount.toFixed(2)} is still too low. Politely decline and suggest they consider the asking price of $${askingPrice.toFixed(2)}.`;
-          console.log('❌ FINAL DECLINE: 3 counters reached, declining');
-        }
-        // Skip all the counter-offer logic below
-      } else {
-        // Continue with normal negotiation logic...
       
       // ============================================
       // SPECIAL CASE: FREE ITEMS ($0)
@@ -219,129 +258,185 @@ export default async function handler(req, res) {
         
         const negotiationHistory = conversation.negotiation_history || [];
         
-        // Determine if this is a subsequent negotiation (not the first)
+        // Check if previous counter-offer expired
+        const lastHistory = negotiationHistory.slice(-1)[0];
+        if (lastHistory?.counter_offer && lastHistory?.expires_at) {
+          const expiryTime = new Date(lastHistory.expires_at);
+          const now = new Date();
+          
+          if (now > expiryTime) {
+            console.log('⏰ Previous counter expired');
+            // Could add logic here to handle expired counters differently
+          }
+        }
+        
+        // Determine negotiation round and history
         const allCounters = negotiationHistory.filter(h => h.counter_offer && h.response === 'countered');
-        const previousCounter = allCounters[allCounters.length - 1]; // Get the most recent counter
-        isSecondNegotiation = allCounters.length > 0;
+        const previousCounter = allCounters.length > 0 ? allCounters[allCounters.length - 1] : null;
+        isSecondNegotiation = allCounters.length === 1;
+        isFinalNegotiation = allCounters.length === 2;
+        
+        // Check if user is responding to our counter (within 15 minutes)
+        const isResponseToCounter = previousCounter && 
+                                    Math.abs(Date.now() - new Date(previousCounter.timestamp).getTime()) < 15 * 60 * 1000;
+        
+        // Track if user increased their offer (good faith signal)
+        let userIncreasedOffer = false;
+        if (isResponseToCounter && previousCounter.user_offer) {
+          userIncreasedOffer = offerAmount > previousCounter.user_offer;
+          if (userIncreasedOffer) {
+            console.log(`📈 User increased offer from $${previousCounter.user_offer} to $${offerAmount}`);
+          } else if (offerAmount < previousCounter.user_offer) {
+            console.log(`📉 WARNING: User decreased offer from $${previousCounter.user_offer} to $${offerAmount}`);
+          }
+        }
         
         console.log('💰 NEGOTIATION STATE:', {
           offerAmount: offerAmount.toFixed(2),
           askingPrice: askingPrice.toFixed(2),
           minimumPrice: minimumPrice.toFixed(2),
+          allCounters: allCounters.length,
           isSecondNegotiation,
-          previousCounter: previousCounter?.counter_offer
+          isFinalNegotiation,
+          previousCounter: previousCounter?.counter_offer,
+          userIncreasedOffer
         });
         
-        // ----------------------------------------
-        // CASE 1: Offer >= Asking Price → ACCEPT
-        // ----------------------------------------
-        if (offerAmount >= askingPrice) {
-          offerAccepted = true;
-          negotiationStrategy = `✅ ACCEPT IMMEDIATELY - Offer ($${offerAmount.toFixed(2)}) meets or exceeds asking price ($${askingPrice.toFixed(2)}). Accept enthusiastically and direct them to the payment button.`;
-          console.log('✅ CASE 1: Accept at/above asking');
-        }
-        
-        // ----------------------------------------
-        // CASE 2: Offer < Minimum → DECLINE (No Counter)
-        // ----------------------------------------
-        else if (offerAmount < minimumPrice) {
-          negotiationStrategy = `❌ DECLINE - Offer ($${offerAmount.toFixed(2)}) is below minimum acceptable ($${minimumPrice.toFixed(2)}). Politely decline WITHOUT revealing the exact minimum. Emphasize the item's value and quality. Do NOT make a counter-offer.`;
-          console.log('❌ CASE 2: Decline below minimum');
-        }
-        
-        // ----------------------------------------
-        // CASE 3: SUBSEQUENT Negotiation → Progressive Counter
-        // ----------------------------------------
-        else if (isSecondNegotiation && previousCounter) {
-          const previousCounterAmount = parseFloat(previousCounter.counter_offer);
-          const negotiationRound = allCounters.length + 1; // Track which round this is
-          
-          // Sub-case: User met or exceeded previous counter
-          if (offerAmount >= previousCounterAmount) {
+        // ============================================
+        // ENHANCEMENT: Hard Stop After 3 Counters
+        // ============================================
+        if (allCounters.length >= 3) {
+          // Agent has already made 3 counters - either accept or decline, NO MORE COUNTERS
+          if (offerAmount >= minimumPrice) {
             offerAccepted = true;
-            negotiationStrategy = `✅ ACCEPT - User's offer ($${offerAmount.toFixed(2)}) meets or exceeds your previous counter ($${previousCounterAmount.toFixed(2)}). Accept this offer warmly.`;
-            console.log('✅ CASE 3A: Accept - met previous counter');
+            negotiationStrategy = `✅ FINAL ACCEPTANCE - You've made 3 counter-offers already. This offer of $${offerAmount.toFixed(2)} meets your minimum of $${minimumPrice.toFixed(2)}. Accept it now to close the deal.`;
+            console.log('✅ HARD STOP: Accepting after 3 counters');
+          } else {
+            negotiationStrategy = `❌ FINAL DECLINE - You've made 3 counter-offers already and this offer of $${offerAmount.toFixed(2)} is still below your minimum of $${minimumPrice.toFixed(2)}. Politely decline and suggest they consider the asking price of $${askingPrice.toFixed(2)}. Mention that you've done your best to negotiate but cannot go lower.`;
+            console.log('❌ HARD STOP: Declining after 3 counters');
           }
-          // Sub-case: User came back with a new offer - Make progressive counter
-          else {
-            // Progressive reduction: Each round reduces by 10-15%
-            const reductionPercentage = Math.min(0.15, 0.05 + (negotiationRound * 0.02)); // 5% + 2% per round
-            const rawCounter = previousCounterAmount * (1 - reductionPercentage);
-            
-            // Round to nearest dollar (ceiling for precision)
-            let newCounter = Math.ceil(rawCounter);
-            
-            // Safety checks:
-            // 1. Must be at least minimum
-            // 2. Must be above user's current offer (otherwise no point)
-            newCounter = Math.max(minimumPrice, newCounter);
-            
-            if (newCounter <= offerAmount) {
-              // Edge case: calculation brought us at/below their offer
-              // Set to minimum or slightly above their offer, whichever is higher
-              newCounter = Math.max(minimumPrice, Math.ceil(offerAmount + 1));
-            }
-            
-            // If this is the 3rd+ round, make it the final offer
-            const isFinalOffer = negotiationRound >= 3;
-            
-            counterOfferAmount = newCounter;
-            
-            if (isFinalOffer) {
-              negotiationStrategy = `🔄 FINAL COUNTER (Round ${negotiationRound}) - Previous counter was $${previousCounterAmount.toFixed(2)}, user offered $${offerAmount.toFixed(2)}. Make your FINAL counter at $${counterOfferAmount.toFixed(2)} (${(reductionPercentage * 100).toFixed(1)}% reduction). This is your absolute final offer. Make it clear this is the last chance and valid for 10 minutes. Be friendly but firm.`;
-            } else {
-              negotiationStrategy = `🔄 COUNTER (Round ${negotiationRound}) - Previous counter was $${previousCounterAmount.toFixed(2)}, user offered $${offerAmount.toFixed(2)}. Counter with $${counterOfferAmount.toFixed(2)} (${(reductionPercentage * 100).toFixed(1)}% reduction from previous). Be friendly, emphasize value, and mention the offer is valid for 10 minutes.`;
-            }
-            
-            console.log(`🔄 CASE 3B: ${isFinalOffer ? 'Final' : 'Progressive'} counter (Round ${negotiationRound})`, {
-              previousCounter: previousCounterAmount.toFixed(2),
-              reduction: (reductionPercentage * 100).toFixed(1) + '%',
-              rawCalculation: rawCounter.toFixed(2),
-              newCounter: counterOfferAmount.toFixed(2),
-              ensuredAboveMinimum: counterOfferAmount >= minimumPrice,
-              isFinalOffer
+        }
+        
+        // ============================================
+        // ENHANCEMENT: Smart Auto-Accept (5% threshold)
+        // ============================================
+        else if (offerAmount >= minimumPrice) {
+          const marginAboveMinimum = ((offerAmount - minimumPrice) / minimumPrice) * 100;
+          
+          if (marginAboveMinimum <= 5) {
+            offerAccepted = true;
+            negotiationStrategy = `✅ SMART ACCEPT - Offer of $${offerAmount.toFixed(2)} is within 5% of your minimum ($${minimumPrice.toFixed(2)}). Accept immediately to secure the sale. This is an excellent deal!`;
+            console.log('✅ SMART ACCEPT: Within 5% of minimum');
+          } else if (offerAmount >= askingPrice) {
+            offerAccepted = true;
+            negotiationStrategy = `✅ ACCEPT IMMEDIATELY - Offer ($${offerAmount.toFixed(2)}) is at or above asking price ($${askingPrice.toFixed(2)}). Accept enthusiastically!`;
+            console.log('✅ CASE 1: At or above asking');
+          } else {
+            offerAccepted = true;
+            negotiationStrategy = `✅ ACCEPT - Offer ($${offerAmount.toFixed(2)}) is above minimum ($${minimumPrice.toFixed(2)}) and represents good value. Accept the offer!`;
+            console.log('✅ CASE 2: Between minimum and asking');
+          }
+        }
+        
+        // ============================================
+        // CASE: Below Minimum - Decline
+        // ============================================
+        else if (offerAmount < minimumPrice) {
+          const gap = minimumPrice - offerAmount;
+          negotiationStrategy = `❌ DECLINE - User offered $${offerAmount.toFixed(2)}, which is $${gap.toFixed(2)} below your minimum of $${minimumPrice.toFixed(2)}. Politely decline and emphasize the item's value. Encourage them to consider ${allCounters.length > 0 ? 'your last counter-offer' : 'a higher offer'}.`;
+          console.log('❌ CASE 3: Below minimum - declining');
+        }
+        
+        // ============================================
+        // ENHANCEMENT: Third Counter - Split the Difference
+        // ============================================
+        else if (isFinalNegotiation && previousCounter) {
+          const lastCounterAmount = previousCounter.counter_offer;
+          const splitDifference = Math.ceil((offerAmount + lastCounterAmount) / 2);
+          
+          // Ensure it's still above minimum
+          counterOfferAmount = Math.max(minimumPrice, splitDifference);
+          
+          // If split is too close to user's offer (within $5), just accept
+          if (counterOfferAmount - offerAmount <= 5) {
+            offerAccepted = true;
+            negotiationStrategy = `✅ CLOSE ENOUGH - Your counter would be $${counterOfferAmount.toFixed(2)}, which is within $5 of their offer of $${offerAmount.toFixed(2)}. Accept it to close the deal!`;
+            console.log('✅ SPLIT TOO CLOSE: Accepting instead');
+          } else {
+            negotiationStrategy = `🤝 FINAL SPLIT - This is your absolute last counter (3rd and final). Split the difference between their $${offerAmount.toFixed(2)} and your last offer of $${lastCounterAmount.toFixed(2)}. Counter at $${counterOfferAmount.toFixed(2)}. Use language like "This is my absolute final offer - let's make this deal happen." Emphasize this is the last opportunity and expires in 10 minutes.`;
+            console.log('🤝 CASE 3 (FINAL): Split the difference', {
+              userOffer: offerAmount.toFixed(2),
+              lastCounter: lastCounterAmount.toFixed(2),
+              split: splitDifference.toFixed(2),
+              finalCounter: counterOfferAmount.toFixed(2)
             });
           }
         }
         
-        // ----------------------------------------
-        // CASE 4: FIRST Negotiation → Counter (55-75% of gap)
-        // ----------------------------------------
-        else {
-          // FORMULA: Counter = Min + (Asking - Min) × random(0.55, 0.75)
-          const gap = askingPrice - minimumPrice;
-          const randomPercentage = 0.55 + (Math.random() * 0.20); // Random between 0.55 and 0.75
-          const rawCounter = minimumPrice + (gap * randomPercentage);
+        // ============================================
+        // ENHANCEMENT: Second Counter - Descending Strategy
+        // ============================================
+        else if (isSecondNegotiation && previousCounter) {
+          const lastCounterAmount = previousCounter.counter_offer;
+          const gapToClose = lastCounterAmount - offerAmount;
           
-          // Round to nearest dollar (ceiling for precision)
+          // Close 40-60% of the remaining gap
+          const percentageToClose = 0.40 + (Math.random() * 0.20);
+          const rawCounter = offerAmount + (gapToClose * percentageToClose);
+          
+          counterOfferAmount = Math.ceil(rawCounter);
+          
+          // Safety: ensure it's above minimum and below previous counter
+          counterOfferAmount = Math.max(minimumPrice, Math.min(counterOfferAmount, lastCounterAmount - 1));
+          
+          // If counter is now too close to user's offer (within $5), just accept
+          if (counterOfferAmount - offerAmount <= 5) {
+            offerAccepted = true;
+            negotiationStrategy = `✅ CLOSE ENOUGH - Counter would be $${counterOfferAmount.toFixed(2)}, which is within $5 of their offer of $${offerAmount.toFixed(2)}. Accept it to secure the sale!`;
+            console.log('✅ TOO CLOSE: Accepting instead of countering');
+          } else {
+            negotiationStrategy = `🔄 SECOND COUNTER - User offered $${offerAmount.toFixed(2)}. Your first counter was $${lastCounterAmount.toFixed(2)}. Move closer by countering at $${counterOfferAmount.toFixed(2)} (closing ${(percentageToClose * 100).toFixed(0)}% of the gap). Be encouraging and mention this is valid for 10 minutes.${userIncreasedOffer ? ' Acknowledge that they increased their offer - good sign!' : ''}`;
+            
+            console.log('🔄 CASE 2 (SECOND): Descending counter', {
+              userOffer: offerAmount.toFixed(2),
+              lastCounter: lastCounterAmount.toFixed(2),
+              gap: gapToClose.toFixed(2),
+              percentageClosed: (percentageToClose * 100).toFixed(0) + '%',
+              rawCounter: rawCounter.toFixed(2),
+              finalCounter: counterOfferAmount.toFixed(2),
+              decreased: (lastCounterAmount - counterOfferAmount).toFixed(2)
+            });
+          }
+        }
+        
+        // ============================================
+        // First Counter - Original Random Strategy
+        // ============================================
+        else {
+          const gap = askingPrice - minimumPrice;
+          const randomPercentage = 0.60 + (Math.random() * 0.25); // 60-85%
+          const rawCounter = minimumPrice + (gap * randomPercentage);
           let firstCounter = Math.ceil(rawCounter);
           
-          // Safety checks:
-          // 1. Must be at least minimum
-          // 2. Should be meaningfully above user's offer
+          // Safety checks
           firstCounter = Math.max(minimumPrice, firstCounter);
           
           if (firstCounter <= offerAmount) {
-            // Edge case: their offer is already near our calculated counter
-            // Adjust to at least $1-5 above their offer
             firstCounter = Math.ceil(offerAmount + Math.min(5, gap * 0.05));
           }
           
           counterOfferAmount = firstCounter;
           
-          negotiationStrategy = `🔄 FIRST COUNTER - User offered $${offerAmount.toFixed(2)}, which is between minimum ($${minimumPrice.toFixed(2)}) and asking ($${askingPrice.toFixed(2)}). Counter with $${counterOfferAmount.toFixed(2)} (Formula: $${minimumPrice.toFixed(2)} + ($${gap.toFixed(2)} × ${(randomPercentage * 100).toFixed(1)}%) = $${rawCounter.toFixed(2)} → rounded to $${counterOfferAmount.toFixed(2)}). Be friendly, emphasize value, and mention the offer is valid for 10 minutes.`;
+          negotiationStrategy = `🔄 FIRST COUNTER - User offered $${offerAmount.toFixed(2)}, which is between minimum ($${minimumPrice.toFixed(2)}) and asking ($${askingPrice.toFixed(2)}). Counter with $${counterOfferAmount.toFixed(2)}. Be friendly, emphasize value, and mention the offer is valid for 10 minutes.`;
           
-          console.log('🔄 CASE 4: First counter', {
+          console.log('🔄 CASE 1 (FIRST): Initial counter', {
             gap: gap.toFixed(2),
             percentage: (randomPercentage * 100).toFixed(1) + '%',
-            calculation: `${minimumPrice.toFixed(2)} + (${gap.toFixed(2)} × ${randomPercentage.toFixed(2)})`,
             rawCounter: rawCounter.toFixed(2),
-            finalCounter: counterOfferAmount.toFixed(2),
-            aboveOffer: (counterOfferAmount - offerAmount).toFixed(2)
+            finalCounter: counterOfferAmount.toFixed(2)
           });
         }
       }
-      } // Close the else block for the 3-counter check
     }
 
     // Build agent prompt
@@ -403,11 +498,14 @@ ${negotiationStrategy}
 
     const aiResponse = completion.choices[0].message.content;
 
-    // Update conversation state
+    // Update conversation state and track momentum
     if (isOffer && offerAmount) {
       const askingPrice = parseFloat(item.price);
       const minimumPrice = knowledge?.minimum_price ? parseFloat(knowledge.minimum_price) : null;
       const negotiationHistory = conversation.negotiation_history || [];
+      
+      // Calculate buyer momentum
+      const momentum = calculateBuyerMomentum(negotiationHistory, conversation.created_at);
       
       if (offerAccepted) {
         // Offer was accepted
@@ -416,27 +514,35 @@ ${negotiationStrategy}
           .update({
             status: 'offer_accepted',
             current_offer: offerAmount,
+            buyer_momentum: momentum,
             negotiation_history: [
               ...negotiationHistory,
               {
                 timestamp: new Date().toISOString(),
                 user_offer: offerAmount,
                 response: 'accepted',
-                reason: offerAmount >= askingPrice ? 'at_or_above_asking' : 'second_negotiation_accepted'
+                reason: offerAmount >= askingPrice ? 'at_or_above_asking' : 
+                        (momentum.is_increasing ? 'smart_accept_with_momentum' : 'smart_accept')
               }
             ]
           })
           .eq('id', conversation.id);
+        
+        // Record analytics
+        await updateNegotiationAnalytics(supabase, conversation, item, knowledge, 'accepted', offerAmount);
+        
       } else if (counterOfferAmount) {
         // Counter-offer made
         const negotiationRound = (negotiationHistory.filter(h => h.counter_offer && h.response === 'countered').length) + 1;
         const isFinalOffer = negotiationRound >= 3;
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
         
         await supabase
           .from('agent_conversations')
           .update({
             status: isFinalOffer ? 'final_offer' : 'negotiating',
             current_offer: offerAmount,
+            buyer_momentum: momentum,
             negotiation_history: [
               ...negotiationHistory,
               {
@@ -445,18 +551,22 @@ ${negotiationStrategy}
                 counter_offer: counterOfferAmount,
                 response: 'countered',
                 round: negotiationRound,
-                is_final: isFinalOffer
+                is_final: isFinalOffer,
+                expires_at: expiresAt,
+                user_increased: momentum.is_increasing
               }
             ]
           })
           .eq('id', conversation.id);
+          
       } else if (minimumPrice && offerAmount < minimumPrice) {
-        // Offer declined (below minimum) - only if minimum exists
+        // Offer declined (below minimum)
         await supabase
           .from('agent_conversations')
           .update({
             status: 'declined',
             current_offer: offerAmount,
+            buyer_momentum: momentum,
             negotiation_history: [
               ...negotiationHistory,
               {
@@ -468,6 +578,10 @@ ${negotiationStrategy}
             ]
           })
           .eq('id', conversation.id);
+        
+        // Record analytics
+        await updateNegotiationAnalytics(supabase, conversation, item, knowledge, 'declined');
+        
       } else if (!minimumPrice && offerAmount < askingPrice) {
         // No minimum set and offer below asking - decline
         await supabase
@@ -475,6 +589,7 @@ ${negotiationStrategy}
           .update({
             status: 'declined',
             current_offer: offerAmount,
+            buyer_momentum: momentum,
             negotiation_history: [
               ...negotiationHistory,
               {
@@ -486,6 +601,9 @@ ${negotiationStrategy}
             ]
           })
           .eq('id', conversation.id);
+        
+        // Record analytics
+        await updateNegotiationAnalytics(supabase, conversation, item, knowledge, 'declined');
       }
     }
 
@@ -507,9 +625,11 @@ ${negotiationStrategy}
       offer_countered: !!counterOfferAmount,
       counter_offer_amount: counterOfferAmount,
       offer_amount: offerAccepted ? offerAmount : null,
-      is_final_counter: isSecondNegotiation, // NEW - tells frontend this is the last chance
-      show_accept_button: offerAccepted || !!counterOfferAmount, // NEW - explicit button trigger
-      expires_at: counterOfferAmount ? new Date(Date.now() + 10 * 60 * 1000).toISOString() : null // NEW - 10 min expiry
+      is_final_counter: isFinalNegotiation, // This is the 3rd counter
+      is_second_counter: isSecondNegotiation, // This is the 2nd counter
+      show_accept_button: offerAccepted || !!counterOfferAmount,
+      expires_at: counterOfferAmount ? new Date(Date.now() + 10 * 60 * 1000).toISOString() : null,
+      negotiation_round: conversation.negotiation_history?.filter(h => h.response === 'countered').length + (counterOfferAmount ? 1 : 0)
     });
 
   } catch (error) {
