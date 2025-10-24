@@ -226,11 +226,12 @@ export default function ProposeTradeModal({ targetItem, currentUserId, onClose, 
                               <p className="text-green-400 font-bold text-sm">
                                 ${item.price?.toFixed(2)}
                               </p>
-                              <Badge variant="outline" className="text-xs mt-1">
-                                {item.condition}
-                              </Badge>
-                            </div>
-                          </div>
+                              {item.condition && (
+                                <Badge variant="outline" className="text-xs mt-1">
+                                  {item.condition}
+                                </Badge>
+                              )}
+                            </div>                          </div>
                         </CardContent>
                       </Card>
                     </div>

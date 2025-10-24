@@ -96,14 +96,20 @@ export default function SmartRecommendations({
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const { data, error } = await supabase
+    let query = supabase
       .from('items')
       .select('*')
       .eq('status', 'active')
-      .neq('id', currentItemId || '')
       .gte('created_at', sevenDaysAgo.toISOString())
       .order('views_count', { ascending: false })
       .limit(limit);
+
+    // Only add neq filter if currentItemId exists
+    if (currentItemId) {
+      query = query.neq('id', currentItemId);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
     return data || [];
