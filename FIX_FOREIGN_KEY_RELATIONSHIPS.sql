@@ -197,13 +197,10 @@ LEFT JOIN items ON pc.item_id = items.id;
 GRANT SELECT ON payment_confirmations_with_details TO authenticated;
 GRANT SELECT ON payment_confirmations_with_details TO anon;
 
--- Create RLS policy for the view
-DROP POLICY IF EXISTS "Users can view their payment confirmation details" ON payment_confirmations_with_details;
-CREATE POLICY "Users can view their payment confirmation details"
-  ON payment_confirmations_with_details
-  FOR SELECT
-  TO authenticated
-  USING (seller_id = auth.uid() OR buyer_id = auth.uid());
+-- Note: Views don't have RLS policies
+-- The view inherits RLS from the underlying tables
+-- (payment_confirmations, profiles, items)
+-- So the existing policies on those tables will apply
 
 
 -- 7. LIST ALL FOREIGN KEYS FOR VERIFICATION
