@@ -28,7 +28,7 @@ export default defineConfig({
           // Core React libraries
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           
-          // UI Component library
+          // UI Component library (only installed packages)
           'vendor-ui': [
             '@radix-ui/react-dialog',
             '@radix-ui/react-dropdown-menu',
@@ -36,16 +36,16 @@ export default defineConfig({
             '@radix-ui/react-select',
             '@radix-ui/react-slot',
             '@radix-ui/react-tabs',
-            '@radix-ui/react-toast',
             '@radix-ui/react-checkbox',
             '@radix-ui/react-progress',
             '@radix-ui/react-radio-group',
             '@radix-ui/react-scroll-area',
             '@radix-ui/react-separator',
-            '@radix-ui/react-sidebar',
             '@radix-ui/react-slider',
             '@radix-ui/react-switch',
             '@radix-ui/react-tooltip',
+            '@radix-ui/react-popover',
+            '@radix-ui/react-avatar',
           ],
           
           // Icons
