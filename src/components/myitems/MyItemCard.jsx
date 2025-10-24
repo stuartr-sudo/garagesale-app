@@ -56,9 +56,11 @@ export default function MyItemCard({ item, onDelete, onStatusChange }) {
           <Badge className={`${currentStatus.color} shadow-md`}>
             {currentStatus.text}
           </Badge>
-          <Badge className={`${conditionColors[item.condition]} shadow-md capitalize`}>
-            {item.condition?.replace('_', ' ')}
-          </Badge>
+          {item.condition && (
+            <Badge className={`${conditionColors[item.condition]} shadow-md capitalize`}>
+              {item.condition.replace('_', ' ')}
+            </Badge>
+          )}
         </div>
         <div className="absolute top-3 right-3">
           <DropdownMenu>
