@@ -38,12 +38,23 @@ export default function ItemDetail() {
   const [isImageFullscreen, setIsImageFullscreen] = useState(false);
   const [negotiatedPrice, setNegotiatedPrice] = useState(null);
   const [offerAccepted, setOfferAccepted] = useState(false);
+  const [theme, setTheme] = useState({});
   const { toast } = useToast();
 
   useEffect(() => {
     // Load item data on mount
     loadItem();
     trackItemView();
+    
+    // Load theme from localStorage
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      try {
+        setTheme(JSON.parse(savedTheme));
+      } catch (error) {
+        console.error('Error parsing theme:', error);
+      }
+    }
   }, [id]);
 
   const trackItemView = async () => {
@@ -513,8 +524,11 @@ export default function ItemDetail() {
                 className={`w-full h-10 md:h-12 text-white font-semibold text-sm md:text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] ${
                   isInCart
                     ? 'bg-green-600 hover:bg-green-600'
-                    : 'bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700'
+                    : ''
                 }`}
+                style={!isInCart ? {
+                  background: `linear-gradient(to right, ${theme?.addToCartFrom || '#a855f7'}, ${theme?.addToCartTo || '#db2777'})`
+                } : undefined}
               >
                 {isInCart ? (
                   <>
@@ -531,8 +545,9 @@ export default function ItemDetail() {
 
               <Button
                 onClick={() => setShowPurchaseModal(true)}
-                className="w-full h-10 md:h-12 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold text-sm md:text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+                className="w-full h-10 md:h-12 text-white font-semibold text-sm md:text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
                 style={{
+                  background: `linear-gradient(to right, ${theme?.buyNowFrom || '#10b981'}, ${theme?.buyNowTo || '#059669'})`,
                   animation: 'subtle-pulse 3s ease-in-out infinite'
                 }}
               >

@@ -16,6 +16,11 @@ const THEME_PRESETS = {
     buttonTo: '#db2777',  // pink-600
     accentColor: '#22d3ee', // cyan-400
     descriptionColor: '#9ca3af', // gray-400
+    // Action Button Colors
+    addToCartFrom: '#a855f7', // purple-500
+    addToCartTo: '#db2777',   // pink-600
+    buyNowFrom: '#10b981',    // emerald-500
+    buyNowTo: '#059669',      // emerald-600
     // Bundle Card Colors
     bundleCardFrom: '#059669', // emerald-600
     bundleCardTo: '#047857',   // emerald-700
@@ -497,6 +502,85 @@ export default function ThemeSettings() {
                 <p className="text-xs text-gray-500">
                   Used for item descriptions and secondary text
                 </p>
+              </div>
+
+              {/* Action Button Colors */}
+              <div className="space-y-6">
+                <h3 className="text-xl font-bold text-white mb-4">Action Button Colors</h3>
+                
+                {/* Add to Cart Button */}
+                <div className="space-y-3">
+                  <Label className="text-white text-lg">Add to Cart Button</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-gray-300 text-sm">From Color</Label>
+                      <Input
+                        type="color"
+                        value={theme.addToCartFrom || '#a855f7'}
+                        onChange={(e) => updateThemeField('addToCartFrom', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.addToCartFrom || '#a855f7'}
+                        onChange={(e) => updateThemeField('addToCartFrom', e.target.value)}
+                        placeholder="e.g., #a855f7"
+                        className="bg-gray-800 border-gray-700 text-white mt-2"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-300 text-sm">To Color</Label>
+                      <Input
+                        type="color"
+                        value={theme.addToCartTo || '#db2777'}
+                        onChange={(e) => updateThemeField('addToCartTo', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.addToCartTo || '#db2777'}
+                        onChange={(e) => updateThemeField('addToCartTo', e.target.value)}
+                        placeholder="e.g., #db2777"
+                        className="bg-gray-800 border-gray-700 text-white mt-2"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Buy Now Button */}
+                <div className="space-y-3">
+                  <Label className="text-white text-lg">Buy Now Button</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-gray-300 text-sm">From Color</Label>
+                      <Input
+                        type="color"
+                        value={theme.buyNowFrom || '#10b981'}
+                        onChange={(e) => updateThemeField('buyNowFrom', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.buyNowFrom || '#10b981'}
+                        onChange={(e) => updateThemeField('buyNowFrom', e.target.value)}
+                        placeholder="e.g., #10b981"
+                        className="bg-gray-800 border-gray-700 text-white mt-2"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-300 text-sm">To Color</Label>
+                      <Input
+                        type="color"
+                        value={theme.buyNowTo || '#059669'}
+                        onChange={(e) => updateThemeField('buyNowTo', e.target.value)}
+                        className="h-10 w-full cursor-pointer"
+                      />
+                      <Input
+                        value={theme.buyNowTo || '#059669'}
+                        onChange={(e) => updateThemeField('buyNowTo', e.target.value)}
+                        placeholder="e.g., #059669"
+                        className="bg-gray-800 border-gray-700 text-white mt-2"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <Separator className="my-6 bg-gray-700" />

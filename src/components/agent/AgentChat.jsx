@@ -200,11 +200,15 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
   };
 
   return (
-    <Card className="bg-gray-900/80 border-gray-800 shadow-xl">
-      <CardHeader className="border-b border-gray-800 bg-gradient-to-r from-purple-900/20 to-pink-900/20">
+    <Card className="bg-gradient-to-br from-purple-900/90 to-pink-900/90 border-2 border-purple-500/50 shadow-2xl ring-2 ring-purple-400/20">
+      <CardHeader className="border-b border-purple-400/30 bg-gradient-to-r from-purple-600/30 to-pink-600/30">
         <CardTitle className="flex items-center justify-center">
-          <div className="p-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl shadow-lg">
-            <Bot className="w-6 h-6 text-white" />
+          <div className="p-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl shadow-xl ring-2 ring-white/20">
+            <Bot className="w-8 h-8 text-white animate-pulse" />
+          </div>
+          <div className="ml-3">
+            <div className="text-white font-bold text-lg">AI Assistant</div>
+            <div className="text-purple-200 text-sm">Ask me anything!</div>
           </div>
         </CardTitle>
       </CardHeader>
@@ -313,7 +317,7 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
                 onKeyPress={handleKeyPress}
                 placeholder="Ask about the item or make an offer..."
                 disabled={loading}
-                className="flex-1 bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-purple-500 focus:ring-purple-500"
+                className="flex-1 bg-white/10 border-2 border-purple-400/50 text-white placeholder-purple-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 rounded-xl h-12 text-lg"
               />
               <Button
                 onClick={() => sendMessage()}
