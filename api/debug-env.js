@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     newSupabaseServiceKey: !!process.env.NEW_SUPABASE_SERVICE_KEY,
     supabaseAnonKey: !!process.env.VITE_SUPABASE_ANON_KEY,
     newSupabaseAnonKey: !!process.env.NEW_VITE_SUPABASE_ANON_KEY,
-    openaiApiKey: !!process.env.VITE_OPENAI_API_KEY,
+    openaiApiKey: !!process.env.OPENAI_API_KEY,
     allEnvKeys: Object.keys(process.env).filter(key => key.includes('SUPABASE') || key.includes('OPENAI'))
   });
 }

@@ -5,7 +5,7 @@
 
 import OpenAI from 'openai';
 
-const openaiApiKey = process.env.VITE_OPENAI_API_KEY;
+const openaiApiKey = process.env.OPENAI_API_KEY;
 const openai = new OpenAI({ apiKey: openaiApiKey });
 
 export default async function handler(req, res) {
