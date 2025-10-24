@@ -318,23 +318,35 @@ export default async function handler(req, res) {
         }
         
         // ============================================
-        // ENHANCEMENT: Smart Auto-Accept (5% threshold)
+        // ENHANCEMENT: Smart Auto-Accept (Only for very close offers)
         // ============================================
         else if (offerAmount >= minimumPrice) {
           const marginAboveMinimum = ((offerAmount - minimumPrice) / minimumPrice) * 100;
+          const marginBelowAsking = ((askingPrice - offerAmount) / askingPrice) * 100;
           
-          if (marginAboveMinimum <= 5) {
-            offerAccepted = true;
-            negotiationStrategy = `✅ SMART ACCEPT - Offer of $${offerAmount.toFixed(2)} is within 5% of your minimum ($${minimumPrice.toFixed(2)}). Accept immediately to secure the sale. This is an excellent deal!`;
-            console.log('✅ SMART ACCEPT: Within 5% of minimum');
-          } else if (offerAmount >= askingPrice) {
+          // Only accept if offer is very close to asking price (within 10%) OR very close to minimum (within 2%)
+          if (offerAmount >= askingPrice) {
             offerAccepted = true;
             negotiationStrategy = `✅ ACCEPT IMMEDIATELY - Offer ($${offerAmount.toFixed(2)}) is at or above asking price ($${askingPrice.toFixed(2)}). Accept enthusiastically!`;
             console.log('✅ CASE 1: At or above asking');
-          } else {
+          } else if (marginBelowAsking <= 10) {
+            // Within 10% of asking price - accept
             offerAccepted = true;
-            negotiationStrategy = `✅ ACCEPT - Offer ($${offerAmount.toFixed(2)}) is above minimum ($${minimumPrice.toFixed(2)}) and represents good value. Accept the offer!`;
-            console.log('✅ CASE 2: Between minimum and asking');
+            negotiationStrategy = `✅ SMART ACCEPT - Offer of $${offerAmount.toFixed(2)} is very close to asking price ($${askingPrice.toFixed(2)}). Accept to secure the sale!`;
+            console.log('✅ SMART ACCEPT: Within 10% of asking');
+          } else if (marginAboveMinimum <= 2) {
+            // Very close to minimum (within 2%) - accept
+            offerAccepted = true;
+            negotiationStrategy = `✅ SMART ACCEPT - Offer of $${offerAmount.toFixed(2)} is very close to your minimum ($${minimumPrice.toFixed(2)}). Accept to secure the sale!`;
+            console.log('✅ SMART ACCEPT: Within 2% of minimum');
+          } else {
+            // Offer is above minimum but not close enough to asking - NEGOTIATE!
+            const gapToAsking = askingPrice - offerAmount;
+            const counterOffer = Math.min(askingPrice * 0.85, offerAmount + (gapToAsking * 0.4));
+            
+            counterOfferAmount = Math.round(counterOffer);
+            negotiationStrategy = `🎯 COUNTER NEGOTIATION - While $${offerAmount.toFixed(2)} is above your minimum, you can do better! The asking price is $${askingPrice.toFixed(2)}. Counter with $${counterOfferAmount.toFixed(2)} to get closer to the full value. Be confident but friendly.`;
+            console.log('🎯 COUNTER: Above minimum but negotiating for more');
           }
         }
         
@@ -410,29 +422,45 @@ export default async function handler(req, res) {
         }
         
         // ============================================
-        // First Counter - Original Random Strategy
+        // First Counter - Aggressive Strategy
         // ============================================
         else {
           const gap = askingPrice - minimumPrice;
-          const randomPercentage = 0.60 + (Math.random() * 0.25); // 60-85%
-          const rawCounter = minimumPrice + (gap * randomPercentage);
-          let firstCounter = Math.ceil(rawCounter);
+          const offerDistanceFromAsking = ((askingPrice - offerAmount) / askingPrice) * 100;
+          
+          let firstCounter;
+          
+          // If offer is very far from asking (more than 30% below), be more aggressive
+          if (offerDistanceFromAsking > 30) {
+            // Start closer to asking price (80-90% of the gap)
+            const aggressivePercentage = 0.80 + (Math.random() * 0.10);
+            firstCounter = Math.ceil(minimumPrice + (gap * aggressivePercentage));
+            console.log('🎯 AGGRESSIVE: Offer is ' + offerDistanceFromAsking.toFixed(1) + '% below asking');
+          } else {
+            // Standard strategy (60-85% of the gap)
+            const randomPercentage = 0.60 + (Math.random() * 0.25);
+            firstCounter = Math.ceil(minimumPrice + (gap * randomPercentage));
+            console.log('🔄 STANDARD: Offer is ' + offerDistanceFromAsking.toFixed(1) + '% below asking');
+          }
           
           // Safety checks
           firstCounter = Math.max(minimumPrice, firstCounter);
           
           if (firstCounter <= offerAmount) {
-            firstCounter = Math.ceil(offerAmount + Math.min(5, gap * 0.05));
+            firstCounter = Math.ceil(offerAmount + Math.min(10, gap * 0.1));
           }
           
           counterOfferAmount = firstCounter;
           
-          negotiationStrategy = `🔄 FIRST COUNTER - User offered $${offerAmount.toFixed(2)}, which is between minimum ($${minimumPrice.toFixed(2)}) and asking ($${askingPrice.toFixed(2)}). Counter with $${counterOfferAmount.toFixed(2)}. Be friendly, emphasize value, and mention the offer is valid for 10 minutes.`;
+          const tone = offerDistanceFromAsking > 30 ? 
+            'Be confident and emphasize the item\'s true value. This is a premium item worth the asking price.' :
+            'Be friendly, emphasize value, and mention the offer is valid for 10 minutes.';
+          
+          negotiationStrategy = `🔄 FIRST COUNTER - User offered $${offerAmount.toFixed(2)} (${offerDistanceFromAsking.toFixed(1)}% below asking). Counter with $${counterOfferAmount.toFixed(2)}. ${tone}`;
           
           console.log('🔄 CASE 1 (FIRST): Initial counter', {
+            offerDistance: offerDistanceFromAsking.toFixed(1) + '%',
             gap: gap.toFixed(2),
-            percentage: (randomPercentage * 100).toFixed(1) + '%',
-            rawCounter: rawCounter.toFixed(2),
             finalCounter: counterOfferAmount.toFixed(2)
           });
         }
