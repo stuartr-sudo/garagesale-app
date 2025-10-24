@@ -689,7 +689,7 @@ export default function ItemDetail() {
                   onClick={() => setShowTradeModal(true)}
                   disabled={itemUnavailable}
                   variant="outline"
-                  className="w-full h-10 text-sm md:text-base bg-gray-800 border-blue-500 text-blue-400 hover:bg-blue-900/30 hover:border-blue-400 disabled:opacity-50"
+                  className="w-full h-10 text-sm md:text-base bg-gray-800 border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white hover:border-blue-400 transition-colors disabled:opacity-50"
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Propose Trade

@@ -156,36 +156,49 @@ export default async function handler(req, res) {
 
     // Send notification to target seller via messaging
     try {
-      // Create or get conversation
-      const conversationResponse = await fetch(`${process.env.VITE_SUPABASE_URL?.replace('/rest/v1', '')}/api/messages/create-conversation`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user1_id: offeror_id,
-          user2_id: target_seller_id
-        })
-      });
+      // Get offeror name first
+      const { data: offerorProfileData } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', offeror_id)
+        .single();
 
-      if (conversationResponse.ok) {
-        const { conversation_id } = await conversationResponse.json();
-        
-        // Get offeror name
-        const { data: offerorProfile } = await supabase
-          .from('profiles')
-          .select('full_name')
-          .eq('id', offeror_id)
-          .single();
+      // Create or get conversation directly via Supabase
+      let conversationId;
+      
+      // Check if conversation exists
+      const { data: existingConv } = await supabase
+        .from('conversations')
+        .select('id')
+        .or(`and(user1_id.eq.${offeror_id},user2_id.eq.${target_seller_id}),and(user1_id.eq.${target_seller_id},user2_id.eq.${offeror_id})`)
+        .single();
 
-        // Send notification message
-        await fetch(`${process.env.VITE_SUPABASE_URL?.replace('/rest/v1', '')}/api/messages/send-message`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            conversation_id,
-            sender_id: offeror_id,
-            content: `🔄 Trade Offer: ${offerorProfile?.full_name || 'Someone'} wants to trade ${offeredItems.length} item${offeredItems.length > 1 ? 's' : ''}${cash_adjustment > 0 ? ` + $${cash_adjustment}` : ''} for your "${targetItem.title}"!\n\nView the offer in Trade Offers to accept or reject. Offer expires in 7 days.`
+      if (existingConv) {
+        conversationId = existingConv.id;
+      } else {
+        // Create new conversation
+        const { data: newConv, error: convError } = await supabase
+          .from('conversations')
+          .insert({
+            user1_id: offeror_id,
+            user2_id: target_seller_id
           })
-        });
+          .select('id')
+          .single();
+        
+        if (newConv) conversationId = newConv.id;
+      }
+
+      if (conversationId) {
+        // Send notification message directly via Supabase
+        await supabase
+          .from('messages')
+          .insert({
+            conversation_id: conversationId,
+            sender_id: offeror_id,
+            content: `🔄 Trade Offer: ${offerorProfileData?.full_name || 'Someone'} wants to trade ${offeredItems.length} item${offeredItems.length > 1 ? 's' : ''}${cash_adjustment > 0 ? ` + $${cash_adjustment}` : ''} for your "${targetItem.title || 'item'}"!\n\nView the offer in Trade Offers to accept or reject. Offer expires in 7 days.`,
+            is_read: false
+          });
       }
     } catch (notificationError) {
       console.error('Error sending notification:', notificationError);
