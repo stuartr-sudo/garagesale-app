@@ -142,7 +142,7 @@ export default function ProposeTradeModal({ targetItem, currentUserId, onClose, 
             Propose Trade
           </DialogTitle>
           <p className="text-gray-400 text-xs">
-            Offer your items in exchange for "{targetItem.title}"
+            Offer your items in exchange for "{targetItem.title || 'this item'}"
           </p>
         </DialogHeader>
 
@@ -157,14 +157,14 @@ export default function ProposeTradeModal({ targetItem, currentUserId, onClose, 
                   {targetItem.image_urls?.[0] && (
                     <img
                       src={targetItem.image_urls[0]}
-                      alt={targetItem.title}
+                      alt={targetItem.title || 'Item'}
                       className="w-20 h-20 object-cover rounded-lg"
                     />
                   )}
                   <div className="flex-1">
-                    <h4 className="font-semibold text-white">{targetItem.title}</h4>
+                    <h4 className="font-semibold text-white">{targetItem.title || 'Untitled Item'}</h4>
                     <p className="text-green-400 font-bold mt-1">
-                      Value: ${targetItem.price?.toFixed(2)}
+                      Value: ${targetItem.price?.toFixed(2) || '0.00'}
                     </p>
                   </div>
                 </div>
