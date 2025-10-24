@@ -91,17 +91,17 @@ export default function CollectionAcknowledgment({
         </div>
       </div>
 
-      <div className="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700">
+      <div className="flex items-start gap-3 p-4 bg-gray-800/50 rounded-lg border border-gray-700 mb-4">
         <Checkbox
           id="collection-acknowledge"
           checked={acknowledged}
           onCheckedChange={onAcknowledge}
-          className="mt-1 w-5 h-5 border-2 border-gray-400 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500"
+          className="mt-1 w-5 h-5 border-2 border-gray-400 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 flex-shrink-0"
         />
         <div className="flex-1">
           <Label 
             htmlFor="collection-acknowledge" 
-            className="text-xs text-gray-300 cursor-pointer leading-relaxed"
+            className="text-xs text-gray-300 cursor-pointer leading-relaxed block"
           >
             I acknowledge that I have read and understand the collection details above. 
             I agree to collect the item on the specified date and time, understand that 

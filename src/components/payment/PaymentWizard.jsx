@@ -262,8 +262,8 @@ export default function PaymentWizard({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <Card className="bg-gray-900/95 backdrop-blur-sm shadow-2xl border border-gray-800 rounded-2xl w-full max-w-2xl h-[700px] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 min-h-screen">
+      <Card className="bg-gray-900/95 backdrop-blur-sm shadow-2xl border border-gray-800 rounded-2xl w-full max-w-2xl h-[800px] md:h-[900px] overflow-hidden flex flex-col">
         <CardHeader className="bg-gray-800/50 border-b border-gray-700 flex-shrink-0 px-6 py-4">
           <div className="flex items-center justify-between">
             <CardTitle className="text-white text-xl">
@@ -294,13 +294,13 @@ export default function PaymentWizard({
           </div>
         </CardHeader>
         
-        <CardContent className="flex-1 overflow-hidden p-6">
-          <div className="h-full flex flex-col">
+        <CardContent className="flex-1 overflow-y-auto p-6">
+          <div className="h-full flex flex-col space-y-4">
             {renderStep()}
           </div>
         </CardContent>
         
-        <div className="flex-shrink-0 p-6 border-t border-gray-700 bg-gray-800/50">
+        <div className="flex-shrink-0 p-6 border-t border-gray-700 bg-gray-800/50 mt-auto">
           <div className="flex justify-between">
             {currentStep > 1 && (
               <Button
