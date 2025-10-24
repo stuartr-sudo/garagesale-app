@@ -77,23 +77,23 @@ export default function ImageUpload({ images = [], onUpload, onRemove, onSetMain
         ))}
         
         {safeImages.length < 8 && (
-          <div className="aspect-square border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center space-y-3 bg-gray-50 p-4">
-            <div className={`flex ${isMobile ? 'flex-col gap-2 w-full' : 'justify-center'}`}>
+          <div className="aspect-square border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center bg-gray-50 p-2">
+            <div className={`flex ${isMobile ? 'flex-col gap-2 w-full px-2' : 'justify-center'}`}>
               <Button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
-                className={`${isMobile ? 'w-full' : 'px-8'} h-12 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold flex items-center justify-center`}
+                className={`${isMobile ? 'w-full' : 'px-6'} h-12 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold flex items-center justify-center text-sm whitespace-nowrap`}
               >
                 {isUploading ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Uploading...
+                    <span className="truncate">Uploading...</span>
                   </>
                 ) : (
                   <>
-                    <Upload className="w-4 h-4 mr-2" />
-                    Add from library
+                    <Upload className="w-4 h-4 mr-2 flex-shrink-0" />
+                    <span className="truncate">Add from library</span>
                   </>
                 )}
               </Button>
@@ -103,10 +103,10 @@ export default function ImageUpload({ images = [], onUpload, onRemove, onSetMain
                   type="button"
                   onClick={() => setShowMobileCamera(true)}
                   disabled={isUploading}
-                  className="w-full h-12 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold flex items-center justify-center"
+                  className="w-full h-12 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold flex items-center justify-center text-sm"
                 >
-                  <Camera className="w-4 h-4 mr-2" />
-                  Take photo
+                  <Camera className="w-4 h-4 mr-2 flex-shrink-0" />
+                  <span className="truncate">Take photo</span>
                 </Button>
               )}
             </div>

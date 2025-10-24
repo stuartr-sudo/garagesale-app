@@ -802,33 +802,6 @@ Return only the description, nothing else.`
             </div>
 
             {/* Voice Input Buttons */}
-            {!hasVoiceInput && (
-              <div className="mb-4 flex gap-2 justify-center">
-                <Button
-                  type="button"
-                  onClick={() => {
-                    setVoiceTargetField('intelligent');
-                    openVoiceInput('intelligent');
-                  }}
-                  variant="outline"
-                  size="sm"
-                  className="border-purple-500 text-purple-400 hover:bg-purple-500/20 hover:text-purple-300 hover:border-purple-400 hover:shadow-md hover:shadow-purple-500/20 transition-all duration-200"
-                >
-                  <Mic className="w-3 h-3 mr-1" />
-                  Yes, describe my item
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => setHasVoiceInput(false)}
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-400 hover:text-white"
-                >
-                  Skip
-                </Button>
-              </div>
-            )}
-
             {/* Voice Input Status */}
             {hasVoiceInput && voiceTranscription && (
               <div className="mb-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
