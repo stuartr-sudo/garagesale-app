@@ -187,8 +187,9 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
           content: data.response,
           timestamp: new Date().toISOString(),
           offer_accepted: data.offer_accepted,
-          counter_offer: counterOfferAmount,
-          accepted_offer: acceptedOfferAmount
+          counter_offer: data.counter_offer_amount || counterOfferAmount, // Use backend value first
+          accepted_offer: acceptedOfferAmount,
+          is_final: data.is_final_counter
         }]);
       } else {
         throw new Error(data.error || 'Failed to send message');
@@ -287,44 +288,42 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
                   )}
                 </div>
                 
-                {/* Show Accept Deal button if there's a counter-offer OR if offer was accepted */}
-                {msg.sender === 'ai' && !offerAccepted && (
-                  <>
-                    {msg.counter_offer && (
-                      <Button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          const offerAmount = msg.counter_offer;
-                          sendMessage(`I accept your offer of $${offerAmount}`);
-                        }}
-                        className="mt-2 w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold shadow-lg"
-                        disabled={loading}
-                      >
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        Accept Deal - ${msg.counter_offer}
-                      </Button>
-                    )}
-                    {msg.accepted_offer && (
-                      <Button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          const acceptedAmount = msg.accepted_offer;
-                          setOfferAccepted(true);
-                          // Call the parent component to open purchase modal with negotiated price
-                          if (onAcceptOffer) {
-                            onAcceptOffer(acceptedAmount);
-                          }
-                        }}
-                        className="mt-2 w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold shadow-lg animate-pulse"
-                        disabled={loading}
-                      >
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        Confirm Purchase - ${msg.accepted_offer}
-                      </Button>
-                    )}
-                  </>
+                {/* Show Accept Deal button if there's a counter-offer */}
+                {msg.sender === 'ai' && msg.counter_offer && (
+                  <Button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const offerAmount = msg.counter_offer;
+                      sendMessage(`I accept your offer of $${offerAmount}`);
+                    }}
+                    className="mt-2 w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold shadow-lg"
+                    disabled={loading}
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Accept Deal - ${msg.counter_offer}
+                  </Button>
+                )}
+                
+                {/* Show Buy Now button if there's an accepted offer */}
+                {msg.sender === 'ai' && msg.accepted_offer && (
+                  <Button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const acceptedAmount = msg.accepted_offer;
+                      setOfferAccepted(true);
+                      // Call the parent component to open purchase modal with negotiated price
+                      if (onAcceptOffer) {
+                        onAcceptOffer(acceptedAmount);
+                      }
+                    }}
+                    className="mt-2 w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold shadow-lg animate-pulse"
+                    disabled={loading}
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Confirm Purchase - ${msg.accepted_offer}
+                  </Button>
                 )}
               </div>
             </div>
