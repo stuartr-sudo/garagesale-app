@@ -279,6 +279,12 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
                       <span>Offer Accepted!</span>
                     </div>
                   )}
+                  {msg.counter_offer && msg.is_final && (
+                    <div className="flex items-center gap-1 mt-2 text-yellow-400 text-xs">
+                      <Sparkles className="w-4 h-4" />
+                      <span>⚠️ Final Offer - This is the last counter!</span>
+                    </div>
+                  )}
                 </div>
                 
                 {/* Show Accept Deal button if there's a counter-offer OR if offer was accepted */}

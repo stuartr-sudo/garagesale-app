@@ -159,6 +159,28 @@ export default async function handler(req, res) {
       const askingPrice = parseFloat(item.price);
       
       // ============================================
+      // CRITICAL: CHECK IF AGENT HAS ALREADY MADE 3 COUNTERS
+      // ============================================
+      const allCounters = (conversation.negotiation_history || [])
+        .filter(h => h.counter_offer && h.response === 'countered');
+      
+      if (allCounters.length >= 3) {
+        // Agent has already made 3 counters - either accept or decline, no more counters
+        const minimumPrice = knowledge?.minimum_price ? parseFloat(knowledge.minimum_price) : null;
+        
+        if (minimumPrice && offerAmount >= minimumPrice) {
+          offerAccepted = true;
+          negotiationStrategy = `✅ FINAL ACCEPTANCE - You've made 3 counter-offers. This offer of $${offerAmount.toFixed(2)} meets your minimum of $${minimumPrice.toFixed(2)}. Accept it now.`;
+          console.log('✅ FINAL ACCEPTANCE: 3 counters reached, accepting');
+        } else {
+          negotiationStrategy = `❌ FINAL DECLINE - You've made 3 counter-offers already. This offer of $${offerAmount.toFixed(2)} is still too low. Politely decline and suggest they consider the asking price of $${askingPrice.toFixed(2)}.`;
+          console.log('❌ FINAL DECLINE: 3 counters reached, declining');
+        }
+        // Skip all the counter-offer logic below
+      } else {
+        // Continue with normal negotiation logic...
+      
+      // ============================================
       // SPECIAL CASE: FREE ITEMS ($0)
       // ============================================
       if (askingPrice === 0) {
@@ -319,6 +341,7 @@ export default async function handler(req, res) {
           });
         }
       }
+      } // Close the else block for the 3-counter check
     }
 
     // Build agent prompt
