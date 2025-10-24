@@ -117,22 +117,23 @@ export default function ItemCard({ item, seller, isSold = false, currentUser = n
   };
 
   return (
-    <Card 
-      className="rounded-2xl shadow-2xl shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 border-2 border-cyan-500/30 hover:border-cyan-400/60 overflow-hidden group hover:scale-[1.02] flex flex-col h-full ring-1 ring-cyan-400/20 hover:ring-cyan-400/40"
-      style={{
-        background: `linear-gradient(to bottom right, ${theme.cardFrom}, ${theme.cardTo})`
-      }}
-    >
-      {/* Standardized square aspect ratio to match Featured Items */}
-      <div className="relative overflow-hidden aspect-square">
-        <img
-          src={primaryImage}
-          alt={item.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          onError={(e) => {
-            e.target.src = "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop";
-          }}
-        />
+    <Link to={`/ItemDetail/${item.id}`} className="block h-full">
+      <Card 
+        className="rounded-2xl shadow-2xl shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 border-2 border-cyan-500/30 hover:border-cyan-400/60 overflow-hidden group hover:scale-[1.02] flex flex-col h-full ring-1 ring-cyan-400/20 hover:ring-cyan-400/40 cursor-pointer"
+        style={{
+          background: `linear-gradient(to bottom right, ${theme.cardFrom}, ${theme.cardTo})`
+        }}
+      >
+        {/* Standardized square aspect ratio to match Featured Items */}
+        <div className="relative overflow-hidden aspect-square">
+          <img
+            src={primaryImage}
+            alt={item.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            onError={(e) => {
+              e.target.src = "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop";
+            }}
+          />
         {/* Special Offer Badge - Top Left */}
         {!isSold && specialOffers.length > 0 && (
           <div className="absolute top-3 left-3 z-10">
@@ -170,11 +171,9 @@ export default function ItemCard({ item, seller, isSold = false, currentUser = n
       
       <CardContent className="p-5 flex flex-col flex-grow">
         <div className="flex-grow">
-          <Link to={`/ItemDetail/${item.id}`}>
-            <h3 className="font-bold text-lg text-white line-clamp-2 leading-tight hover:text-pink-400 transition-colors cursor-pointer">
-              {item.title}
-            </h3>
-          </Link>
+          <h3 className="font-bold text-lg text-white line-clamp-2 leading-tight">
+            {item.title}
+          </h3>
           
           {/* Product Description */}
           {item.description && (
@@ -228,17 +227,14 @@ export default function ItemCard({ item, seller, isSold = false, currentUser = n
               </div>
             )}
             
-            <Link to={`/ItemDetail/${item.id}`}>
-              <Button
-                className="w-full h-10 hover:opacity-90"
-                style={{
-                  background: `linear-gradient(to right, ${theme.buttonFrom}, ${theme.buttonTo})`
-                }}
-              >
-                <Eye className="w-4 h-4 mr-2" />
-                View Details
-              </Button>
-            </Link>
+            <div className="w-full h-10 px-4 rounded-lg text-center text-white text-sm font-medium flex items-center justify-center"
+              style={{
+                background: `linear-gradient(to right, ${theme.buttonFrom}, ${theme.buttonTo})`
+              }}
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              View Details
+            </div>
           </div>
         ) : (
           <div className="w-full mt-4 h-10 px-4 bg-gray-800/50 rounded-lg border border-gray-700 text-center text-gray-400 text-sm font-medium flex items-center justify-center">
@@ -247,5 +243,6 @@ export default function ItemCard({ item, seller, isSold = false, currentUser = n
         )}
       </CardContent>
     </Card>
+    </Link>
   );
 }
