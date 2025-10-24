@@ -48,12 +48,12 @@ export default function PromoteItem() {
       
       setSellerBalance(profile?.seller_balance || 0);
 
-      // Load user's items (only available items)
+      // Load user's items (only active items)
       const { data: items, error: itemsError } = await supabase
         .from('items')
         .select('*')
         .eq('seller_id', user.id)
-        .eq('status', 'available')
+        .eq('status', 'active')
         .order('created_at', { ascending: false });
 
       if (itemsError) throw itemsError;
@@ -246,40 +246,40 @@ export default function PromoteItem() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <TrendingUp className="w-10 h-10 text-yellow-500" />
+    <div className="h-screen bg-slate-950 text-white overflow-hidden flex flex-col">
+      <div className="container mx-auto px-4 py-4 max-w-7xl flex-1 flex flex-col">
+        {/* Compact Header */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-7 h-7 text-yellow-500" />
             <div>
-              <h1 className="text-3xl font-bold">Promote Your Items</h1>
-              <p className="text-gray-400 text-sm">Boost visibility and sell faster</p>
+              <h1 className="text-2xl font-bold">Promote Your Items</h1>
+              <p className="text-gray-400 text-xs">Boost visibility and sell faster</p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-gray-400 text-sm">Your Balance</p>
-            <p className="text-2xl font-bold text-green-400">${sellerBalance.toFixed(2)}</p>
+            <p className="text-gray-400 text-xs">Balance</p>
+            <p className="text-xl font-bold text-green-400">${sellerBalance.toFixed(2)}</p>
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div className="grid lg:grid-cols-2 gap-4 flex-1 overflow-hidden">
           {/* Left Column - Promote Item */}
-          <Card className="bg-gray-900 border-gray-800">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+          <Card className="bg-gray-900 border-gray-800 flex flex-col overflow-hidden">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
                 <Zap className="w-5 h-5 text-yellow-500" />
                 Promote an Item
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {/* How it Works */}
-              <div className="p-4 bg-blue-900/20 border border-blue-800 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <Info className="w-5 h-5 text-blue-400 mt-0.5" />
+            <CardContent className="space-y-3 flex-1 overflow-y-auto">
+              {/* How it Works - Compact */}
+              <div className="p-3 bg-blue-900/20 border border-blue-800 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <Info className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
                   <div>
-                    <h4 className="text-blue-200 font-semibold mb-2">How Promoted Listings Work</h4>
-                    <ul className="text-sm text-blue-100 space-y-1">
+                    <h4 className="text-blue-200 font-semibold text-sm mb-1">How Promoted Listings Work</h4>
+                    <ul className="text-xs text-blue-100 space-y-0.5">
                       <li>• Bid for top spots in your category</li>
                       <li>• Highest bidder gets featured placement</li>
                       <li>• Promotion lasts for {PROMOTION_DURATION_DAYS} days</li>
@@ -291,8 +291,8 @@ export default function PromoteItem() {
               </div>
 
               {/* Select Item */}
-              <div className="space-y-2">
-                <Label>Select Item to Promote *</Label>
+              <div className="space-y-1.5">
+                <Label className="text-sm">Select Item to Promote *</Label>
                 <Select
                   value={selectedItem?.id}
                   onValueChange={(itemId) => {
@@ -300,13 +300,13 @@ export default function PromoteItem() {
                     setSelectedItem(item);
                   }}
                 >
-                  <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                  <SelectTrigger className="bg-gray-800 border-gray-700 text-white h-10">
                     <SelectValue placeholder="Choose an item..." />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-700">
+                  <SelectContent className="bg-gray-800 border-gray-700 max-h-60">
                     {myItems.length === 0 ? (
-                      <div className="p-4 text-center text-gray-400">
-                        No available items to promote
+                      <div className="p-3 text-center text-gray-400 text-sm">
+                        No active items to promote
                       </div>
                     ) : (
                       myItems.map((item) => (
@@ -316,11 +316,11 @@ export default function PromoteItem() {
                               <img
                                 src={item.image_urls[0]}
                                 alt={item.title}
-                                className="w-10 h-10 object-cover rounded"
+                                className="w-8 h-8 object-cover rounded"
                               />
                             )}
                             <div>
-                              <p className="font-medium">{item.title}</p>
+                              <p className="font-medium text-sm">{item.title}</p>
                               <p className="text-xs text-gray-400">${item.price?.toFixed(2)}</p>
                             </div>
                           </div>
@@ -348,8 +348,8 @@ export default function PromoteItem() {
               )}
 
               {/* Bid Amount */}
-              <div className="space-y-2">
-                <Label htmlFor="bid">Your Bid Amount *</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="bid" className="text-sm">Your Bid Amount *</Label>
                 <div className="relative">
                   <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
@@ -360,30 +360,30 @@ export default function PromoteItem() {
                     value={bidAmount}
                     onChange={(e) => setBidAmount(e.target.value)}
                     placeholder={MIN_BID.toFixed(2)}
-                    className="pl-10 bg-gray-800 border-gray-700 text-white"
+                    className="pl-10 bg-gray-800 border-gray-700 text-white h-10"
                     disabled={!selectedItem}
                   />
                 </div>
                 <p className="text-xs text-gray-500">
-                  Minimum bid: ${MIN_BID.toFixed(2)}
-                  {topBid > 0 && ` | Beat current top: $${(topBid + 0.01).toFixed(2)}`}
+                  Min: ${MIN_BID.toFixed(2)}
+                  {topBid > 0 && ` | Beat: $${(topBid + 0.01).toFixed(2)}`}
                 </p>
               </div>
 
               {/* Duration Info */}
-              <div className="p-3 bg-gray-800 rounded-lg flex items-center justify-between">
+              <div className="p-2 bg-gray-800 rounded-lg flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-purple-400" />
-                  <span className="text-gray-300 text-sm">Duration:</span>
+                  <span className="text-gray-300 text-xs">Duration:</span>
                 </div>
-                <span className="text-white font-semibold">{PROMOTION_DURATION_DAYS} days</span>
+                <span className="text-white font-semibold text-sm">{PROMOTION_DURATION_DAYS} days</span>
               </div>
 
               {/* Submit Button */}
               <Button
                 onClick={handleSubmitBid}
                 disabled={!selectedItem || !bidAmount || submitting || parseFloat(bidAmount) > sellerBalance}
-                className="w-full bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700"
+                className="w-full bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 h-10"
               >
                 {submitting ? (
                   <>
@@ -400,21 +400,21 @@ export default function PromoteItem() {
 
               {parseFloat(bidAmount) > sellerBalance && (
                 <p className="text-xs text-red-400 text-center">
-                  Insufficient balance. You need ${(parseFloat(bidAmount) - sellerBalance).toFixed(2)} more.
+                  Insufficient balance. Need ${(parseFloat(bidAmount) - sellerBalance).toFixed(2)} more.
                 </p>
               )}
             </CardContent>
           </Card>
 
           {/* Right Column - Active Promotions */}
-          <Card className="bg-gray-900 border-gray-800">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+          <Card className="bg-gray-900 border-gray-800 flex flex-col overflow-hidden">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
                 <Target className="w-5 h-5 text-green-500" />
                 Your Active Promotions
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-1 overflow-y-auto">
               {activePromotions.length === 0 ? (
                 <div className="text-center py-12">
                   <Trophy className="w-16 h-16 mx-auto mb-4 text-gray-600" />
