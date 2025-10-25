@@ -52,20 +52,53 @@ export async function addToCart({
 
     console.log('⏰ Reservation expires at:', reservedUntil.toISOString());
 
-    // Step 3: Add to cart with reservation
-    const { data, error } = await supabase
+    // Step 3: Check if item is already in cart
+    const { data: existingItem } = await supabase
       .from('cart_items')
-      .insert({
-        item_id: itemId,
-        buyer_id: buyerId,
-        quantity,
-        negotiated_price: negotiatedPrice,
-        price_source: priceSource,
-        reserved_until: reservedUntil.toISOString(),
-        reservation_status: 'active'
-      })
-      .select()
+      .select('*')
+      .eq('item_id', itemId)
+      .eq('buyer_id', buyerId)
       .single();
+
+    let data;
+    let error;
+
+    if (existingItem) {
+      // Item already in cart - update the reservation time
+      console.log('🔄 Item already in cart, extending reservation');
+      const result = await supabase
+        .from('cart_items')
+        .update({
+          reserved_until: reservedUntil.toISOString(),
+          reservation_status: 'active',
+          negotiated_price: negotiatedPrice || existingItem.negotiated_price,
+          price_source: priceSource || existingItem.price_source
+        })
+        .eq('id', existingItem.id)
+        .select()
+        .single();
+      
+      data = result.data;
+      error = result.error;
+    } else {
+      // Add new item to cart
+      const result = await supabase
+        .from('cart_items')
+        .insert({
+          item_id: itemId,
+          buyer_id: buyerId,
+          quantity,
+          negotiated_price: negotiatedPrice,
+          price_source: priceSource,
+          reserved_until: reservedUntil.toISOString(),
+          reservation_status: 'active'
+        })
+        .select()
+        .single();
+      
+      data = result.data;
+      error = result.error;
+    }
 
     if (error) {
       console.error('❌ Error adding to cart:', error);
