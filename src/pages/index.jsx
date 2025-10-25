@@ -249,7 +249,7 @@ function PagesContent() {
                 
                 <Route path="/SpecialOffers" element={<SpecialOffers />} />
                 
-                <Route path="/ThemeSettings" element={<ThemeSettings />} />
+                <Route path="/themesettings" element={<ThemeSettings />} />
                 
                 <Route path="/PaymentConfirmations" element={<PaymentConfirmations />} />
                 <Route path="/EmailTest" element={<EmailTestPage />} />
