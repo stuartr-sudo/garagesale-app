@@ -5,8 +5,9 @@
 CREATE OR REPLACE FUNCTION deactivate_bundles_on_item_sale()
 RETURNS TRIGGER AS $$
 BEGIN
-  -- When an item is marked as sold or pending payment, deactivate all bundles containing that item
-  IF NEW.status IN ('sold', 'pending_payment') AND (OLD.status IS NULL OR OLD.status NOT IN ('sold', 'pending_payment')) THEN
+  -- When an item is marked as sold, deactivate all bundles containing that item
+  -- Check if status changed AND the new status is 'sold'
+  IF NEW.status::text = 'sold' AND (OLD.status IS NULL OR OLD.status::text != 'sold') THEN
     -- Update all bundles that contain this item to unavailable status
     UPDATE bundles
     SET status = 'unavailable',
@@ -31,7 +32,6 @@ DROP TRIGGER IF EXISTS trigger_deactivate_bundles_on_item_sale ON items;
 CREATE TRIGGER trigger_deactivate_bundles_on_item_sale
   AFTER UPDATE ON items
   FOR EACH ROW
-  WHEN (NEW.status IN ('sold', 'pending_payment'))
   EXECUTE FUNCTION deactivate_bundles_on_item_sale();
 
 -- Also create a function to check bundle availability (for queries)
@@ -40,19 +40,19 @@ RETURNS BOOLEAN AS $$
 DECLARE
   unavailable_count INTEGER;
 BEGIN
-  -- Check if any items in the bundle are sold or pending payment
+  -- Check if any items in the bundle are sold
   SELECT COUNT(*)
   INTO unavailable_count
   FROM bundle_items bi
   JOIN items i ON i.id = bi.item_id
   WHERE bi.bundle_id = bundle_id_param
-    AND i.status IN ('sold', 'pending_payment');
+    AND i.status::text = 'sold';
   
   -- Bundle is available only if all items are available
   RETURN unavailable_count = 0;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-COMMENT ON FUNCTION deactivate_bundles_on_item_sale() IS 'Automatically deactivates bundles when any of their items are sold or pending payment individually';
+COMMENT ON FUNCTION deactivate_bundles_on_item_sale() IS 'Automatically deactivates bundles when any of their items are sold individually';
 COMMENT ON FUNCTION is_bundle_available(UUID) IS 'Checks if a bundle is available by verifying all its items are available';
 
