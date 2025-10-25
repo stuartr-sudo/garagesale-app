@@ -96,10 +96,11 @@ export default function HomePage() {
 
   const handleDashboardClick = () => {
     // Check if user is a seller, redirect to MyItems, otherwise to Marketplace
+    // Use replace: true to prevent flicker
     if (currentUser?.account_type === 'seller') {
-      navigate(createPageUrl('MyItems'));
+      navigate(createPageUrl('MyItems'), { replace: true });
     } else {
-      navigate(createPageUrl('Marketplace'));
+      navigate(createPageUrl('Marketplace'), { replace: true });
     }
   };
 

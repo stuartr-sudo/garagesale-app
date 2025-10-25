@@ -1,0 +1,18 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "403e68b9-a7c8-4f4d-ab85-324797a19e9e"
+      }
+    },
+    "android": {
+      "package": "com.astastu.blockswapapp"
+    },
+    "ios": {
+      "bundleIdentifier": "com.astastu.blockswapapp",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    }
+  }
+}
