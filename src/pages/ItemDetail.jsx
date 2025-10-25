@@ -19,6 +19,7 @@ import ProposeTradeModal from '@/components/trading/ProposeTradeModal';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { addToCart } from '@/utils/cart';
+import UrgencyIndicators from '@/components/marketplace/UrgencyIndicators';
 
 export default function ItemDetail() {
   const { id } = useParams();
@@ -459,6 +460,12 @@ export default function ItemDetail() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Urgency Indicators - Real-time activity */}
+            <UrgencyIndicators 
+              itemId={item.id} 
+              viewCount={item.view_count || 0}
+            />
 
             {/* Price, Condition, Category Row */}
             <div className="grid grid-cols-3 gap-4">
