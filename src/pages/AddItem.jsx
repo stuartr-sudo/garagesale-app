@@ -15,6 +15,7 @@ import { ArrowLeft, ArrowRight, Upload, Camera, Sparkles, CheckCircle, Loader2, 
 import { useToast } from "@/hooks/use-toast";
 import ImageUpload from "../components/additem/ImageUpload";
 import VoiceInputField from "../components/additem/VoiceInputField";
+import AIImageAnalyzer from "../components/items/AIImageAnalyzer";
 
 const categories = [
   { value: "electronics", label: "Electronics" },
@@ -68,6 +69,7 @@ export default function AddItem() {
   const [voiceTranscription, setVoiceTranscription] = useState('');
   const [hasVoiceInput, setHasVoiceInput] = useState(false);
   const [ownershipConfirmed, setOwnershipConfirmed] = useState(false);
+  const [aiAnalysisUsed, setAiAnalysisUsed] = useState(false);
 
   useEffect(() => {
     loadUser();
@@ -86,6 +88,69 @@ export default function AddItem() {
     } catch (error) {
       console.error("Error loading user:", error);
     }
+  };
+
+  const handleAIAnalysis = (analysis) => {
+    // Map AI analysis to form data
+    const updates = {};
+
+    if (analysis.title) {
+      updates.title = analysis.title;
+    }
+
+    if (analysis.description) {
+      updates.description = analysis.description;
+    }
+
+    if (analysis.category) {
+      // Map AI category to form categories
+      const categoryMap = {
+        'Electronics': 'electronics',
+        'Clothing & Accessories': 'clothing',
+        'Furniture': 'furniture',
+        'Books & Media': 'books',
+        'Toys & Games': 'toys',
+        'Sports & Outdoors': 'sports',
+        'Home & Garden': 'home_garden',
+        'Tools & Equipment': 'automotive',
+        'Art & Collectibles': 'collectibles',
+        'Other': 'other'
+      };
+      updates.category = categoryMap[analysis.category] || 'other';
+    }
+
+    if (analysis.condition) {
+      // Map AI condition to form conditions
+      const conditionMap = {
+        'New': 'new',
+        'Like New': 'like_new',
+        'Good': 'good',
+        'Fair': 'fair',
+        'Poor': 'poor'
+      };
+      updates.condition = conditionMap[analysis.condition] || 'good';
+    }
+
+    if (analysis.priceRange) {
+      // Use the middle of the price range as suggested price
+      const suggestedPrice = Math.round((analysis.priceRange.min + analysis.priceRange.max) / 2);
+      updates.price = suggestedPrice.toString();
+      // Set minimum price to 70% of suggested price
+      updates.minimum_price = Math.round(suggestedPrice * 0.7).toString();
+    }
+
+    if (analysis.tags && analysis.tags.length > 0) {
+      updates.tags = analysis.tags;
+    }
+
+    // Update form data
+    setItemData(prev => ({ ...prev, ...updates }));
+    setAiAnalysisUsed(true);
+
+    toast({
+      title: "AI Analysis Applied! ✨",
+      description: `Auto-filled ${Object.keys(updates).length} fields. Review and adjust as needed.`,
+    });
   };
 
   const handleVoiceTranscript = async (transcript) => {
@@ -734,6 +799,17 @@ Return only the description, nothing else.`
                   onSetMain={setMainImage}
                   isUploading={isUploading}
                 />
+
+                {/* AI Image Analyzer - Auto-fill listing details */}
+                {itemData.image_urls.length > 0 && (
+                  <div className="mt-6">
+                    <AIImageAnalyzer
+                      imageUrl={itemData.image_urls[0]}
+                      onAnalysisComplete={handleAIAnalysis}
+                      disabled={isUploading}
+                    />
+                  </div>
+                )}
 
           </div>
         );
