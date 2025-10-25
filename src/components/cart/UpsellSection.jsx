@@ -37,13 +37,17 @@ export default function UpsellSection({ cartItems, currentUserId }) {
       // Get seller IDs from current cart items
       const sellerIds = [...new Set(cartItems.map(item => item.seller_id))];
       
+      console.log('🛒 Cart seller IDs:', sellerIds);
+      
       if (sellerIds.length === 0) {
+        console.log('❌ No sellers in cart');
         setUpsellItems([]);
         return;
       }
 
       // Get item IDs already in cart (to exclude them from upsells)
       const cartItemIds = cartItems.map(item => item.id);
+      console.log('🛒 Items already in cart:', cartItemIds);
 
       // Fetch sellers who have AI upsell enabled
       const { data: enabledSellers, error: sellersError } = await supabase
@@ -54,7 +58,10 @@ export default function UpsellSection({ cartItems, currentUserId }) {
 
       if (sellersError) throw sellersError;
 
+      console.log('✅ Sellers with AI upsell enabled:', enabledSellers);
+
       if (!enabledSellers || enabledSellers.length === 0) {
+        console.log('❌ No sellers have AI upsell enabled');
         setUpsellItems([]);
         return;
       }
@@ -72,8 +79,10 @@ export default function UpsellSection({ cartItems, currentUserId }) {
 
       if (itemsError) throw itemsError;
 
+      console.log(`📦 Found ${items?.length || 0} potential upsell items`);
+
       // Enrich items with seller info and calculate discounted price
-      const enrichedItems = items.map(item => {
+      const enrichedItems = (items || []).map(item => {
         const seller = enabledSellers.find(s => s.id === item.seller_id);
         const commissionRate = seller?.upsell_commission_rate || 15;
         const discountedPrice = item.price * (1 - commissionRate / 100);
@@ -88,6 +97,7 @@ export default function UpsellSection({ cartItems, currentUserId }) {
         };
       });
 
+      console.log(`✨ ${enrichedItems.length} upsell items ready to display`);
       setUpsellItems(enrichedItems);
 
     } catch (error) {
