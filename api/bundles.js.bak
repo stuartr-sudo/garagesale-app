@@ -87,11 +87,15 @@ export default async function handler(req, res) {
         throw bundleItemsError;
       }
 
+      // Mark individual items as 'bundled' to prevent individual sale
+      const { error: updateItemsError } = await supabase
+        .from('items')
+        .update({ status: 'bundled' })
+        .in('id', itemIds);
 
-      // NOTE: Items remain 'available' status - they can be sold individually
-      // If an item sells individually, the trigger 'deactivate_bundles_on_item_sale' 
-      // will automatically mark all bundles containing that item as 'unavailable'
-
+      if (updateItemsError) {
+        console.error("Failed to update item statuses after bundle creation:", updateItemsError);
+      }
 
       res.status(201).json({ bundle });
 
