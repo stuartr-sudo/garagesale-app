@@ -66,6 +66,7 @@ export default function Settings() {
       const needsOnboarding = !user.country || !user.postcode;
       setIsOnboarding(needsOnboarding);
       
+      // Ensure all fields have default values
       setFormData({
         full_name: user.full_name || "",
         email: user.email || "",
@@ -74,7 +75,8 @@ export default function Settings() {
         city: user.city || "",
         postcode: user.postcode || "",
         phone: user.phone || "",
-        collection_address: user.collection_address || ""
+        collection_address: user.collection_address || "",
+        negotiation_aggressiveness: user.negotiation_aggressiveness || "balanced"
       });
 
       if (user.country) {
@@ -83,6 +85,18 @@ export default function Settings() {
       }
     } catch (error) {
       console.error("Error loading user:", error);
+      // Set default form data if user loading fails
+      setFormData({
+        full_name: "",
+        email: "",
+        country: "",
+        state_region: "",
+        city: "",
+        postcode: "",
+        phone: "",
+        collection_address: "",
+        negotiation_aggressiveness: "balanced"
+      });
     }
     setLoading(false);
   };
@@ -245,7 +259,7 @@ export default function Settings() {
                     <div className="space-y-2">
                       <Label htmlFor="country" className="text-gray-300">Country *</Label>
                       <Select
-                        value={formData.country}
+                        value={formData.country || ""}
                         onValueChange={handleCountryChange}
                       >
                         <SelectTrigger className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white">
@@ -274,7 +288,7 @@ export default function Settings() {
                       </Label>
                       {selectedCountry && selectedCountry.states.length > 0 ? (
                         <Select
-                          value={formData.state_region}
+                          value={formData.state_region || ""}
                           onValueChange={(value) => setFormData(prev => ({ ...prev, state_region: value }))}
                         >
                           <SelectTrigger className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white">
@@ -369,7 +383,7 @@ export default function Settings() {
                     <div className="space-y-2">
                       <Label htmlFor="negotiation_aggressiveness" className="text-gray-300">Negotiation Style</Label>
                       <Select
-                        value={formData.negotiation_aggressiveness}
+                        value={formData.negotiation_aggressiveness || "balanced"}
                         onValueChange={(value) => setFormData(prev => ({ ...prev, negotiation_aggressiveness: value }))}
                       >
                         <SelectTrigger className="h-12 rounded-xl bg-gray-800 border-gray-700 text-white">
