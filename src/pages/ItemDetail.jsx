@@ -642,34 +642,31 @@ export default function ItemDetail() {
                 </div>
               )}
 
-              <Button
-                onClick={handleAddToCart}
-                disabled={isAddingToCart || isInCart || itemUnavailable}
-                className={`w-full h-10 md:h-12 text-white font-semibold text-sm md:text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] ${
-                  isInCart
-                    ? 'bg-green-600 hover:bg-green-600'
-                    : itemUnavailable
-                    ? 'opacity-50 cursor-not-allowed'
-                    : ''
-                }`}
-                style={
-                  !isInCart && !itemUnavailable
-                    ? { background: `linear-gradient(to right, ${theme?.addToCartFrom || '#a855f7'}, ${theme?.addToCartTo || '#db2777'})` }
-                    : undefined
-                }
-              >
-                {isInCart ? (
-                  <>
-                    <Check className="w-4 h-4 mr-1" />
-                    Added
-                  </>
-                ) : (
-                  <>
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add to Cart
-                  </>
-                )}
-              </Button>
+              {isInCart ? (
+                <Button
+                  onClick={() => navigate(createPageUrl('Cart'))}
+                  className="w-full h-10 md:h-12 bg-green-600 hover:bg-green-700 text-white font-semibold text-sm md:text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+                >
+                  <ShoppingCart className="w-4 h-4 mr-1" />
+                  View Cart
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleAddToCart}
+                  disabled={isAddingToCart || itemUnavailable}
+                  className={`w-full h-10 md:h-12 text-white font-semibold text-sm md:text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] ${
+                    itemUnavailable ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                  style={
+                    !itemUnavailable
+                      ? { background: `linear-gradient(to right, ${theme?.addToCartFrom || '#a855f7'}, ${theme?.addToCartTo || '#db2777'})` }
+                      : undefined
+                  }
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add to Cart
+                </Button>
+              )}
 
               <Button
                 onClick={() => setShowPurchaseModal(true)}
