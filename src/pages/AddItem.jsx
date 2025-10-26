@@ -262,6 +262,51 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
     }
   };
 
+  // Helper function to compress images before upload
+  const compressImage = async (file, maxWidth = 1200, maxHeight = 1200, quality = 0.8) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          // Calculate new dimensions while maintaining aspect ratio
+          if (width > height) {
+            if (width > maxWidth) {
+              height = (height * maxWidth) / width;
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width = (width * maxHeight) / height;
+              height = maxHeight;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Convert canvas to blob with compression
+          canvas.toBlob(
+            (blob) => {
+              resolve(blob);
+            },
+            'image/jpeg',
+            quality
+          );
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleImageUpload = async (files) => {
     // Check if user is loaded
     if (!currentUser) {
@@ -291,15 +336,22 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
       const uploadedUrls = [];
       
       for (const file of files) {
-        const fileExt = file.name.split('.').pop();
+        // Compress the image before uploading
+        const compressedBlob = await compressImage(file);
+        const compressedFile = new File([compressedBlob], file.name, {
+          type: 'image/jpeg',
+          lastModified: Date.now()
+        });
+
+        const fileExt = 'jpg'; // Always use jpg after compression
         const fileName = `${Math.random().toString(36).substring(7)}_${Date.now()}.${fileExt}`;
         const filePath = `${currentUser.id}/${fileName}`;
 
         const { data, error } = await supabase.storage
           .from('item-images')
-          .upload(filePath, file, { 
+          .upload(filePath, compressedFile, { 
             upsert: true,
-            contentType: file.type
+            contentType: 'image/jpeg'
           });
 
         if (error) {
@@ -321,7 +373,7 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
 
       toast({
         title: "Success!",
-        description: `${uploadedUrls.length} image(s) uploaded successfully.`,
+        description: `${uploadedUrls.length} image(s) uploaded and optimized.`,
       });
     } catch (error) {
       console.error("Upload error:", error);

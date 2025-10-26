@@ -57,10 +57,29 @@ export default function MobileCameraCapture({ onCapture, onClose }) {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    // Calculate compressed dimensions (max 1200px)
+    const maxWidth = 1200;
+    const maxHeight = 1200;
+    let width = video.videoWidth;
+    let height = video.videoHeight;
 
+    if (width > height) {
+      if (width > maxWidth) {
+        height = (height * maxWidth) / width;
+        width = maxWidth;
+      }
+    } else {
+      if (height > maxHeight) {
+        width = (width * maxHeight) / height;
+        height = maxHeight;
+      }
+    }
+
+    canvas.width = width;
+    canvas.height = height;
+    context.drawImage(video, 0, 0, width, height);
+
+    // Use 0.8 quality for better compression
     canvas.toBlob(async (blob) => {
       if (blob) {
         const imageUrl = URL.createObjectURL(blob);
@@ -72,7 +91,7 @@ export default function MobileCameraCapture({ onCapture, onClose }) {
         await analyzeImage(blob);
       }
       setIsCapturing(false);
-    }, 'image/jpeg', 0.9);
+    }, 'image/jpeg', 0.8);
   }, [stopCamera]);
 
   const analyzeImage = async (imageBlob) => {
