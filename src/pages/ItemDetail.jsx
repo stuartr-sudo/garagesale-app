@@ -47,6 +47,18 @@ export default function ItemDetail() {
   const [touchEnd, setTouchEnd] = useState(null);
   const { toast } = useToast();
 
+  // Prevent browser auto-scroll/scroll restoration on mount (especially mobile)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const prev = window.history.scrollRestoration;
+      window.history.scrollRestoration = 'manual';
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      return () => {
+        window.history.scrollRestoration = prev || 'auto';
+      };
+    }
+  }, []);
+
   useEffect(() => {
     // Load item data on mount
     loadItem();
