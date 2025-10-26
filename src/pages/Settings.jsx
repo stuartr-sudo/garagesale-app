@@ -131,6 +131,32 @@ export default function Settings() {
     setLoading(false);
   };
 
+  const loadSellerBalance = async () => {
+    if (!currentUser || currentUser.account_type !== 'seller') return;
+    
+    setLoadingBalance(true);
+    try {
+      // Calculate seller balance from completed orders
+      const { data: orders, error } = await supabase
+        .from('orders')
+        .select('total_amount, payment_status')
+        .eq('seller_id', currentUser.id)
+        .eq('payment_status', 'completed');
+
+      if (error) {
+        console.error('Error loading seller balance:', error);
+        return;
+      }
+
+      const balance = orders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0;
+      setSellerBalance(balance);
+    } catch (error) {
+      console.error('Error loading seller balance:', error);
+    } finally {
+      setLoadingBalance(false);
+    }
+  };
+
   const handleInputChange = (e) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
