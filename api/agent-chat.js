@@ -396,7 +396,17 @@ export default async function handler(req, res) {
           } else {
             // NEGOTIATE based on seller aggressiveness and offer distance
             const gapToAsking = askingPrice - offerAmount;
-            let counterPercentage;
+            
+            // CRITICAL CHECK: If gap to asking is too small to counter meaningfully, accept instead
+            // For example: $5 offer on $6 item = $1 gap. After counter logic, might overshoot.
+            const minimumCounterGap = Math.max(2, askingPrice * 0.10); // At least $2 or 10% of asking
+            if (gapToAsking < minimumCounterGap) {
+              offerAccepted = true;
+              negotiationStrategy = `✅ ACCEPT - Offer of $${offerAmount.toFixed(2)} is very close to asking price ($${askingPrice.toFixed(2)}). The gap is too small to counter-offer meaningfully. Accept this excellent offer!`;
+              console.log(`✅ AUTO-ACCEPT: Gap ($${gapToAsking.toFixed(2)}) too small for meaningful counter`);
+            } else {
+              // Proceed with counter-offer
+              let counterPercentage;
             
             // Determine counter strategy based on aggressiveness and offer position
             if (aggressiveness === 'passive') {
@@ -446,6 +456,16 @@ export default async function handler(req, res) {
             const minimumIncrease = Math.max(5, offerAmount * 0.02);
             if (counterOfferAmount - offerAmount < minimumIncrease) {
               counterOfferAmount = Math.ceil(offerAmount + minimumIncrease);
+              
+              // CRITICAL: Never counter above asking price, even with minimum increase
+              if (counterOfferAmount >= askingPrice) {
+                counterOfferAmount = askingPrice - 1;
+              }
+            }
+            
+            // FINAL SAFETY CHECK: Absolutely never exceed asking price
+            if (counterOfferAmount >= askingPrice) {
+              counterOfferAmount = askingPrice - 1;
             }
             
             // Set tone based on aggressiveness
@@ -480,6 +500,7 @@ ${tone} Explain why the item is worth more than their offer, and mention this co
               gain: (counterOfferAmount - offerAmount).toFixed(2),
               gapToAsking: (askingPrice - counterOfferAmount).toFixed(2)
             });
+            } // Close the "else" for minimumCounterGap check
           }
         }
       }
