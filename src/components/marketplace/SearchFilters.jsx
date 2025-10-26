@@ -19,8 +19,10 @@ import {
   DollarSign,
   Grid3x3,
   Star,
-  TrendingUp
+  TrendingUp,
+  Target
 } from 'lucide-react';
+import { User } from '@/api/entities';
 
 export default function SearchFilters({ onFilterChange, itemCount }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -30,6 +32,9 @@ export default function SearchFilters({ onFilterChange, itemCount }) {
   const [sortBy, setSortBy] = useState('date_desc');
   const [location, setLocation] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [locationScope, setLocationScope] = useState('my_postcode'); // 'my_postcode', 'nationwide'
+  const [userPostcode, setUserPostcode] = useState(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
 
   const categories = [
     { value: 'all', label: 'All Categories' },
@@ -62,6 +67,29 @@ export default function SearchFilters({ onFilterChange, itemCount }) {
     { value: 'views', label: 'Most Viewed' }
   ];
 
+  // Load user's postcode on component mount
+  useEffect(() => {
+    loadUserPostcode();
+  }, []);
+
+  const loadUserPostcode = async () => {
+    setIsLoadingUser(true);
+    try {
+      const user = await User.me();
+      if (user && user.postcode) {
+        setUserPostcode(user.postcode);
+        // Automatically set location to user's postcode by default
+        setLocation(user.postcode);
+      }
+    } catch (error) {
+      console.log('User not logged in or postcode not set:', error);
+      // If user is not logged in or has no postcode, default to nationwide
+      setLocationScope('nationwide');
+    } finally {
+      setIsLoadingUser(false);
+    }
+  };
+
   useEffect(() => {
     // Debounce search
     const timer = setTimeout(() => {
@@ -69,9 +97,18 @@ export default function SearchFilters({ onFilterChange, itemCount }) {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchTerm, category, condition, priceRange, sortBy, location]);
+  }, [searchTerm, category, condition, priceRange, sortBy, location, locationScope]);
 
   const applyFilters = () => {
+    // Determine the actual location filter value based on scope
+    let locationFilter = null;
+    if (locationScope === 'my_postcode' && userPostcode) {
+      locationFilter = userPostcode;
+    } else if (locationScope === 'custom' && location) {
+      locationFilter = location;
+    }
+    // If 'nationwide', locationFilter stays null
+
     onFilterChange({
       searchTerm,
       category: category === 'all' ? null : category,
@@ -79,7 +116,7 @@ export default function SearchFilters({ onFilterChange, itemCount }) {
       minPrice: priceRange[0],
       maxPrice: priceRange[1],
       sortBy,
-      location: location || null
+      location: locationFilter
     });
   };
 
@@ -90,6 +127,17 @@ export default function SearchFilters({ onFilterChange, itemCount }) {
     setPriceRange([0, 10000]);
     setSortBy('date_desc');
     setLocation('');
+    setLocationScope('my_postcode'); // Reset to default
+  };
+
+  const handleLocationScopeChange = (value) => {
+    setLocationScope(value);
+    if (value === 'my_postcode' && userPostcode) {
+      setLocation(userPostcode);
+    } else if (value === 'nationwide') {
+      setLocation('');
+    }
+    // If 'custom', keep the current location value
   };
 
   const activeFiltersCount = [
@@ -97,7 +145,8 @@ export default function SearchFilters({ onFilterChange, itemCount }) {
     category !== 'all',
     condition !== 'all',
     priceRange[0] > 0 || priceRange[1] < 10000,
-    location
+    locationScope === 'custom' && location, // Only count custom location as active filter
+    locationScope === 'nationwide' // Count nationwide as active filter
   ].filter(Boolean).length;
 
   return (
@@ -225,19 +274,60 @@ export default function SearchFilters({ onFilterChange, itemCount }) {
                 </Select>
               </div>
 
-              {/* Location Filter */}
+              {/* Location Scope Filter */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-cyan-400" />
-                  Location
+                  <Target className="w-4 h-4 text-cyan-400" />
+                  Location Scope
                 </label>
-                <Input
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder="City, State, or Postcode"
-                  className="bg-gray-900 border-gray-700 text-white placeholder-gray-500"
-                />
+                <Select 
+                  value={locationScope} 
+                  onValueChange={handleLocationScopeChange}
+                  disabled={isLoadingUser}
+                >
+                  <SelectTrigger className="bg-gray-900 border-gray-700 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-900 border-gray-700 text-white">
+                    {userPostcode && (
+                      <SelectItem 
+                        value="my_postcode"
+                        className="text-white hover:bg-cyan-600 hover:text-white focus:bg-cyan-600 focus:text-white cursor-pointer"
+                      >
+                        My Postcode ({userPostcode})
+                      </SelectItem>
+                    )}
+                    <SelectItem 
+                      value="nationwide"
+                      className="text-white hover:bg-cyan-600 hover:text-white focus:bg-cyan-600 focus:text-white cursor-pointer"
+                    >
+                      Nationwide
+                    </SelectItem>
+                    <SelectItem 
+                      value="custom"
+                      className="text-white hover:bg-cyan-600 hover:text-white focus:bg-cyan-600 focus:text-white cursor-pointer"
+                    >
+                      Custom Location
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+
+              {/* Custom Location Input - Only show when 'custom' is selected */}
+              {locationScope === 'custom' && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-cyan-400" />
+                    Custom Location
+                  </label>
+                  <Input
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    placeholder="City, State, or Postcode"
+                    className="bg-gray-900 border-gray-700 text-white placeholder-gray-500"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Price Range Slider */}
@@ -270,12 +360,32 @@ export default function SearchFilters({ onFilterChange, itemCount }) {
 
       {/* Results Summary */}
       <div className="flex items-center justify-between text-sm text-gray-400 px-2">
-        <div>
-          Showing <span className="text-cyan-400 font-semibold">{itemCount}</span> items
-          {activeFiltersCount > 0 && (
-            <span className="ml-2">
-              with <span className="text-pink-400 font-semibold">{activeFiltersCount}</span> {activeFiltersCount === 1 ? 'filter' : 'filters'} applied
-            </span>
+        <div className="flex items-center gap-3 flex-wrap">
+          <span>
+            Showing <span className="text-cyan-400 font-semibold">{itemCount}</span> items
+            {activeFiltersCount > 0 && (
+              <span className="ml-2">
+                with <span className="text-pink-400 font-semibold">{activeFiltersCount}</span> {activeFiltersCount === 1 ? 'filter' : 'filters'} applied
+              </span>
+            )}
+          </span>
+          {locationScope === 'my_postcode' && userPostcode && (
+            <Badge className="bg-cyan-900 text-cyan-300 border border-cyan-700 flex items-center gap-1">
+              <Target className="w-3 h-3" />
+              Local to {userPostcode}
+            </Badge>
+          )}
+          {locationScope === 'nationwide' && (
+            <Badge className="bg-purple-900 text-purple-300 border border-purple-700 flex items-center gap-1">
+              <MapPin className="w-3 h-3" />
+              All Locations
+            </Badge>
+          )}
+          {locationScope === 'custom' && location && (
+            <Badge className="bg-pink-900 text-pink-300 border border-pink-700 flex items-center gap-1">
+              <MapPin className="w-3 h-3" />
+              Near {location}
+            </Badge>
           )}
         </div>
       </div>

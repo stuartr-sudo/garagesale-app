@@ -10,7 +10,6 @@ The cart and upsell system provides:
 - **Intelligent Upsells**: 6 different recommendation algorithms
 - **Special Offers**: BOGO, percentage discounts, bulk discounts, bundle deals
 - **Real-time Updates**: Live cart count and availability tracking
-
 ## Core Components
 
 ### 1. Database Schema
