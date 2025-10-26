@@ -28,6 +28,18 @@ echo "Please enter your OpenAI API key:"
 read -s OPENAI_KEY
 supabase secrets set OPENAI_API_KEY="$OPENAI_KEY"
 
+# Set the Serper API key secret (optional but recommended for market research)
+echo ""
+echo "🔍 Setting SERPER_API_KEY secret (for real-time market pricing)..."
+echo "Please enter your Serper API key (or press Enter to skip):"
+read -s SERPER_KEY
+if [ -n "$SERPER_KEY" ]; then
+    supabase secrets set SERPER_API_KEY="$SERPER_KEY"
+    echo "✅ Serper API key set - market research enabled!"
+else
+    echo "⚠️  Skipped - AI will use estimated pricing (less accurate)"
+fi
+
 echo ""
 echo "✅ Deployment complete!"
 echo ""

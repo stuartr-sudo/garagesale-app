@@ -34,13 +34,31 @@ serve(async (req) => {
     console.log('Voice transcript length:', voiceTranscript?.length || 0)
 
     // ============================================
-    // STEP 1: ANALYZE IMAGE
+    // STEP 1: QUICK ITEM IDENTIFICATION (for market research)
     // ============================================
-    const imageAnalysis = await analyzeImage(imageUrl, openaiApiKey)
-    console.log('✅ Image analysis complete:', imageAnalysis.title)
+    const itemIdentification = await quickIdentifyItem(imageUrl, openaiApiKey)
+    console.log('🔍 Item identified:', itemIdentification)
 
     // ============================================
-    // STEP 2: ANALYZE VOICE (if provided)
+    // STEP 2: MARKET RESEARCH (parallel with image analysis)
+    // ============================================
+    const serperApiKey = Deno.env.get('SERPER_API_KEY')
+    
+    // Run market research and full image analysis in parallel for speed
+    const [marketData, imageAnalysis] = await Promise.all([
+      serperApiKey && itemIdentification 
+        ? searchMarketPrices(itemIdentification, serperApiKey)
+        : Promise.resolve(null),
+      analyzeImageWithMarketData(imageUrl, openaiApiKey, null) // Will get market data added later
+    ])
+    
+    console.log('✅ Image analysis complete:', imageAnalysis.title)
+    if (marketData) {
+      console.log('💰 Market data:', marketData)
+    }
+
+    // ============================================
+    // STEP 3: ANALYZE VOICE (if provided)
     // ============================================
     let voiceAnalysis = null
     if (voiceTranscript && voiceTranscript.trim()) {
@@ -49,11 +67,23 @@ serve(async (req) => {
     }
 
     // ============================================
-    // STEP 3: INTELLIGENT MERGE
+    // STEP 4: INTELLIGENT MERGE (with market data)
     // ============================================
-    const finalAnalysis = voiceAnalysis 
+    let finalAnalysis = voiceAnalysis 
       ? mergeAnalyses(imageAnalysis, voiceAnalysis)
       : imageAnalysis
+    
+    // Apply market data to final pricing if available
+    if (marketData && !voiceAnalysis?.price) {
+      // Only use market data if user didn't specify price in voice
+      finalAnalysis = {
+        ...finalAnalysis,
+        price: marketData.suggestedPrice,
+        minimum_price: marketData.minimumPrice,
+        market_research: marketData.summary
+      }
+      console.log('💰 Applied market pricing:', marketData.summary)
+    }
 
     console.log('✅ Final merged analysis:', finalAnalysis.title)
 
@@ -373,5 +403,147 @@ function validateCondition(condition: any): string {
   const validConditions = ['new', 'like_new', 'good', 'fair', 'poor']
   const normalized = String(condition || 'good').toLowerCase().replace(/[\s-]/g, '_')
   return validConditions.includes(normalized) ? normalized : 'good'
+}
+
+// ============================================
+// QUICK ITEM IDENTIFICATION (for market research)
+// ============================================
+async function quickIdentifyItem(imageUrl: string, apiKey: string): Promise<string> {
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini', // Faster, cheaper model for quick identification
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { 
+                type: 'text', 
+                text: 'Identify this item in 3-5 words (brand, model, key feature). Examples: "iPhone 12 Pro 128GB", "Nike Air Max 90", "IKEA KALLAX Shelf". Be specific and concise.' 
+              },
+              { type: 'image_url', image_url: { url: imageUrl } }
+            ]
+          }
+        ],
+        max_tokens: 30,
+        temperature: 0.1
+      })
+    })
+
+    const data = await response.json()
+    const identification = data.choices[0].message.content.trim()
+    return identification
+  } catch (error) {
+    console.error('Quick identification failed:', error)
+    return '' // Fallback to no market research
+  }
+}
+
+// ============================================
+// MARKET RESEARCH WITH SERPER API
+// ============================================
+async function searchMarketPrices(itemTitle: string, apiKey: string) {
+  try {
+    console.log('🔍 Searching market prices for:', itemTitle)
+    
+    // Search for sold/completed listings (most accurate pricing)
+    const searchQuery = `${itemTitle} price Australia sold ebay gumtree`
+    
+    const response = await fetch('https://google.serper.dev/search', {
+      method: 'POST',
+      headers: {
+        'X-API-KEY': apiKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        q: searchQuery,
+        gl: 'au', // Australia
+        num: 5, // Only 5 results for speed
+        type: 'search'
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`Serper API error: ${response.status}`)
+    }
+
+    const results = await response.json()
+    
+    // Extract prices from search results
+    const prices = extractPricesFromResults(results.organic || [])
+    
+    if (prices.length === 0) {
+      console.log('⚠️ No prices found in search results')
+      return null
+    }
+    
+    // Calculate pricing statistics
+    const avgPrice = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length)
+    const minPrice = Math.min(...prices)
+    const maxPrice = Math.max(...prices)
+    const suggestedPrice = Math.round(avgPrice * 1.05) // 5% above average for wiggle room
+    const minimumPrice = Math.round(avgPrice * 0.75) // 75% of average for negotiation floor
+    
+    return {
+      suggestedPrice,
+      minimumPrice,
+      summary: `Based on ${prices.length} recent listings: $${minPrice}-$${maxPrice} (avg: $${avgPrice})`,
+      priceRange: { min: minPrice, max: maxPrice, average: avgPrice },
+      dataPoints: prices.length
+    }
+  } catch (error) {
+    console.error('Market research failed:', error)
+    return null // Graceful fallback
+  }
+}
+
+// ============================================
+// EXTRACT PRICES FROM SEARCH RESULTS
+// ============================================
+function extractPricesFromResults(results: any[]): number[] {
+  const prices: number[] = []
+  const pricePattern = /\$\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/g
+  
+  for (const result of results) {
+    const text = `${result.title} ${result.snippet}`.toLowerCase()
+    
+    // Skip if it's clearly not a price (shipping, description, etc.)
+    if (text.includes('shipping') || text.includes('postage') || text.includes('delivery')) {
+      continue
+    }
+    
+    // Extract all dollar amounts
+    const matches = text.matchAll(pricePattern)
+    for (const match of matches) {
+      const price = parseFloat(match[1].replace(/,/g, ''))
+      
+      // Filter reasonable prices (between $5 and $10,000)
+      if (price >= 5 && price <= 10000) {
+        prices.push(price)
+      }
+    }
+  }
+  
+  // Remove outliers (prices more than 2x the median)
+  if (prices.length > 3) {
+    prices.sort((a, b) => a - b)
+    const median = prices[Math.floor(prices.length / 2)]
+    return prices.filter(p => p <= median * 2 && p >= median * 0.5)
+  }
+  
+  return prices
+}
+
+// ============================================
+// MODIFIED IMAGE ANALYSIS (with market data support)
+// ============================================
+async function analyzeImageWithMarketData(imageUrl: string, apiKey: string, marketData: any) {
+  // Use the existing analyzeImage function
+  return analyzeImage(imageUrl, apiKey)
 }
 
