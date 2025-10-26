@@ -304,7 +304,7 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
           </div>
           <div className="ml-3">
             <div className="text-white font-bold text-lg">AI Assistant</div>
-            <div className="text-white/80 text-sm">Ask me anything!</div>
+            <div className="text-white/80 text-sm">Negotiate</div>
           </div>
         </CardTitle>
       </CardHeader>
@@ -370,19 +370,6 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
                     </div>
                   )}
                   
-                  {/* Negotiation progress bar */}
-                  {msg.counter_offer && negotiationRound > 0 && (
-                    <div className="mt-2 flex gap-1">
-                      {[1, 2, 3].map(i => (
-                        <div 
-                          key={i}
-                          className={`h-1 flex-1 rounded ${
-                            i <= negotiationRound ? 'bg-yellow-400' : 'bg-gray-600'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  )}
                 </div>
                 
                 {/* Show Accept Deal button if there's a counter-offer */}
