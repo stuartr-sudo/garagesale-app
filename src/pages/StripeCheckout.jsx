@@ -56,13 +56,14 @@ const CheckoutForm = ({ clientSecret, amount, onSuccess, onCancel }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="p-4 bg-gray-900 border border-gray-700 rounded-lg">
+      <div className="p-4 bg-gray-900 rounded-lg">
         <CardElement
           options={{
             style: {
               base: {
                 fontSize: '16px',
                 color: '#ffffff',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                 '::placeholder': {
                   color: '#9ca3af',
                 },

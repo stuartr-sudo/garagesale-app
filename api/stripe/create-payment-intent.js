@@ -3,6 +3,15 @@ import Stripe from 'stripe';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export default async function handler(req, res) {
+  // Enable CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -16,16 +25,18 @@ export default async function handler(req, res) {
       });
     }
 
+    // Validate Stripe key
+    if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_SECRET_KEY.startsWith('sk_')) {
+      return res.status(500).json({ error: 'Stripe secret key not configured' });
+    }
+
     // Create payment intent
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(amount), // Amount in cents
       currency: currency.toLowerCase(),
+      payment_method_types: ['card'], // Explicitly specify card payments
       metadata: {
         itemId: itemId,
-        // Add any other metadata you need
-      },
-      automatic_payment_methods: {
-        enabled: true,
       },
     });
 
