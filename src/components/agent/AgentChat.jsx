@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Bot, Send, Loader2, CheckCircle, Sparkles, Clock, TrendingUp } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
 
 // Countdown Timer Component with Animated Progress Bar
 function CountdownTimer({ expiresAt }) {
@@ -76,6 +77,7 @@ function CountdownTimer({ expiresAt }) {
 }
 
 export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer }) {
+  const { currentUser } = useAuth();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -164,24 +166,20 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
     }
 
     try {
-      // Fetch the response
-      const response = await fetch('/api/agent-chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          item_id: itemId,
-          message: userMessage,
-          conversation_id: conversationId
-        })
+      // Use Supabase Edge Function instead of exposed API
+      const { data, error } = await supabase.functions.invoke('agent-negotiate', {
+        body: {
+          itemId,
+          userMessage,
+          conversationId,
+          buyerId: currentUser?.id
+        }
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('API Error Response:', errorData);
-        throw new Error(errorData.message || errorData.error || 'Failed to send message');
+      if (error) {
+        console.error('Edge Function Error:', error);
+        throw new Error(error.message || 'Failed to send message');
       }
-
-      const data = await response.json();
 
       if (data.success) {
         // Add a thoughtful delay (2-3 seconds) before showing the response
@@ -189,73 +187,28 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
         await new Promise(resolve => setTimeout(resolve, delayMs));
 
         // Set conversation ID and negotiation round
-        if (data.conversation_id) {
-          setConversationId(data.conversation_id);
+        if (data.conversationId) {
+          setConversationId(data.conversationId);
         }
-        if (data.negotiation_round !== undefined) {
-          setNegotiationRound(data.negotiation_round);
+        if (data.counterOfferAmount) {
+          setNegotiationRound(prev => prev + 1);
         }
 
-        // Extract counter-offer or accepted offer amount
-        const responseLower = data.response.toLowerCase();
-        const allPriceMatches = [...data.response.matchAll(/\$(\d+(?:,\d{3})*(?:\.\d{2})?)/g)];
-        
-        let counterOfferAmount = null;
-        let acceptedOfferAmount = null;
-        
-        // Check for rejection/decline phrases
-        const isRejection = responseLower.includes("can't accept") ||
-                           responseLower.includes("cannot accept") ||
-                           responseLower.includes("can not accept") ||
-                           responseLower.includes("unable to accept") ||
-                           responseLower.includes("too low") ||
-                           responseLower.includes("below") ||
-                           responseLower.includes("minimum") ||
-                           (responseLower.includes('however') && responseLower.includes('can')) ||
-                           (responseLower.includes('while') && responseLower.includes('appreciate'));
-        
-        // If offer was accepted by API
-        if (data.offer_accepted && allPriceMatches.length > 0) {
-          acceptedOfferAmount = parseFloat(allPriceMatches[0][1].replace(/,/g, ''));
-        } else if (!isRejection && allPriceMatches.length > 0) {
-          // Check if AI is accepting
-          const isAcceptingOffer = (responseLower.includes('i can absolutely accept') ||
-                                    responseLower.includes('i can accept') ||
-                                    (responseLower.includes('absolutely') && responseLower.includes('accept')) ||
-                                    (responseLower.includes('happy to accept')) ||
-                                    (responseLower.includes('great') && responseLower.includes('offer') && responseLower.includes('accept')));
-          
-          if (isAcceptingOffer) {
-            acceptedOfferAmount = parseFloat(allPriceMatches[0][1].replace(/,/g, ''));
-          } else {
-            // Check for counter-offer
-            const isCounterOffer = (responseLower.includes('counter') && responseLower.includes('at')) || 
-                                   responseLower.includes('how about') || 
-                                   responseLower.includes('would you consider') ||
-                                   responseLower.includes('could you do') ||
-                                   (responseLower.includes('meet') && responseLower.includes('at')) ||
-                                   responseLower.includes('i can offer') ||
-                                   responseLower.includes('settle at') ||
-                                   responseLower.includes('final offer');
-            
-            if (isCounterOffer) {
-              const lastPriceMatch = allPriceMatches[allPriceMatches.length - 1];
-              counterOfferAmount = parseFloat(lastPriceMatch[1].replace(/,/g, ''));
-            }
-          }
-        }
+        // Use the counter-offer amount directly from Edge Function
+        const counterOfferAmount = data.counterOfferAmount;
+        const acceptedOfferAmount = data.offerAccepted ? counterOfferAmount : null;
 
         // Add AI response with metadata
         setMessages(prev => [...prev, {
           sender: 'ai',
           content: data.response,
           timestamp: new Date().toISOString(),
-          offer_accepted: data.offer_accepted,
+          offer_accepted: data.offerAccepted,
           counter_offer: counterOfferAmount,
           accepted_offer: acceptedOfferAmount,
-          is_final_counter: data.is_final_counter,
-          is_second_counter: data.is_second_counter,
-          expires_at: data.expires_at
+          is_final_counter: data.counterOfferAmount && negotiationRound >= 2,
+          is_second_counter: data.counterOfferAmount && negotiationRound === 1,
+          expires_at: data.expiresAt
         }]);
       } else {
         throw new Error(data.error || 'Failed to send message');
