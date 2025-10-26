@@ -77,39 +77,25 @@ export default function ImageUpload({ images = [], onUpload, onRemove, onSetMain
         ))}
         
         {safeImages.length < 8 && (
-          <div className="aspect-square border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center bg-gray-50 p-4">
-            <div className={`flex ${isMobile ? 'flex-col gap-2 w-full' : 'justify-center'}`}>
-              <Button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                className={`${isMobile ? 'w-full' : 'px-4'} h-10 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium flex items-center justify-center text-xs`}
-              >
-                {isUploading ? (
-                  <>
-                    <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
-                    <span>Uploading...</span>
-                  </>
-                ) : (
-                  <>
-                    <Upload className="w-3 h-3 mr-1.5 flex-shrink-0" />
-                    <span>Add from library</span>
-                  </>
-                )}
-              </Button>
-              
-              {isMobile && (
-                <Button
-                  type="button"
-                  onClick={() => setShowMobileCamera(true)}
-                  disabled={isUploading}
-                  className="w-full h-10 rounded-lg bg-green-600 hover:bg-green-700 text-white font-medium flex items-center justify-center text-xs"
-                >
-                  <Camera className="w-3 h-3 mr-1.5 flex-shrink-0" />
-                  <span>Take photo</span>
-                </Button>
+          <div className="aspect-square border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center bg-gray-50 p-6">
+            <Button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              className="w-full max-w-[160px] h-auto py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium flex items-center justify-center text-xs"
+            >
+              {isUploading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <span>Uploading...</span>
+                </>
+              ) : (
+                <>
+                  <Upload className="w-4 h-4 mr-2 flex-shrink-0" />
+                  <span>Add from library</span>
+                </>
               )}
-            </div>
+            </Button>
           </div>
         )}
       </div>
