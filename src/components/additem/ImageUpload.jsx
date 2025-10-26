@@ -77,16 +77,16 @@ export default function ImageUpload({ images = [], onUpload, onRemove, onSetMain
         ))}
         
         {safeImages.length < 8 && (
-          <div className="aspect-square border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center bg-gray-50 p-6">
+          <div className="aspect-square border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center bg-gray-50 p-4">
             <Button
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
-              className="w-full max-w-[160px] h-auto py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium flex items-center justify-center text-xs"
+              className="px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium flex items-center justify-center text-sm whitespace-nowrap"
             >
               {isUploading ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin flex-shrink-0" />
                   <span>Uploading...</span>
                 </>
               ) : (
