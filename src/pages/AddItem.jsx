@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Item } from "@/api/entities";
 import { User } from "@/api/entities";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
@@ -8,14 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowLeft, ArrowRight, Upload, Camera, Sparkles, CheckCircle, Loader2, X, Mic } from "lucide-react";
+import { ArrowLeft, ArrowRight, Sparkles, CheckCircle, Loader2, X, Mic, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ImageUpload from "../components/additem/ImageUpload";
 import VoiceInputField from "../components/additem/VoiceInputField";
-import AIImageAnalyzer from "../components/items/AIImageAnalyzer";
 
 const categories = [
   { value: "electronics", label: "Electronics" },
@@ -43,7 +40,7 @@ export default function AddItem() {
   const { toast } = useToast();
   const [currentUser, setCurrentUser] = useState(null);
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 7;
+  const totalSteps = 3; // Changed from 7 to 3
   
   const [itemData, setItemData] = useState({
     title: "",
@@ -60,16 +57,15 @@ export default function AddItem() {
     collection_flexible: false
   });
   
-  const [isGeneratingContent, setIsGeneratingContent] = useState(false);
-  const [isGeneratingTags, setIsGeneratingTags] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [showVoiceInput, setShowVoiceInput] = useState(false);
-  const [voiceTargetField, setVoiceTargetField] = useState('description');
   const [voiceTranscription, setVoiceTranscription] = useState('');
   const [hasVoiceInput, setHasVoiceInput] = useState(false);
   const [ownershipConfirmed, setOwnershipConfirmed] = useState(false);
-  const [aiAnalysisUsed, setAiAnalysisUsed] = useState(false);
+  const [aiGenerated, setAiGenerated] = useState(false);
+  const [tagInput, setTagInput] = useState('');
 
   useEffect(() => {
     loadUser();
@@ -90,179 +86,99 @@ export default function AddItem() {
     }
   };
 
-  const handleAIAnalysis = (analysis) => {
-    // Map AI analysis to form data
-    const updates = {};
-
-    if (analysis.title) {
-      updates.title = analysis.title;
-    }
-
-    if (analysis.description) {
-      updates.description = analysis.description;
-    }
-
-    if (analysis.category) {
-      // Map AI category to form categories
-      const categoryMap = {
-        'Electronics': 'electronics',
-        'Clothing & Accessories': 'clothing',
-        'Furniture': 'furniture',
-        'Books & Media': 'books',
-        'Toys & Games': 'toys',
-        'Sports & Outdoors': 'sports',
-        'Home & Garden': 'home_garden',
-        'Tools & Equipment': 'automotive',
-        'Art & Collectibles': 'collectibles',
-        'Other': 'other'
-      };
-      updates.category = categoryMap[analysis.category] || 'other';
-    }
-
-    if (analysis.condition) {
-      // Map AI condition to form conditions
-      const conditionMap = {
-        'New': 'new',
-        'Like New': 'like_new',
-        'Good': 'good',
-        'Fair': 'fair',
-        'Poor': 'poor'
-      };
-      updates.condition = conditionMap[analysis.condition] || 'good';
-    }
-
-    if (analysis.priceRange) {
-      // Use the middle of the price range as suggested price
-      const suggestedPrice = Math.round((analysis.priceRange.min + analysis.priceRange.max) / 2);
-      updates.price = suggestedPrice.toString();
-      // Set minimum price to 70% of suggested price
-      updates.minimum_price = Math.round(suggestedPrice * 0.7).toString();
-    }
-
-    if (analysis.tags && analysis.tags.length > 0) {
-      updates.tags = analysis.tags;
-    }
-
-    // Update form data
-    setItemData(prev => ({ ...prev, ...updates }));
-    setAiAnalysisUsed(true);
+  // Voice input handler
+  const handleVoiceTranscript = (transcript) => {
+    setVoiceTranscription(transcript);
+    setHasVoiceInput(true);
+    setShowVoiceInput(false);
 
     toast({
-      title: "AI Analysis Applied! ✨",
-      description: `Auto-filled ${Object.keys(updates).length} fields. Review and adjust as needed.`,
+      title: "Voice Input Captured! 🎤",
+      description: "Your voice description will enhance the AI analysis.",
     });
   };
 
-  const handleVoiceTranscript = async (transcript) => {
-    // Store the voice transcription for AI optimization
-    setVoiceTranscription(transcript);
-    setHasVoiceInput(true);
-    
-    // If user specifically chose a field, use that
-    if (voiceTargetField === 'title') {
+  // Add more details voice handler (appends to description)
+  const handleAdditionalVoice = (transcript) => {
       setItemData(prev => ({ 
         ...prev, 
-        title: prev.title ? `${prev.title} - ${transcript}` : transcript 
-      }));
-    } else if (voiceTargetField === 'description') {
-      // For description, append to existing content or replace if empty
-      setItemData(prev => ({ 
-        ...prev, 
-        description: prev.description ? `${prev.description}\n\n${transcript}` : transcript 
-      }));
-    } else {
-      // If no specific field chosen, intelligently parse the voice input
-      try {
-        const parsed = await parseVoiceInputIntelligently(transcript);
-        
-        setItemData(prev => ({
-          ...prev,
-          title: parsed.title ? (prev.title ? `${prev.title} - ${parsed.title}` : parsed.title) : prev.title,
-          description: parsed.description ? (prev.description ? `${prev.description}\n\n${parsed.description}` : parsed.description) : prev.description
-        }));
-        
-        toast({
-          title: "Voice Input Processed!",
-          description: `Intelligently extracted ${parsed.title ? 'title and ' : ''}description from your voice input.`,
-        });
-      } catch (error) {
-        console.error('Error parsing voice input:', error);
-        // Fallback to description field
-        setItemData(prev => ({ 
-          ...prev, 
-          description: prev.description ? `${prev.description}\n\n${transcript}` : transcript 
-        }));
-      }
-    }
+      description: prev.description 
+        ? `${prev.description}\n\n${transcript}` 
+        : transcript
+    }));
     setShowVoiceInput(false);
+    
+    toast({
+      title: "Details Added! 🎤",
+      description: "Additional information appended to description.",
+    });
   };
 
-  const openVoiceInput = (field) => {
-    setVoiceTargetField(field);
-    setShowVoiceInput(true);
-  };
+  // Combined AI Analysis (Voice + Images)
+  const analyzeWithVoiceAndImages = async () => {
+    if (itemData.image_urls.length === 0) {
+        toast({
+        title: "No Images",
+        description: "Please upload at least one image first.",
+        variant: "destructive"
+      });
+      return;
+    }
 
-  const parseVoiceInputIntelligently = async (voiceText) => {
+    setIsAnalyzing(true);
+    
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const response = await fetch('/api/analyze-image-with-voice', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'user',
-              content: `Analyze this voice input from a seller describing their item: "${voiceText}"
-
-Intelligently extract and structure the information:
-
-1. TITLE: If the seller mentions a specific name, title, or product name, extract it. If not, create a concise title based on what they're describing.
-
-2. DESCRIPTION: Extract all the descriptive details, features, condition, benefits, and selling points mentioned.
-
-Rules:
-- If the voice input is primarily about naming the item, focus on extracting/creating a good title
-- If the voice input is primarily descriptive, focus on extracting details for description
-- If the voice input contains both, extract both appropriately
-- Keep titles under 60 characters
-- Keep descriptions under 200 words
-- Be natural and conversational in the description
-
-Return in JSON format: {"title": "...", "description": "...", "confidence": "high/medium/low"}`
-            }
-          ],
-          max_tokens: 300,
-          response_format: { type: "json_object" }
+          imageUrl: itemData.image_urls[0], // Main image
+          voiceTranscript: voiceTranscription || null
         })
       });
 
-      const data = await response.json();
-      
-      if (data.error) {
-        throw new Error(data.error.message || 'Failed to parse voice input');
+      if (!response.ok) {
+        throw new Error('Analysis failed');
       }
+
+      const analysis = await response.json();
       
-      const result = JSON.parse(data.choices[0].message.content);
-      return {
-        title: result.title?.trim() || '',
-        description: result.description?.trim() || '',
-        confidence: result.confidence || 'medium'
-      };
+      if (!analysis.success) {
+        throw new Error(analysis.error || 'Analysis failed');
+      }
+
+      // Auto-fill all fields
+      setItemData(prev => ({
+        ...prev,
+        title: analysis.title || prev.title,
+        description: analysis.description || prev.description,
+        price: analysis.price?.toString() || prev.price,
+        minimum_price: analysis.minimum_price?.toString() || prev.minimum_price,
+        category: analysis.category || prev.category,
+        condition: analysis.condition || prev.condition,
+        tags: analysis.tags || prev.tags
+      }));
+
+      setAiGenerated(true);
+      
+      toast({
+        title: "AI Analysis Complete! ✨",
+        description: `Generated ${hasVoiceInput ? 'with voice + images' : 'from images'}. Review and edit as needed.`,
+      });
+
     } catch (error) {
-      console.error('Error parsing voice input:', error);
-      // Fallback: just use the voice text as description
-      return {
-        title: '',
-        description: voiceText,
-        confidence: 'low'
-      };
+      console.error('Analysis error:', error);
+      toast({
+        title: "Analysis Failed",
+        description: error.message || "Could not analyze content. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
-  // Helper function to compress images before upload
+  // Image compression helper
   const compressImage = async (file, maxWidth = 1200, maxHeight = 1200, quality = 0.8) => {
     return new Promise((resolve) => {
       const reader = new FileReader();
@@ -273,7 +189,6 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
           let width = img.width;
           let height = img.height;
 
-          // Calculate new dimensions while maintaining aspect ratio
           if (width > height) {
             if (width > maxWidth) {
               height = (height * maxWidth) / width;
@@ -292,7 +207,6 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
 
-          // Convert canvas to blob with compression
           canvas.toBlob(
             (blob) => {
               resolve(blob);
@@ -307,8 +221,8 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
     });
   };
 
+  // Image upload handler
   const handleImageUpload = async (files) => {
-    // Check if user is loaded
     if (!currentUser) {
       toast({
         title: "Please wait",
@@ -320,7 +234,6 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
 
     setIsUploading(true);
     try {
-      // Check authentication
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError || !session) {
@@ -336,28 +249,21 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
       const uploadedUrls = [];
       
       for (const file of files) {
-        // Compress the image before uploading
         const compressedBlob = await compressImage(file);
         const compressedFile = new File([compressedBlob], file.name, {
           type: 'image/jpeg',
           lastModified: Date.now()
         });
 
-        const fileExt = 'jpg'; // Always use jpg after compression
+        const fileExt = 'jpg';
         const fileName = `${Math.random().toString(36).substring(7)}_${Date.now()}.${fileExt}`;
         const filePath = `${currentUser.id}/${fileName}`;
 
         const { data, error } = await supabase.storage
           .from('item-images')
-          .upload(filePath, compressedFile, { 
-            upsert: true,
-            contentType: 'image/jpeg'
-          });
+          .upload(filePath, compressedFile);
 
-        if (error) {
-          console.error("Upload error for file:", file.name, error);
-          throw error;
-        }
+        if (error) throw error;
 
         const { data: { publicUrl } } = supabase.storage
           .from('item-images')
@@ -373,13 +279,14 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
 
       toast({
         title: "Success!",
-        description: `${uploadedUrls.length} image(s) uploaded and optimized.`,
+        description: `${uploadedUrls.length} image(s) uploaded successfully.`,
       });
+
     } catch (error) {
       console.error("Upload error:", error);
       toast({
         title: "Upload Failed",
-        description: error.message || "Failed to upload images. Please try again.",
+        description: "Failed to upload images. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -397,381 +304,91 @@ Return in JSON format: {"title": "...", "description": "...", "confidence": "hig
   const setMainImage = (index) => {
     setItemData(prev => {
       const newImages = [...prev.image_urls];
-      // Move the selected image to the front (index 0)
-      const [selectedImage] = newImages.splice(index, 1);
-      newImages.unshift(selectedImage);
-      
+      const [mainImage] = newImages.splice(index, 1);
       return {
         ...prev,
-        image_urls: newImages
+        image_urls: [mainImage, ...newImages]
       };
     });
   };
 
-  const generateWithAI = async (field) => {
-    // Check if we have an image to analyze
-    if (!itemData.image_urls || itemData.image_urls.length === 0) {
-      toast({
-        title: "No Image",
-        description: "Please upload at least one image first.",
-        variant: "destructive"
-      });
+  // Tag management
+  const addTag = () => {
+    if (tagInput.trim() && !itemData.tags.includes(tagInput.trim().toLowerCase())) {
+      setItemData(prev => ({
+        ...prev,
+        tags: [...prev.tags, tagInput.trim().toLowerCase()]
+      }));
+      setTagInput('');
+    }
+  };
+
+  const removeTag = (tagToRemove) => {
+        setItemData(prev => ({ 
+          ...prev, 
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
+    }));
+  };
+
+  // Navigation
+  const goToStep = (stepNumber) => {
+    if (stepNumber >= 1 && stepNumber <= totalSteps) {
+      // Validate before moving forward
+      if (stepNumber > currentStep) {
+        if (currentStep === 1 && itemData.image_urls.length === 0) {
+          toast({
+            title: "Images Required",
+            description: "Please upload at least one image.",
+            variant: "destructive"
+          });
+          return;
+        }
+        if (currentStep === 2) {
+          if (!itemData.title || !itemData.description || !itemData.price) {
+          toast({
+              title: "Required Fields",
+              description: "Please fill in title, description, and price.",
+          variant: "destructive" 
+        });
+            return;
+          }
+        }
+      }
+      setCurrentStep(stepNumber);
+    }
+  };
+
+  const goToNextStep = () => {
+    goToStep(currentStep + 1);
+  };
+
+  const goToPreviousStep = () => {
+    goToStep(currentStep - 1);
+  };
+
+  // Submit handler
+  const handleSubmit = async () => {
+    // Final validation
+    if (!ownershipConfirmed) {
+        toast({ 
+        title: "Confirmation Required",
+        description: "Please confirm ownership of the item.",
+          variant: "destructive" 
+        });
       return;
     }
 
-    const mainImageUrl = itemData.image_urls[0];
-
-    if (field === 'both') {
-      setIsGeneratingContent(true);
-      try {
-        // Enhanced prompt for superior product recognition and listing generation
-        let promptText = `Carefully analyze this product image and provide the following:
-
-**TITLE (max 60 characters):**
-Create a concise, searchable title using this exact format:
-[Brand] [Model/Product Type] - [1-2 Key Features] ([Condition])
-
-Guidelines:
-- Start with brand name if visible/identifiable
-- Include specific model numbers or product names
-- Add distinguishing features (color, size, capacity)
-- Use marketplace-friendly language (avoid special characters)
-- Prioritize searchability over creativity
-
-**DESCRIPTION (150-200 words):**
-Write a compelling, structured description with:
-
-1. OPENING: Lead with the product's main value proposition
-2. SPECIFICATIONS: List key technical details, dimensions, materials
-3. CONDITION: Assess and describe condition honestly (New/Like New/Excellent/Good/Fair/Poor)
-   - Note any visible wear, damage, or defects
-   - Highlight if original packaging/accessories are visible
-4. FEATURES & BENEFITS: Emphasize what makes this product desirable
-5. USE CASES: Briefly mention who this is ideal for or how it's used
-
-Style requirements:
-- Use clear, professional language
-- Write in third person or direct product description style
-- Include specific measurements if visible
-- Mention colors, materials, and finishes accurately
-- Avoid exaggeration or unverifiable claims
-- Use bullet points for technical specs if needed
-
-**CATEGORY SUGGESTION:**
-Recommend the most appropriate marketplace category (e.g., "Electronics > Cameras", "Home & Garden > Furniture")
-
-**QUALITY CHECK:**
-If image quality is poor or product is unclear, state: "Image quality insufficient - [specific issue]" and provide best-effort analysis.`;
-        
-        if (hasVoiceInput && voiceTranscription) {
-          promptText += `\n\nIMPORTANT: The seller has provided additional context via voice input: "${voiceTranscription}"\n\nUse this voice context to enhance your analysis:\n- If the seller mentions a specific brand, model, or product name, prioritize that information\n- Incorporate the seller's description of condition, features, and use cases\n- The voice input contains the seller's personal knowledge - use it to make the listing more accurate and authentic\n- Combine visual analysis with the seller's verbal description for the most complete product understanding`;
-        }
-        
-        promptText += '\n\nReturn in JSON format: {"title": "...", "description": "...", "category_suggestion": "...", "quality_note": "..."}';
-
-        // Generate both title and description in a single AI call
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
-          },
-          body: JSON.stringify({
-            model: 'gpt-4o',
-            messages: [
-              {
-                role: 'user',
-                content: [
-                  {
-                    type: 'text',
-                    text: promptText
-                  },
-                  {
-                    type: 'image_url',
-                    image_url: {
-                      url: mainImageUrl,
-                      detail: 'high'
-                    }
-                  }
-                ]
-              }
-            ],
-            max_tokens: 500,
-            response_format: { type: "json_object" }
-          })
-        });
-
-        const data = await response.json();
-        
-        if (data.error) {
-          throw new Error(data.error.message || 'Failed to analyze image');
-        }
-        
-        const result = JSON.parse(data.choices[0].message.content);
-        const generatedTitle = result.title?.trim().replace(/^["']|["']$/g, '') || '';
-        const generatedDescription = result.description?.trim() || '';
-        const categorySuggestion = result.category_suggestion?.trim() || '';
-        const qualityNote = result.quality_note?.trim() || '';
-        
-        setItemData(prev => ({ 
-          ...prev, 
-          // Append to existing title if it exists, otherwise use generated title
-          title: prev.title ? `${prev.title} - ${generatedTitle}` : generatedTitle,
-          // Append to existing description if it exists, otherwise use generated description
-          description: prev.description ? `${prev.description}\n\n${generatedDescription}` : generatedDescription
-        }));
-        
-        // Show category suggestion if provided
-        if (categorySuggestion) {
-          toast({
-            title: "Category Suggestion",
-            description: `AI suggests: ${categorySuggestion}`,
-            duration: 5000
-          });
-        }
-        
-        // Show quality note if there are issues
-        if (qualityNote && qualityNote.includes('insufficient')) {
-          toast({
-            title: "Image Quality Note",
-            description: qualityNote,
-            variant: "destructive",
-            duration: 7000
-          });
-        }
+    if (!itemData.collection_date || !itemData.collection_address) {
         toast({ 
-          title: "Success!", 
-          description: hasVoiceInput ? "Title and description generated using both image and voice input!" : "Title and description generated from image with AI." 
-        });
-      } catch (error) {
-        console.error("Error generating content:", error);
-        toast({ 
-          title: "Error", 
-          description: error.message || "Failed to generate content.", 
+        title: "Collection Details Required",
+        description: "Please provide collection date and address.",
           variant: "destructive" 
         });
-      } finally {
-        setIsGeneratingContent(false);
-      }
-    } else if (field === 'title') {
-      setIsGeneratingContent(true);
-      try {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
-          },
-          body: JSON.stringify({
-            model: 'gpt-4o',
-            messages: [
-              {
-                role: 'user',
-                content: [
-                  {
-                    type: 'text',
-                    text: `Analyze this product image and create a concise, searchable title (max 60 characters) using this format:
-[Brand] [Model/Product Type] - [1-2 Key Features] ([Condition])
-
-Guidelines:
-- Start with brand name if visible/identifiable
-- Include specific model numbers or product names
-- Add distinguishing features (color, size, capacity)
-- Use marketplace-friendly language (avoid special characters)
-- Prioritize searchability over creativity
-
-Return only the title, nothing else.`
-                  },
-                  {
-                    type: 'image_url',
-                    image_url: {
-                      url: mainImageUrl,
-                      detail: 'low'
-                    }
-                  }
-                ]
-              }
-            ],
-            max_tokens: 100
-          })
-        });
-
-        const data = await response.json();
-        
-        if (data.error) {
-          throw new Error(data.error.message || 'Failed to analyze image');
-        }
-        
-        const generatedTitle = data.choices[0].message.content.trim().replace(/^["']|["']$/g, '');
-        
-        setItemData(prev => ({ 
-          ...prev, 
-          title: prev.title ? `${prev.title} - ${generatedTitle}` : generatedTitle 
-        }));
-        toast({ title: "Success!", description: "Title generated from image with AI." });
-      } catch (error) {
-        console.error("Error generating title:", error);
-        toast({ 
-          title: "Error", 
-          description: error.message || "Failed to generate title.", 
-          variant: "destructive" 
-        });
-      } finally {
-        setIsGeneratingContent(false);
-      }
-    } else if (field === 'description') {
-      setIsGeneratingContent(true);
-      try {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
-          },
-          body: JSON.stringify({
-            model: 'gpt-4o',
-            messages: [
-              {
-                role: 'user',
-                content: [
-                  {
-                    type: 'text',
-                    text: `Analyze this product image and write a compelling, structured description (150-200 words) with:
-
-1. OPENING: Lead with the product's main value proposition
-2. SPECIFICATIONS: List key technical details, dimensions, materials
-3. CONDITION: Assess and describe condition honestly (New/Like New/Excellent/Good/Fair/Poor)
-   - Note any visible wear, damage, or defects
-   - Highlight if original packaging/accessories are visible
-4. FEATURES & BENEFITS: Emphasize what makes this product desirable
-5. USE CASES: Briefly mention who this is ideal for or how it's used
-
-Style requirements:
-- Use clear, professional language
-- Write in third person or direct product description style
-- Include specific measurements if visible
-- Mention colors, materials, and finishes accurately
-- Avoid exaggeration or unverifiable claims
-- Use bullet points for technical specs if needed
-
-Return only the description, nothing else.`
-                  },
-                  {
-                    type: 'image_url',
-                    image_url: {
-                      url: mainImageUrl,
-                      detail: 'high'
-                    }
-                  }
-                ]
-              }
-            ],
-            max_tokens: 400
-          })
-        });
-
-        const data = await response.json();
-        
-        if (data.error) {
-          throw new Error(data.error.message || 'Failed to analyze image');
-        }
-        
-        const generatedDescription = data.choices[0].message.content.trim();
-        
-        setItemData(prev => ({ 
-          ...prev, 
-          description: prev.description ? `${prev.description}\n\n${generatedDescription}` : generatedDescription 
-        }));
-        toast({ title: "Success!", description: "Description generated from image with AI." });
-      } catch (error) {
-        console.error("Error generating description:", error);
-        toast({ 
-          title: "Error", 
-          description: error.message || "Failed to generate description.", 
-          variant: "destructive" 
-        });
-      } finally {
-        setIsGeneratingContent(false);
-      }
-    } else if (field === 'tags') {
-      setIsGeneratingTags(true);
-      try {
-        const prompt = `Generate 5-8 relevant tags (single words or short phrases) for this item: "${itemData.title} - ${itemData.description}". Return only a comma-separated list of tags, nothing else.`;
-        
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
-          },
-          body: JSON.stringify({
-            model: 'gpt-4',
-            messages: [{ role: 'user', content: prompt }],
-            max_tokens: 100
-          })
-        });
-
-        const data = await response.json();
-        const tagsString = data.choices[0].message.content.trim();
-        const tags = tagsString.split(',').map(tag => tag.trim().toLowerCase()).filter(tag => tag.length > 0);
-        
-        setItemData(prev => ({ ...prev, tags }));
-        toast({ title: "Success!", description: "Tags generated with AI." });
-      } catch (error) {
-        console.error("Error generating tags:", error);
-        toast({ title: "Error", description: "Failed to generate tags.", variant: "destructive" });
-      } finally {
-        setIsGeneratingTags(false);
-      }
+      return;
     }
-  };
 
-  const canProceed = () => {
-    switch (currentStep) {
-      case 1: return itemData.image_urls.length > 0;
-      case 2: return itemData.title.trim() && itemData.description.trim();
-      case 3: return itemData.price;
-      case 4: return itemData.category && itemData.condition && itemData.postcode;
-      case 5: {
-        // Collection address is always required
-        if (!itemData.collection_address.trim()) return false;
-        
-        // If flexible collection, no date validation needed
-        if (itemData.collection_flexible) return true;
-        
-        // If specific date, validate it's set and within 14 days
-        if (!itemData.collection_date) return false;
-        
-        const collectionDate = new Date(itemData.collection_date);
-        const now = new Date();
-        const maxDate = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
-        
-        return collectionDate >= now && collectionDate <= maxDate;
-      }
-      case 6: return true;
-      case 7: return ownershipConfirmed;
-      default: return false;
-    }
-  };
-
-  const handleNext = () => {
-    if (currentStep === 4) {
-      // Auto-generate tags before going to step 5
-      if (itemData.tags.length === 0) {
-        generateWithAI('tags');
-      }
-    }
-    if (canProceed()) {
-      setCurrentStep(prev => Math.min(prev + 1, totalSteps));
-    }
-  };
-
-  const handleBack = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
-  };
-
-  const handleSubmit = async () => {
     setIsSubmitting(true);
+
     try {
       const itemPayload = {
         title: itemData.title,
@@ -779,14 +396,14 @@ Return only the description, nothing else.`
         price: parseFloat(itemData.price),
         condition: itemData.condition,
         category: itemData.category,
-        location: `Postcode ${itemData.postcode}, Australia`,
-        tags: itemData.tags,
+        location: itemData.postcode,
         image_urls: itemData.image_urls,
         seller_id: currentUser.id,
         status: 'active',
-        collection_date: itemData.collection_flexible ? null : itemData.collection_date,
+        collection_date: itemData.collection_date,
         collection_address: itemData.collection_address,
-        collection_flexible: itemData.collection_flexible
+        collection_flexible: itemData.collection_flexible,
+        tags: itemData.tags
       };
 
       const { data: newItem, error: itemError } = await supabase
@@ -797,16 +414,16 @@ Return only the description, nothing else.`
 
       if (itemError) throw itemError;
 
-      // Create item_knowledge entry with voice transcription data
+      // Create item_knowledge entry
       const knowledgePayload = {
         item_id: newItem.id,
         minimum_price: itemData.minimum_price ? parseFloat(itemData.minimum_price) : null,
         negotiation_enabled: !!itemData.minimum_price,
-        selling_points: [itemData.title, itemData.condition, itemData.category],
+        selling_points: itemData.tags,
         additional_info: {
           voice_transcription: hasVoiceInput ? voiceTranscription : null,
           has_voice_input: hasVoiceInput,
-          created_with_voice: hasVoiceInput
+          ai_generated: aiGenerated
         }
       };
 
@@ -817,7 +434,7 @@ Return only the description, nothing else.`
       if (knowledgeError) console.error("Error creating item_knowledge:", knowledgeError);
 
       toast({
-        title: "Success!",
+        title: "Success! 🎉",
         description: "Your item has been listed successfully.",
       });
 
@@ -834,14 +451,38 @@ Return only the description, nothing else.`
     }
   };
 
-  const renderStep = () => {
-    switch (currentStep) {
-      case 1:
-  return (
+  // Step indicator breadcrumbs
+  const renderStepIndicator = () => (
+    <div className="flex justify-center gap-2 sm:gap-4 mb-6">
+      {[1, 2, 3].map(step => (
+        <button
+          key={step}
+          onClick={() => goToStep(step)}
+          disabled={isSubmitting}
+          className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg transition-all ${
+            currentStep === step 
+              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg' 
+              : currentStep > step
+              ? 'bg-green-900/30 text-green-400 border border-green-500/30'
+              : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+          }`}
+        >
+          <span className="font-bold">{step}</span>
+          <span className="text-xs sm:text-sm hidden sm:inline">
+            {step === 1 ? 'Images' : step === 2 ? 'Details' : 'Collection'}
+          </span>
+          {currentStep > step && <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />}
+        </button>
+      ))}
+    </div>
+  );
+
+  // Step 1: Upload Images
+  const renderStep1 = () => (
           <div className="space-y-4">
             <div className="text-center mb-4">
-              <h2 className="text-xl font-bold text-white mb-1">Add Photos</h2>
-              <p className="text-gray-400 text-sm">Upload images of your item. Click "Set as Main" on any image to make it the main photo.</p>
+        <h2 className="text-xl font-bold text-white mb-1">Upload Photos</h2>
+        <p className="text-gray-400 text-sm">Add images of your item. First image will be the main photo.</p>
           </div>
 
                 <ImageUpload
@@ -852,614 +493,448 @@ Return only the description, nothing else.`
                   isUploading={isUploading}
                 />
 
-                {/* AI Image Analyzer - Auto-fill listing details */}
                 {itemData.image_urls.length > 0 && (
-                  <div className="mt-6">
-                    <AIImageAnalyzer
-                      imageUrl={itemData.image_urls[0]}
-                      onAnalysisComplete={handleAIAnalysis}
-                      disabled={isUploading}
-                    />
+        <div className="text-center text-sm text-green-400 flex items-center justify-center gap-2">
+          <CheckCircle className="w-4 h-4" />
+          {itemData.image_urls.length} image{itemData.image_urls.length > 1 ? 's' : ''} uploaded
                   </div>
                 )}
-
           </div>
         );
 
-      case 2:
-        return (
-          <div className="space-y-4">
+  // Step 2: Voice + AI Content Generation
+  const renderStep2 = () => (
+    <div className="space-y-6">
             <div className="text-center mb-4">
-              <h2 className="text-xl font-bold text-white mb-1">Title & Description</h2>
-              <p className="text-gray-400 text-sm">Tell buyers about your item</p>
+        <h2 className="text-xl font-bold text-white mb-1">Item Details</h2>
+        <p className="text-gray-400 text-sm">Add voice description or let AI generate from images</p>
             </div>
 
-            {/* Image Preview */}
-            {itemData.image_urls.length > 0 && (
-              <div className="mb-4">
-                <Label className="text-gray-300 mb-2 block text-sm">Your Listing Preview</Label>
-                <div className="bg-gray-800 rounded-lg p-3 border border-gray-700">
-                  <div className="flex gap-3">
-                    <div className="w-16 h-16 flex-shrink-0">
-                      <img
-                        src={itemData.image_urls[0]}
-                        alt="Item preview"
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-white font-semibold text-sm mb-1 line-clamp-2">
-                        {itemData.title || "Your item title will appear here"}
-                      </h3>
-                      <p className="text-gray-400 text-xs line-clamp-2">
-                        {itemData.description || "Your item description will appear here"}
-                      </p>
-                      <div className="mt-1">
-                        <span className="text-lg font-bold text-green-400">
-                          ${itemData.price || "0.00"}
-                        </span>
+      {/* Voice Input Section */}
+      <Card className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 border-purple-500/30">
+        <CardContent className="p-6">
+          <div className="text-center">
+            <Mic className="w-12 h-12 text-purple-400 mx-auto mb-3" />
+            <h3 className="text-white font-semibold mb-2">Add Voice Description</h3>
+            <p className="text-gray-400 text-sm mb-4">
+              Describe your item by voice to personalize the AI-generated content
+            </p>
+            
+            {hasVoiceInput && voiceTranscription ? (
+              <div className="mb-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    <span className="text-green-400 font-medium text-sm">Voice captured!</span>
                       </div>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setVoiceTranscription('');
+                      setHasVoiceInput(false);
+                    }}
+                    className="text-gray-400 hover:text-white h-7"
+                  >
+                    <X className="w-3 h-3 mr-1" />
+                    Clear
+                  </Button>
                     </div>
+                <div className="p-2 bg-gray-800 rounded text-xs text-gray-300 text-left max-h-24 overflow-y-auto">
+                  "{voiceTranscription}"
                   </div>
                 </div>
+            ) : null}
+            
+            <Button
+              onClick={() => setShowVoiceInput(true)}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+            >
+              <Mic className="w-4 h-4 mr-2" />
+              {hasVoiceInput ? 'Re-record Voice' : 'Record Voice Description'}
+            </Button>
               </div>
-            )}
+        </CardContent>
+      </Card>
 
-            {/* AI Generation Button - Always Visible */}
-            <div className="flex justify-center mb-4">
+      {/* AI Generation Button */}
+      <div className="flex justify-center">
               <Button
-                type="button"
-                onClick={() => generateWithAI('both')}
-                disabled={isGeneratingContent}
-                variant="outline"
-                size="sm"
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 hover:shadow-lg hover:shadow-purple-500/25 text-white border-purple-500 hover:border-purple-400 transition-all duration-200"
-              >
-                {isGeneratingContent ? (
-                  <>
-                    <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                    Generating...
+          onClick={analyzeWithVoiceAndImages}
+          disabled={isAnalyzing || itemData.image_urls.length === 0}
+          size="lg"
+          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
+        >
+          {isAnalyzing ? (
+            <>
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              Analyzing...
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-3 h-3 mr-1" />
-                    {hasVoiceInput ? "Generate with AI + Voice" : "Generate with AI"}
+              <Sparkles className="w-5 h-5 mr-2" />
+              {hasVoiceInput ? 'Generate with AI + Voice' : 'Generate with AI'}
                   </>
                 )}
               </Button>
             </div>
 
-            {/* Voice Input Buttons */}
-            {/* Voice Input Status */}
-            {hasVoiceInput && voiceTranscription && (
-              <div className="mb-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
-                <div className="flex items-center gap-2 mb-1">
-                  <CheckCircle className="w-4 h-4 text-green-400" />
-                  <span className="text-green-400 font-medium text-sm">Voice input captured!</span>
-                </div>
-                <p className="text-gray-300 text-xs mb-2">
-                  Your voice description will be used to enhance the AI-generated content.
-                </p>
-                <div className="p-2 bg-gray-800 rounded text-xs text-gray-300">
-                  "{voiceTranscription.substring(0, 80)}{voiceTranscription.length > 80 ? '...' : ''}"
-                </div>
+      {aiGenerated && (
+        <div className="text-center text-sm text-blue-400 flex items-center justify-center gap-2">
+          <Sparkles className="w-4 h-4" />
+          AI-generated content - edit as needed below
               </div>
             )}
 
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="title" className="text-gray-300">Title *</Label>
-                <Button
-                  type="button"
-                  onClick={() => openVoiceInput('title')}
-                  variant="outline"
-                  size="sm"
-                  className="border-purple-500 text-purple-400 hover:bg-purple-500/20 hover:text-purple-300 hover:border-purple-400 hover:shadow-md hover:shadow-purple-500/20 transition-all duration-200"
-                >
-                  <Mic className="w-4 h-4 mr-1" />
-                  Voice
-                </Button>
-              </div>
+      {/* Editable Fields */}
+      <div className="space-y-4 bg-gray-800/50 p-6 rounded-lg border border-gray-700">
+        {/* Title */}
+        <div>
+          <Label htmlFor="title" className="text-gray-300 mb-2 block">
+            Title {aiGenerated && <Sparkles className="inline w-3 h-3 text-purple-400" />}
+          </Label>
               <Input
                 id="title"
                 value={itemData.title}
                 onChange={(e) => setItemData(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="e.g., iPhone 13 Pro 256GB - Like New"
-                className="bg-gray-800 border-gray-700 text-white"
+            placeholder="e.g., iPhone 12 Pro - 128GB Blue"
+            className="bg-gray-900 border-gray-700 text-white"
+            maxLength={50}
               />
+          <p className="text-xs text-gray-500 mt-1">{itemData.title.length}/50 characters</p>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="description" className="text-gray-300">Description *</Label>
-                <Button
-                  type="button"
-                  onClick={() => openVoiceInput('description')}
-                  variant="outline"
-                  size="sm"
-                  className="border-purple-500 text-purple-400 hover:bg-purple-500/20 hover:text-purple-300 hover:border-purple-400 hover:shadow-md hover:shadow-purple-500/20 transition-all duration-200"
-                >
-                  <Mic className="w-4 h-4 mr-1" />
-                  Voice
-                </Button>
-              </div>
+        {/* Description */}
+        <div>
+          <Label htmlFor="description" className="text-gray-300 mb-2 block">
+            Description {aiGenerated && <Sparkles className="inline w-3 h-3 text-purple-400" />}
+          </Label>
               <Textarea
                 id="description"
                 value={itemData.description}
                 onChange={(e) => setItemData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Describe your item in detail..."
-                rows={4}
-                className="bg-gray-800 border-gray-700 text-white"
-              />
+            placeholder="Describe your item's features, condition, and any important details..."
+            className="bg-gray-900 border-gray-700 text-white min-h-[120px]"
+            maxLength={500}
+          />
+          <p className="text-xs text-gray-500 mt-1">{itemData.description.length}/500 characters</p>
             </div>
 
-          </div>
-        );
-
-      case 3:
-        return (
-          <div className="space-y-4">
-            <div className="text-center mb-4">
-              <h2 className="text-xl font-bold text-white mb-1">Pricing</h2>
-              <p className="text-gray-400 text-sm">Set your price and minimum offer</p>
-            </div>
-
-                  <div className="space-y-2">
-              <Label htmlFor="price" className="text-gray-300">Asking Price (AUD) *</Label>
+        {/* Price & Minimum Price */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="price" className="text-gray-300 mb-2 block">
+              Price ($) {aiGenerated && <Sparkles className="inline w-3 h-3 text-purple-400" />}
+            </Label>
                     <Input
                       id="price"
                       type="number"
-                      step="0.01"
                       value={itemData.price}
                 onChange={(e) => setItemData(prev => ({ ...prev, price: e.target.value }))}
-                      placeholder="0.00"
-                className="bg-gray-800 border-gray-700 text-white text-2xl"
+              placeholder="50"
+              className="bg-gray-900 border-gray-700 text-white"
+              min="0"
+              step="0.01"
                     />
                 </div>
-
-                <div className="space-y-2">
-              <Label htmlFor="minimum_price" className="text-gray-300">
-                Minimum Price for AI Agent (Optional)
+          <div>
+            <Label htmlFor="minimum_price" className="text-gray-300 mb-2 block">
+              Minimum Price ($) {aiGenerated && <Sparkles className="inline w-3 h-3 text-purple-400" />}
               </Label>
               <Input
                 id="minimum_price"
                 type="number"
-                step="0.01"
                 value={itemData.minimum_price}
                 onChange={(e) => setItemData(prev => ({ ...prev, minimum_price: e.target.value }))}
-                placeholder="0.00"
-                className="bg-gray-800 border-gray-700 text-white"
-              />
-              <p className="text-xs text-gray-500">
-                The AI agent will automatically accept offers at or above this price
-              </p>
+              placeholder="35"
+              className="bg-gray-900 border-gray-700 text-white"
+              min="0"
+              step="0.01"
+            />
+            <p className="text-xs text-gray-500 mt-1">For negotiation</p>
             </div>
           </div>
-        );
 
-      case 4:
-        return (
-          <div className="space-y-4">
-            <div className="text-center mb-4">
-              <h2 className="text-xl font-bold text-white mb-1">Details</h2>
-              <p className="text-gray-400 text-sm">Category, condition, and location</p>
-                </div>
-
-                  <div className="space-y-2">
-              <Label htmlFor="category" className="text-gray-300">Category *</Label>
-              <Select value={itemData.category} onValueChange={(value) => setItemData(prev => ({ ...prev, category: value }))}>
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+        {/* Category & Condition */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label className="text-gray-300 mb-2 block">
+              Category {aiGenerated && <Sparkles className="inline w-3 h-3 text-purple-400" />}
+            </Label>
+            <Select
+              value={itemData.category}
+              onValueChange={(value) => setItemData(prev => ({ ...prev, category: value }))}
+            >
+              <SelectTrigger className="bg-gray-900 border-gray-700 text-white">
                         <SelectValue />
                       </SelectTrigger>
                 <SelectContent>
                         {categories.map(cat => (
-                    <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
+                  <SelectItem key={cat.value} value={cat.value}>
+                    {cat.label}
+                  </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
-
-                  <div className="space-y-2">
-              <Label htmlFor="condition" className="text-gray-300">Condition *</Label>
-              <Select value={itemData.condition} onValueChange={(value) => setItemData(prev => ({ ...prev, condition: value }))}>
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+          <div>
+            <Label className="text-gray-300 mb-2 block">
+              Condition {aiGenerated && <Sparkles className="inline w-3 h-3 text-purple-400" />}
+            </Label>
+            <Select
+              value={itemData.condition}
+              onValueChange={(value) => setItemData(prev => ({ ...prev, condition: value }))}
+            >
+              <SelectTrigger className="bg-gray-900 border-gray-700 text-white">
                         <SelectValue />
                       </SelectTrigger>
                 <SelectContent>
                         {conditions.map(cond => (
-                    <SelectItem key={cond.value} value={cond.value}>{cond.label}</SelectItem>
+                  <SelectItem key={cond.value} value={cond.value}>
+                    {cond.label}
+                  </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+          </div>
                   </div>
 
-                  <div className="space-y-2">
-              <Label htmlFor="postcode" className="text-gray-300">Postcode (Australia) *</Label>
+        {/* Tags */}
+        <div>
+          <Label className="text-gray-300 mb-2 block">
+            Tags {aiGenerated && <Sparkles className="inline w-3 h-3 text-purple-400" />}
+          </Label>
+          <div className="flex gap-2 mb-2">
                     <Input
-                id="postcode"
-                value={itemData.postcode}
-                onChange={(e) => setItemData(prev => ({ ...prev, postcode: e.target.value.replace(/\D/g, '').slice(0, 4) }))}
-                placeholder="2000"
-                maxLength={4}
-                className="bg-gray-800 border-gray-700 text-white"
-              />
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+              placeholder="Add a tag..."
+              className="bg-gray-900 border-gray-700 text-white"
+            />
+            <Button
+              type="button"
+              onClick={addTag}
+              variant="outline"
+              className="border-gray-700"
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
             </div>
-
-            {isGeneratingTags && (
-              <div className="flex items-center gap-2 text-purple-400">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="text-sm">Generating tags with AI...</span>
+          {itemData.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {itemData.tags.map((tag, idx) => (
+                <span
+                  key={idx}
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-purple-900/30 border border-purple-500/30 rounded-full text-sm text-purple-300"
+                >
+                  {tag}
+                  <button
+                    onClick={() => removeTag(tag)}
+                    className="hover:text-white"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
               </div>
             )}
+        </div>
+      </div>
+
+      {/* Additional Voice Notes */}
+      <div className="text-center">
+        <Button
+          onClick={() => {
+            setShowVoiceInput(true);
+            setVoiceTargetField('additional');
+          }}
+          variant="outline"
+          className="border-gray-700 text-gray-300"
+        >
+          <Mic className="w-4 h-4 mr-2" />
+          Add More Details by Voice
+        </Button>
+      </div>
           </div>
         );
 
-      case 5:
-        return (
+  // Step 3: Collection Details & Submit
+  const renderStep3 = () => (
           <div className="space-y-4">
             <div className="text-center mb-4">
               <h2 className="text-xl font-bold text-white mb-1">Collection Details</h2>
               <p className="text-gray-400 text-sm">When and where can buyers collect this item?</p>
             </div>
 
-            {/* Collection Type Selection */}
-            <div className="space-y-3">
-              <Label className="text-gray-300">Collection Arrangement *</Label>
-              <div className="space-y-2">
-                <label className="flex items-center gap-3 p-3 bg-gray-800 border border-gray-700 rounded-lg cursor-pointer hover:border-gray-600 transition-colors">
-                  <input
-                    type="radio"
-                    name="collection_type"
-                    checked={!itemData.collection_flexible}
-                    onChange={() => setItemData(prev => ({ ...prev, collection_flexible: false }))}
-                    className="w-4 h-4 text-pink-600 bg-gray-700 border-gray-600 focus:ring-pink-500"
-                  />
+      <div className="space-y-4 bg-gray-800/50 p-6 rounded-lg border border-gray-700">
                   <div>
-                    <p className="text-white font-medium">Specific Collection Date</p>
-                    <p className="text-xs text-gray-400">Choose when buyers can collect (within 14 days)</p>
-                  </div>
-                </label>
-                
-                <label className="flex items-center gap-3 p-3 bg-gray-800 border border-gray-700 rounded-lg cursor-pointer hover:border-gray-600 transition-colors">
-                  <input
-                    type="radio"
-                    name="collection_type"
-                    checked={itemData.collection_flexible}
-                    onChange={() => setItemData(prev => ({ ...prev, collection_flexible: true, collection_date: "" }))}
-                    className="w-4 h-4 text-pink-600 bg-gray-700 border-gray-600 focus:ring-pink-500"
-                  />
-                  <div>
-                    <p className="text-white font-medium">Flexible Pickup</p>
-                    <p className="text-xs text-gray-400">Buyer will contact you to arrange collection time</p>
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            {/* Specific Date Picker (only show if not flexible) */}
-            {!itemData.collection_flexible && (
-              <div className="space-y-2">
-                <Label htmlFor="collection_date" className="text-gray-300">Collection Date *</Label>
+          <Label htmlFor="collection_date" className="text-gray-300 mb-2 block">
+            Collection Date *
+          </Label>
                 <Input
                   id="collection_date"
-                  type="datetime-local"
+            type="date"
                   value={itemData.collection_date}
                   onChange={(e) => setItemData(prev => ({ ...prev, collection_date: e.target.value }))}
-                  className="bg-gray-800 border-gray-700 text-white [color-scheme:dark] text-lg h-14 font-medium"
-                  style={{
-                    colorScheme: 'dark',
-                  }}
-                  min={new Date().toISOString().slice(0, 16)}
-                  max={new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16)}
-                />
-                <p className="text-xs text-gray-500">
-                  Choose a date and time when buyers can collect the item (must be within 14 days of listing)
-                </p>
-                {itemData.collection_date && (() => {
-                  const collectionDate = new Date(itemData.collection_date);
-                  const now = new Date();
-                  const maxDate = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
-                  
-                  if (collectionDate < now) {
-                    return (
-                      <p className="text-xs text-red-400 mt-1">
-                        ⚠️ Collection date cannot be in the past
-                      </p>
-                    );
-                  }
-                  
-                  if (collectionDate > maxDate) {
-                    return (
-                      <p className="text-xs text-red-400 mt-1">
-                        ⚠️ Collection date cannot be more than 14 days from today
-                      </p>
-                    );
-                  }
-                  
-                  return null;
-                })()}
+            className="bg-gray-900 border-gray-700 text-white"
+            min={new Date().toISOString().split('T')[0]}
+          />
               </div>
-            )}
 
-            <div className="space-y-2">
-              <Label htmlFor="collection_address" className="text-gray-300">Collection Address *</Label>
+        <div>
+          <Label htmlFor="collection_address" className="text-gray-300 mb-2 block">
+            Collection Address *
+          </Label>
               <Textarea
                 id="collection_address"
                 value={itemData.collection_address}
                 onChange={(e) => setItemData(prev => ({ ...prev, collection_address: e.target.value }))}
-                placeholder="Enter the full address where buyers can collect the item..."
+            placeholder="Enter the pickup location..."
+            className="bg-gray-900 border-gray-700 text-white"
                 rows={3}
-                className="bg-gray-800 border-gray-700 text-white"
               />
-              <p className="text-xs text-gray-500">
-                Provide the complete address including street, suburb, and postcode
+          <p className="text-xs text-gray-500 mt-1">
+            Full address will be revealed 24 hours before collection date
               </p>
             </div>
 
-            <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <div className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0">ℹ️</div>
                 <div>
-                  <h3 className="text-blue-400 font-medium mb-1">Collection Information</h3>
-                  <p className="text-blue-200 text-sm">
-                    Buyers will see this information when they purchase your item. 
-                    Make sure the date and address are accurate and accessible.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-
-      case 6:
-        return (
-          <div className="space-y-4">
-            <div className="text-center mb-4">
-              <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-2" />
-              <h2 className="text-xl font-bold text-white mb-1">Review & Confirm</h2>
-              <p className="text-gray-400 text-sm">Check your listing before publishing</p>
-            </div>
-
-            <Card className="bg-gray-800 border-gray-700">
-              <CardContent className="p-4 space-y-3">
-                {itemData.image_urls[0] && (
-                  <img src={itemData.image_urls[0]} alt="Main" className="w-full h-32 object-cover rounded-lg" />
-                )}
-                
-                <div>
-                  <h3 className="text-xl font-bold text-white">{itemData.title}</h3>
-                  <p className="text-gray-400 text-sm mt-2">{itemData.description}</p>
+          <Label htmlFor="postcode" className="text-gray-300 mb-2 block">
+            Postcode
+          </Label>
+          <Input
+            id="postcode"
+            value={itemData.postcode}
+            onChange={(e) => setItemData(prev => ({ ...prev, postcode: e.target.value }))}
+            placeholder="e.g., 2000"
+            className="bg-gray-900 border-gray-700 text-white"
+          />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-500">Price:</span>
-                    <span className="text-white font-bold ml-2">${itemData.price}</span>
+                  <div className="flex items-start gap-3">
+          <input
+            type="checkbox"
+            id="collection_flexible"
+            checked={itemData.collection_flexible}
+            onChange={(e) => setItemData(prev => ({ ...prev, collection_flexible: e.target.checked }))}
+            className="mt-1"
+          />
+          <Label htmlFor="collection_flexible" className="text-gray-300 text-sm cursor-pointer">
+            Collection time is flexible (buyers can arrange alternative times)
+          </Label>
                   </div>
-                  <div>
-                    <span className="text-gray-500">Category:</span>
-                    <span className="text-white ml-2">{categories.find(c => c.value === itemData.category)?.label}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Condition:</span>
-                    <span className="text-white ml-2">{conditions.find(c => c.value === itemData.condition)?.label}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Location:</span>
-                    <span className="text-white ml-2">{itemData.postcode}</span>
-                  </div>
-                </div>
 
-                <div className="border-t border-gray-700 pt-3">
-                  <h4 className="text-gray-300 font-medium mb-2">Collection Details</h4>
-                  <div className="space-y-1 text-sm">
-                    <div>
-                      <span className="text-gray-500">Collection Date:</span>
-                      <span className="text-white ml-2">
-                        {itemData.collection_date 
-                          ? new Date(itemData.collection_date).toLocaleString('en-AU', {
-                              weekday: 'long',
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })
-                          : 'Not set'
-                        }
-                      </span>
+        <div className="pt-4 border-t border-gray-700">
+                  <div className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              id="ownership"
+              checked={ownershipConfirmed}
+              onChange={(e) => setOwnershipConfirmed(e.target.checked)}
+              className="mt-1"
+            />
+            <Label htmlFor="ownership" className="text-gray-300 text-sm cursor-pointer">
+              I confirm that I own this item and have the right to sell it *
+            </Label>
                     </div>
-                    <div>
-                      <span className="text-gray-500">Collection Address:</span>
-                      <span className="text-white ml-2 block mt-1">{itemData.collection_address}</span>
                     </div>
                   </div>
-                </div>
 
-                {itemData.tags.length > 0 && (
-                  <div>
-                    <span className="text-gray-500 text-sm">Tags:</span>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {itemData.tags.map((tag, idx) => (
-                        <span key={idx} className="bg-gray-700 text-gray-300 px-2 py-1 rounded text-xs">
-                          {tag}
-                        </span>
-                      ))}
+      {/* Summary Preview */}
+      <Card className="bg-gray-800/50 border-gray-700">
+        <CardContent className="p-4">
+          <h3 className="text-white font-semibold mb-3 text-sm">Listing Summary</h3>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-400">Title:</span>
+              <span className="text-white">{itemData.title || 'Not set'}</span>
                     </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Price:</span>
+              <span className="text-green-400 font-semibold">${itemData.price || '0.00'}</span>
+                    </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Category:</span>
+              <span className="text-white">
+                {categories.find(c => c.value === itemData.category)?.label || 'Other'}
+              </span>
                   </div>
-                )}
+            <div className="flex justify-between">
+              <span className="text-gray-400">Condition:</span>
+              <span className="text-white">
+                {conditions.find(c => c.value === itemData.condition)?.label || 'Good'}
+              </span>
+                </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Images:</span>
+              <span className="text-white">{itemData.image_urls.length}</span>
+                    </div>
+                </div>
               </CardContent>
             </Card>
           </div>
         );
 
-      case 7:
-        return (
-          <div className="space-y-6">
-            <div className="text-center mb-6">
-              <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-white mb-2">Ownership Confirmation</h2>
-              <p className="text-gray-400">Please confirm that you are the legal owner of this item</p>
-            </div>
-
-            <Card className="bg-gray-800 border-gray-700">
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <span className="text-white text-sm font-bold">1</span>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-white mb-1">Legal Ownership</h3>
-                      <p className="text-gray-400 text-sm">You must be the legal owner of this item to list it for sale.</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <span className="text-white text-sm font-bold">2</span>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-white mb-1">Authentic Item</h3>
-                      <p className="text-gray-400 text-sm">The item must be authentic and not counterfeit or stolen.</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <span className="text-white text-sm font-bold">3</span>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-white mb-1">Right to Sell</h3>
-                      <p className="text-gray-400 text-sm">You have the legal right to sell this item and transfer ownership.</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-6 p-4 bg-yellow-900/20 border border-yellow-500/30 rounded-lg">
-                  <div className="flex items-start gap-3">
-                    <div className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5">⚠️</div>
-                    <div>
-                      <h4 className="text-yellow-200 font-semibold mb-1">Important Notice</h4>
-                      <p className="text-yellow-100 text-sm">
-                        By confirming ownership, you declare that you are the legal owner of this item and have the right to sell it. 
-                        Listing stolen or counterfeit items is prohibited and may result in account suspension.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Processing Fee Notice */}
-                <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4 mb-6">
-                  <div className="flex items-start gap-3">
-                    <div className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5">💳</div>
-                    <div>
-                      <h4 className="text-blue-200 font-semibold mb-2">Payment Processing Fee</h4>
-                      <p className="text-blue-100 text-sm mb-2">
-                        When your item is sold via credit card payment, a 5% processing fee will be deducted from your payout to cover secure payment processing and fraud protection.
-                      </p>
-                      <div className="text-blue-200 text-xs">
-                        <p className="font-medium mb-1">Example:</p>
-                        <ul className="list-disc list-inside space-y-1">
-                          <li>Item sells for $100 → You receive $95 (5% fee deducted)</li>
-                          <li>Item sells for $50 → You receive $47.50 (5% fee deducted)</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Credit Card Hold Notice */}
-                <div className="bg-yellow-900/20 border border-yellow-700 rounded-lg p-4 mb-6">
-                  <div className="flex items-start gap-3">
-                    <div className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5">⏰</div>
-                    <div>
-                      <h4 className="text-yellow-200 font-semibold mb-2">Credit Card Payment Hold</h4>
-                      <p className="text-yellow-100 text-sm mb-2">
-                        Credit card payments are held for 14 days to prevent chargebacks and ensure secure transactions.
-                      </p>
-                      <div className="text-yellow-200 text-xs">
-                        <p className="font-medium mb-1">Important Terms:</p>
-                        <ul className="list-disc list-inside space-y-1">
-                          <li>Payments are held for 14 days before release</li>
-                          <li>Any chargebacks will be charged directly to your account</li>
-                          <li>This protects both you and the buyer from fraud</li>
-                          <li>Bank transfers and crypto payments are not subject to holds</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-6">
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={ownershipConfirmed}
-                      onChange={(e) => setOwnershipConfirmed(e.target.checked)}
-                      className="w-5 h-5 text-green-500 bg-gray-700 border-gray-600 rounded focus:ring-green-500 focus:ring-2"
-                    />
-                    <span className="text-white font-medium">
-                      I confirm that I am the legal owner of this item and have the right to sell it
-                    </span>
-                  </label>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        );
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1:
+        return renderStep1();
+      case 2:
+        return renderStep2();
+      case 3:
+        return renderStep3();
+      default:
+        return null;
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-gray-200 p-4 md:p-6">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gray-950 text-white p-4">
+      <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="mb-4">
+        <div className="mb-6">
           <Button
             variant="ghost"
             onClick={() => navigate(createPageUrl('MyItems'))}
-            className="text-gray-400 hover:text-white mb-2"
+            className="text-gray-400 hover:text-white mb-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
+            Back to My Items
           </Button>
-          
-          <h1 className="text-2xl font-bold text-white mb-2">Add New Item</h1>
-          
-          {/* Progress Bar */}
-          <div className="space-y-1">
-            <div className="flex justify-between text-sm text-gray-400">
-              <span>Step {currentStep} of {totalSteps}</span>
-              <span>{Math.round((currentStep / totalSteps) * 100)}%</span>
-            </div>
-            <Progress value={(currentStep / totalSteps) * 100} className="h-1" />
-          </div>
+          <h1 className="text-2xl font-bold text-center mb-2">Create New Listing</h1>
+          <p className="text-center text-gray-400 text-sm">
+            Step {currentStep} of {totalSteps}
+          </p>
         </div>
 
-        {/* Content */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 md:p-6 mb-4">
+        {/* Step Indicator */}
+        {renderStepIndicator()}
+
+        {/* Step Content */}
+        <Card className="bg-gray-900 border-gray-800 mb-6">
+          <CardContent className="p-6">
           {renderStep()}
-        </div>
+          </CardContent>
+        </Card>
 
-        {/* Navigation */}
+        {/* Navigation Buttons */}
         <div className="flex justify-between gap-4">
               <Button
-            onClick={handleBack}
-            disabled={currentStep === 1}
                 variant="outline"
-            className="bg-gray-800 hover:bg-gray-700 text-white border-gray-700"
+            onClick={goToPreviousStep}
+            disabled={currentStep === 1 || isSubmitting}
+            className="border-gray-700 text-gray-300"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
+            Previous
           </Button>
 
           {currentStep < totalSteps ? (
             <Button
-              onClick={handleNext}
-              disabled={!canProceed()}
-              className="bg-gradient-to-r from-pink-600 to-fuchsia-600 hover:from-pink-700 hover:to-fuchsia-700"
+              onClick={goToNextStep}
+              disabled={isSubmitting}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
             >
               Next
               <ArrowRight className="w-4 h-4 ml-2" />
@@ -1467,18 +942,18 @@ Return only the description, nothing else.`
           ) : (
               <Button
               onClick={handleSubmit}
-              disabled={isSubmitting}
+              disabled={isSubmitting || !ownershipConfirmed}
               className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
               >
                 {isSubmitting ? (
                   <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Publishing...
+                  Creating...
                   </>
                 ) : (
                   <>
                   <CheckCircle className="w-4 h-4 mr-2" />
-                  Publish Listing
+                  Create Listing
                   </>
                 )}
               </Button>
@@ -1489,9 +964,10 @@ Return only the description, nothing else.`
       {/* Voice Input Modal */}
       {showVoiceInput && (
         <VoiceInputField
-          onTranscript={handleVoiceTranscript}
+          onTranscript={voiceTargetField === 'additional' ? handleAdditionalVoice : handleVoiceTranscript}
           onClose={() => setShowVoiceInput(false)}
           targetField={voiceTargetField}
+          placeholder={voiceTargetField === 'additional' ? 'Add more details...' : 'Describe your item...'}
         />
       )}
     </div>
