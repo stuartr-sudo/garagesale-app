@@ -24,7 +24,6 @@ import { supabase } from '@/lib/supabase';
 import CollectionAcknowledgment from './CollectionAcknowledgment';
 import PaymentMethodSelector from './PaymentMethodSelector';
 import BankTransferDetails from './BankTransferDetails';
-import StripePaymentForm from './StripePaymentForm';
 import CryptoPaymentSelector from './CryptoPaymentSelector';
 import CryptoPaymentDetails from './CryptoPaymentDetails';
 import ConfirmationScreen from './ConfirmationScreen';
