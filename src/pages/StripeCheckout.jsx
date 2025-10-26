@@ -11,7 +11,7 @@ import { createPageUrl } from '@/utils';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
-const CheckoutForm = ({ clientSecret, amount, onSuccess }) => {
+const CheckoutForm = ({ clientSecret, amount, onSuccess, onCancel }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -34,6 +34,8 @@ const CheckoutForm = ({ clientSecret, amount, onSuccess }) => {
       });
 
       if (error) {
+        // Payment failed - cleanup reservations
+        if (onCancel) await onCancel();
         throw new Error(error.message);
       }
 
@@ -127,6 +129,31 @@ export default function StripeCheckout() {
     }
   }, [clientSecret, navigate, toast]);
 
+  const handlePaymentCancel = async () => {
+    try {
+      // Cleanup buy_now reservations on cancel/error (matches mobile flow)
+      const pendingCheckout = sessionStorage.getItem('pendingCartCheckout');
+      if (pendingCheckout) {
+        const { cartItems } = JSON.parse(pendingCheckout);
+        const itemIds = cartItems.map(ci => ci.item_id || ci.item.id);
+        
+        const { error } = await supabase
+          .from('item_reservations')
+          .delete()
+          .in('item_id', itemIds)
+          .eq('reservation_type', 'buy_now');
+
+        if (error) {
+          console.error('Error cleaning up reservations:', error);
+        } else {
+          console.log('✅ Cleaned up buy_now reservations after payment error');
+        }
+      }
+    } catch (error) {
+      console.error('Error in handlePaymentCancel:', error);
+    }
+  };
+
   const handlePaymentSuccess = async (paymentIntent) => {
     try {
       // Get cart data from session storage
@@ -137,7 +164,29 @@ export default function StripeCheckout() {
 
       const { cartItems } = JSON.parse(pendingCheckout);
 
-      // Create orders for each cart item
+      // Get current user ID
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // STEP 1: Immediately mark items SOLD (matches mobile app flow)
+      const itemIds = cartItems.map(ci => ci.item_id || ci.item.id);
+      const { error: soldError } = await supabase
+        .from('items')
+        .update({
+          status: 'sold',
+          is_sold: true,
+          sold_at: new Date().toISOString(),
+          buyer_id: user.id
+        })
+        .in('id', itemIds);
+
+      if (soldError) {
+        console.error('Error marking items sold:', soldError);
+        throw soldError;
+      }
+
+      // STEP 2: Create orders with payment_confirmed status
+      // This triggers the seller balance update automatically via DB trigger
       const orderPromises = cartItems.map(async (cartItem) => {
         const effectivePrice = cartItem.negotiated_price || cartItem.item.price;
         const item = cartItem.item;
@@ -146,31 +195,60 @@ export default function StripeCheckout() {
           .from('orders')
           .insert({
             item_id: item.id,
-            buyer_id: cartItem.buyer_id,
+            buyer_id: user.id,
             seller_id: item.seller_id,
             total_amount: effectivePrice,
             shipping_cost: 0,
             delivery_method: 'collect',
             collection_address: item.collection_address || item.location || null,
             collection_date: item.collection_date || null,
-            status: 'payment_confirmed'
+            status: 'payment_confirmed' // Triggers seller balance update via DB trigger
           })
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error creating order:', error);
+          throw error;
+        }
         return order;
       });
 
       await Promise.all(orderPromises);
 
-      // Clear cart
+      // STEP 3: Disable bundles containing these items
+      const { error: bundleError } = await supabase
+        .from('bundles')
+        .update({ status: 'inactive' })
+        .contains('item_ids', itemIds);
+
+      if (bundleError) {
+        console.warn('Error disabling bundles:', bundleError);
+        // Don't fail on bundle error
+      }
+
+      // STEP 4: Delete buy_now reservations for these items
+      const { error: reservationError } = await supabase
+        .from('item_reservations')
+        .delete()
+        .in('item_id', itemIds)
+        .eq('reservation_type', 'buy_now');
+
+      if (reservationError) {
+        console.warn('Error clearing reservations:', reservationError);
+        // Don't fail on reservation cleanup
+      }
+
+      // STEP 5: Clear cart
       const { error: clearError } = await supabase
         .from('cart_items')
         .delete()
         .in('id', cartItems.map(ci => ci.id));
 
-      if (clearError) throw clearError;
+      if (clearError) {
+        console.warn('Error clearing cart:', clearError);
+        // Don't fail on cart clear
+      }
 
       // Clear session storage
       sessionStorage.removeItem('pendingCartCheckout');
@@ -179,7 +257,7 @@ export default function StripeCheckout() {
 
       toast({
         title: "Payment Successful!",
-        description: "Your order has been confirmed",
+        description: "Your order has been confirmed. Seller has been credited.",
       });
 
       // Redirect to My Orders after 2 seconds
@@ -191,7 +269,7 @@ export default function StripeCheckout() {
       console.error('Error completing order:', error);
       toast({
         title: "Error",
-        description: "Payment succeeded but order creation failed. Please contact support.",
+        description: error.message || "Payment succeeded but order creation failed. Please contact support.",
         variant: "destructive"
       });
     }
@@ -244,6 +322,7 @@ export default function StripeCheckout() {
                 clientSecret={clientSecret} 
                 amount={amount}
                 onSuccess={handlePaymentSuccess}
+                onCancel={handlePaymentCancel}
               />
             </Elements>
           </CardContent>

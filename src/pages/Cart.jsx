@@ -448,6 +448,27 @@ export default function Cart() {
         }
       }
 
+      // Step 1.5: Create buy_now reservations (10 minutes) - matches mobile flow
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+      const reservations = cartItems.map(ci => ({
+        item_id: ci.item.id,
+        user_id: currentUser.id,
+        reservation_type: 'buy_now',
+        expires_at: expiresAt
+      }));
+
+      const { error: reservationError } = await supabase
+        .from('item_reservations')
+        .upsert(reservations, {
+          onConflict: 'item_id,user_id',
+          ignoreDuplicates: false
+        });
+
+      if (reservationError) {
+        console.warn('Error creating reservations:', reservationError);
+        // Don't fail checkout on reservation error
+      }
+
       // Step 2: Calculate total and create Stripe payment intent
       const totalAmount = parseFloat(pricing.total);
       const amountInCents = Math.round(totalAmount * 100); // Convert to cents
