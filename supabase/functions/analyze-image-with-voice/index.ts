@@ -146,11 +146,18 @@ async function analyzeImage(imageUrl: string, apiKey: string) {
 - Be specific (not "Phone" but "iPhone 12 Pro")
 - Include color/size if prominent
 
-**Description** (2-3 sentences):
-- Sentence 1: What it is + main appeal
-- Sentence 2: Condition details + notable features
-- Sentence 3: Who it's for or use case
-- Be honest about visible wear/damage
+**Description** (detailed paragraph, 4-6 sentences, 150-300 words):
+- Paragraph structure:
+  * Opening: What the item is, its primary purpose, and standout feature
+  * Features: List 3-5 specific features, specifications, or benefits
+  * Condition: Detailed condition assessment - be specific about any wear, marks, functionality
+  * Value proposition: Why this is a good buy, what makes it special
+  * Use case: Who would love this item or what situations it's perfect for
+- Write in an engaging, descriptive style that sells the item
+- Be honest and transparent about condition
+- Include measurements, dimensions, or specs if visible
+- Mention any accessories, original packaging, or extras shown
+- Use natural, flowing language (not bullet points)
 
 **Price & Minimum Price**:
 - Research typical market value for the condition
@@ -182,8 +189,8 @@ Return ONLY the JSON object.`
           ]
         }
       ],
-      max_tokens: 500,
-      temperature: 0.3
+      max_tokens: 800,
+      temperature: 0.4
     })
   })
 
@@ -231,7 +238,7 @@ ${transcript}
 **Field Instructions:**
 
 **title**: Create from their description (e.g., "iPhone 12 Pro - 128GB Blue")
-**description**: Use their own words when possible, 2-3 complete sentences
+**description**: Expand their words into a detailed, compelling 4-6 sentence paragraph (150-300 words). Cover features, condition, value, and appeal. Make it flow naturally and sound professional while keeping their authentic details.
 **price**: The asking price they mention (if they say "around $100" → 100)
 **minimum_price**: Extract if they say "but I'd take...", "willing to accept...", "at least...", "no lower than..." (if not mentioned → 70% of price)
 **category**: Choose best fit from: electronics, clothing, furniture, books, toys, sports, home_garden, automotive, collectibles, other
@@ -252,8 +259,8 @@ Return ONLY the JSON object.`
       messages: [
         { role: 'user', content: prompt }
       ],
-      max_tokens: 350,
-      temperature: 0.3
+      max_tokens: 600,
+      temperature: 0.4
     })
   })
 

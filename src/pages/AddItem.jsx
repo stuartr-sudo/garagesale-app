@@ -117,6 +117,8 @@ export default function AddItem() {
 
   // Combined AI Analysis (Voice + Images)
   const analyzeWithVoiceAndImages = async () => {
+    alert(`Function called! Images: ${itemData.image_urls.length}, Voice: ${voiceTranscription ? 'YES' : 'NO'}`);
+    
     if (itemData.image_urls.length === 0) {
       toast({
         title: "No Images",
