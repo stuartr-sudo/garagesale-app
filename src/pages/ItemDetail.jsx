@@ -294,7 +294,7 @@ export default function ItemDetail() {
           reservation_type: 'buy_now',
           expires_at: expiresAt
         }, {
-          onConflict: 'item_id,user_id'
+          onConflict: 'item_id'
         });
 
       if (error) {
@@ -356,7 +356,7 @@ export default function ItemDetail() {
           reservation_type: 'buy_now',
           expires_at: expiresAt
         }, {
-          onConflict: 'item_id,user_id'
+          onConflict: 'item_id'
         });
 
       if (error) {
