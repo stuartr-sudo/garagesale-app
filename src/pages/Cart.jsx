@@ -443,15 +443,17 @@ export default function Cart() {
 
       // Step 2: Calculate total and create Stripe payment intent
       const totalAmount = parseFloat(pricing.total);
+      const amountInCents = Math.round(totalAmount * 100); // Convert to cents
       
       // Create payment intent via API
-      const response = await fetch('/api/stripe/create-payment-intent', {
+      const response = await fetch('/api/stripe/create-payment-intent-cart', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          amount: totalAmount,
+          amount: amountInCents,
+          currency: 'aud',
           items: cartItems.map(ci => ({
             id: ci.item.id,
             title: ci.item.title,
@@ -462,7 +464,8 @@ export default function Cart() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create payment intent');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create payment intent');
       }
 
       const { clientSecret } = await response.json();

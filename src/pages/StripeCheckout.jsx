@@ -206,8 +206,8 @@ export default function StripeCheckout() {
       <div className="max-w-2xl mx-auto">
         <Button
           onClick={() => navigate(createPageUrl('Cart'))}
-          variant="ghost"
-          className="mb-6 text-gray-400 hover:text-white"
+          variant="outline"
+          className="mb-6 bg-gray-800 border-gray-700 text-white hover:bg-gray-700 hover:text-white"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Cart
