@@ -417,7 +417,8 @@ async function quickIdentifyItem(imageUrl: string, apiKey: string): Promise<stri
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini', // Faster, cheaper model for quick identification
+        // Use a vision-capable model for image input; gpt-4o-mini may not support images
+        model: 'gpt-4o',
         messages: [
           {
             role: 'user',
