@@ -34,11 +34,11 @@ export default function ItemDetail() {
   const [showAgentSettings, setShowAgentSettings] = useState(false);
   const [minimumPrice, setMinimumPrice] = useState('');
   const [isOwner, setIsOwner] = useState(false);
-  // Cart states removed - cart system scorched
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [isImageFullscreen, setIsImageFullscreen] = useState(false);
   const [negotiatedPrice, setNegotiatedPrice] = useState(null);
   const [offerAccepted, setOfferAccepted] = useState(false);
+  const [itemSold, setItemSold] = useState(false);
   const [theme, setTheme] = useState({});
   const [itemUnavailable, setItemUnavailable] = useState(false);
   const [availabilityStatus, setAvailabilityStatus] = useState('available');
@@ -266,7 +266,129 @@ export default function ItemDetail() {
     }
   };
 
-  // handleAddToCart removed - cart system scorched
+  const handleBuyNow = async () => {
+    if (!currentUser) {
+      toast({
+        title: "Please Sign In",
+        description: "You must be signed in to purchase items",
+        variant: "destructive"
+      });
+      navigate(createPageUrl('SignIn'));
+      return;
+    }
+
+    try {
+      // Create buy_now reservation (10 minutes)
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+      
+      const { error } = await supabase
+        .from('item_reservations')
+        .upsert({
+          item_id: item.id,
+          user_id: currentUser.id,
+          reservation_type: 'buy_now',
+          expires_at: expiresAt
+        }, {
+          onConflict: 'item_id,user_id'
+        });
+
+      if (error) {
+        console.error('Reservation error:', error);
+        toast({
+          title: "Item Unavailable",
+          description: "This item is currently reserved. Please try again later.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Navigate to cart with asking price
+      navigate(createPageUrl('Cart'), {
+        state: {
+          items: [{
+            id: item.id,
+            title: item.title,
+            price: item.price,
+            category: item.category,
+            image_urls: item.image_urls,
+            seller_id: item.seller_id,
+            collection_address: item.collection_address,
+            collection_date: item.collection_date
+          }]
+        }
+      });
+
+    } catch (error) {
+      console.error('Error handling buy now:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process purchase",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleAcceptOffer = async () => {
+    if (!currentUser) {
+      toast({
+        title: "Please Sign In",
+        description: "You must be signed in to purchase items",
+        variant: "destructive"
+      });
+      navigate(createPageUrl('SignIn'));
+      return;
+    }
+
+    try {
+      // Create buy_now reservation (10 minutes)
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+      
+      const { error } = await supabase
+        .from('item_reservations')
+        .upsert({
+          item_id: item.id,
+          user_id: currentUser.id,
+          reservation_type: 'buy_now',
+          expires_at: expiresAt
+        }, {
+          onConflict: 'item_id,user_id'
+        });
+
+      if (error) {
+        console.error('Reservation error:', error);
+        toast({
+          title: "Item Unavailable",
+          description: "This item is currently reserved. Please try again later.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Navigate to cart with negotiated price
+      navigate(createPageUrl('Cart'), {
+        state: {
+          items: [{
+            id: item.id,
+            title: item.title,
+            price: negotiatedPrice,
+            category: item.category,
+            image_urls: item.image_urls,
+            seller_id: item.seller_id,
+            collection_address: item.collection_address,
+            collection_date: item.collection_date
+          }]
+        }
+      });
+
+    } catch (error) {
+      console.error('Error accepting offer:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process offer acceptance",
+        variant: "destructive"
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -601,26 +723,54 @@ export default function ItemDetail() {
                 </div>
               )}
 
-              {/* Add to Cart button removed - cart system scorched */}
-
-              <Button
-                onClick={() => setShowPurchaseModal(true)}
-                disabled={itemUnavailable}
-                className={`w-full h-10 md:h-12 text-white font-semibold text-sm md:text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] ${
-                  itemUnavailable ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-                style={
-                  !itemUnavailable
-                    ? {
-                        background: `linear-gradient(to right, ${theme?.buyNowFrom || '#10b981'}, ${theme?.buyNowTo || '#059669'})`,
-                        animation: 'subtle-pulse 3s ease-in-out infinite'
-                      }
-                    : undefined
-                }
-              >
-                <ShoppingCart className="w-4 h-4 mr-1" />
-                {item.price === 0 ? 'Claim' : 'Buy Now'}
-              </Button>
+              {/* Buy Now / Accept Offer / Sold Button */}
+              {itemSold ? (
+                <Button
+                  disabled
+                  className="w-full h-10 md:h-12 bg-gray-600 text-white font-semibold text-sm md:text-base rounded-lg cursor-not-allowed"
+                >
+                  <Check className="w-4 h-4 mr-1" />
+                  Sold
+                </Button>
+              ) : offerAccepted && negotiatedPrice ? (
+                <Button
+                  onClick={handleAcceptOffer}
+                  disabled={itemUnavailable}
+                  className={`w-full h-10 md:h-12 text-white font-semibold text-sm md:text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] ${
+                    itemUnavailable ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                  style={
+                    !itemUnavailable
+                      ? {
+                          background: `linear-gradient(to right, ${theme?.buyNowFrom || '#10b981'}, ${theme?.buyNowTo || '#059669'})`,
+                          animation: 'subtle-pulse 3s ease-in-out infinite'
+                        }
+                      : undefined
+                  }
+                >
+                  <ShoppingCart className="w-4 h-4 mr-1" />
+                  Accept Offer ${negotiatedPrice.toFixed(2)}
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleBuyNow}
+                  disabled={itemUnavailable}
+                  className={`w-full h-10 md:h-12 text-white font-semibold text-sm md:text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] ${
+                    itemUnavailable ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                  style={
+                    !itemUnavailable
+                      ? {
+                          background: `linear-gradient(to right, ${theme?.buyNowFrom || '#10b981'}, ${theme?.buyNowTo || '#059669'})`,
+                          animation: 'subtle-pulse 3s ease-in-out infinite'
+                        }
+                      : undefined
+                  }
+                >
+                  <ShoppingCart className="w-4 h-4 mr-1" />
+                  {item.price === 0 ? 'Claim' : 'Buy Now'}
+                </Button>
+              )}
 
               {/* Propose Trade Button - Only show if not owner */}
               {!isOwner && currentUser && item.price > 0 && (

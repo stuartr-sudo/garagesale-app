@@ -44,6 +44,10 @@ const PaymentWizardDemo = lazy(() => import("./PaymentWizardDemo"));
 const Messages = lazy(() => import("./Messages"));
 const WishLists = lazy(() => import("./WishLists"));
 const PromoteItem = lazy(() => import("./PromoteItem"));
+const Cart = lazy(() => import("./Cart"));
+const StripeCheckout = lazy(() => import("./StripeCheckout"));
+const CryptoCheckout = lazy(() => import("./CryptoCheckout"));
+const BankCheckout = lazy(() => import("./BankCheckout"));
 
 // Loading component - Minimal, non-intrusive loader
 const PageLoader = () => (
@@ -241,6 +245,11 @@ function PagesContent() {
                 <Route path="/ItemDetail/:id" element={<ItemDetail />} />
                 
                 <Route path="/MyOrders" element={<MyOrders />} />
+                
+                <Route path="/Cart" element={<Cart />} />
+                <Route path="/stripe-checkout" element={<StripeCheckout />} />
+                <Route path="/crypto-checkout" element={<CryptoCheckout />} />
+                <Route path="/bank-checkout" element={<BankCheckout />} />
                 
                 <Route path="/SpecialOffers" element={<SpecialOffers />} />
                 
