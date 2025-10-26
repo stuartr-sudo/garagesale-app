@@ -6,7 +6,6 @@ import Layout from "./Layout.jsx";
 import Marketplace from "./Marketplace"; // Eager load - most visited page
 import ItemDetail from "./ItemDetail"; // Eager load - frequently accessed
 import MyItems from "./MyItems"; // Eager load - seller's main page
-import Cart from "./Cart"; // Eager load to avoid dynamic import 404s on /cart
 
 // Lazy load less frequently accessed pages for code splitting
 const AddItem = lazy(() => import("./AddItem"));
@@ -45,7 +44,6 @@ const PaymentWizardDemo = lazy(() => import("./PaymentWizardDemo"));
 const Messages = lazy(() => import("./Messages"));
 const WishLists = lazy(() => import("./WishLists"));
 const PromoteItem = lazy(() => import("./PromoteItem"));
-const StripeCheckout = lazy(() => import("./StripeCheckout"));
 
 // Loading component - Minimal, non-intrusive loader
 const PageLoader = () => (
@@ -126,8 +124,6 @@ const PAGES = {
     
     MyOrders: MyOrders,
     
-    Cart: Cart,
-    
     SpecialOffers: SpecialOffers,
     
     ThemeSettings: ThemeSettings,
@@ -154,7 +150,7 @@ function _getCurrentPage(url) {
         url = url.slice(0, -1);
     }
     
-    // Handle ItemDetail pages - they should show cart and navigation
+    // Handle ItemDetail pages
     if (url.includes('/ItemDetail/')) {
         return 'ItemDetail';
     }
@@ -245,10 +241,6 @@ function PagesContent() {
                 <Route path="/ItemDetail/:id" element={<ItemDetail />} />
                 
                 <Route path="/MyOrders" element={<MyOrders />} />
-                
-                <Route path="/cart" element={<Cart />} />
-                
-                <Route path="/stripe-checkout" element={<StripeCheckout />} />
                 
                 <Route path="/SpecialOffers" element={<SpecialOffers />} />
                 

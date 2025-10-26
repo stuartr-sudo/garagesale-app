@@ -18,7 +18,7 @@ import SpecialOffersSection from '@/components/marketplace/SpecialOffersSection'
 import ProposeTradeModal from '@/components/trading/ProposeTradeModal';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
-import { addToCart } from '@/utils/cart';
+// Cart system scorched - addToCart removed
 import UrgencyIndicators from '@/components/marketplace/UrgencyIndicators';
 
 export default function ItemDetail() {
@@ -34,8 +34,7 @@ export default function ItemDetail() {
   const [showAgentSettings, setShowAgentSettings] = useState(false);
   const [minimumPrice, setMinimumPrice] = useState('');
   const [isOwner, setIsOwner] = useState(false);
-  const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const [isInCart, setIsInCart] = useState(false);
+  // Cart states removed - cart system scorched
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [isImageFullscreen, setIsImageFullscreen] = useState(false);
   const [negotiatedPrice, setNegotiatedPrice] = useState(null);
@@ -267,47 +266,7 @@ export default function ItemDetail() {
     }
   };
 
-  const handleAddToCart = async () => {
-    setIsAddingToCart(true);
-    try {
-      const user = await UserEntity.me();
-      
-      // Use the new reservation system
-      const result = await addToCart({
-        itemId: item.id,
-        buyerId: user.id,
-        quantity: 1,
-        negotiatedPrice: negotiatedPrice,
-        priceSource: negotiatedPrice ? 'negotiated' : 'original'
-      });
-
-      if (!result.success) {
-        toast({
-          title: "Item Not Available",
-          description: result.error || "This item is currently reserved by another user. Please try again in a few minutes.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Immediately update button state
-      setIsInCart(true);
-      
-      toast({
-        title: "Added to Cart!",
-        description: `${item.title} has been reserved for 10 minutes`
-      });
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add item to cart",
-        variant: "destructive"
-      });
-    } finally {
-      setIsAddingToCart(false);
-    }
-  };
+  // handleAddToCart removed - cart system scorched
 
   if (loading) {
     return (
@@ -642,31 +601,7 @@ export default function ItemDetail() {
                 </div>
               )}
 
-              {isInCart ? (
-                <Button
-                  onClick={() => navigate(createPageUrl('Cart'))}
-                  className="w-full h-10 md:h-12 bg-green-600 hover:bg-green-700 text-white font-semibold text-sm md:text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
-                >
-                  <ShoppingCart className="w-4 h-4 mr-1" />
-                  Go to Cart
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleAddToCart}
-                  disabled={isAddingToCart || itemUnavailable}
-                  className={`w-full h-10 md:h-12 text-white font-semibold text-sm md:text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] ${
-                    itemUnavailable ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                  style={
-                    !itemUnavailable
-                      ? { background: `linear-gradient(to right, ${theme?.addToCartFrom || '#a855f7'}, ${theme?.addToCartTo || '#db2777'})` }
-                      : undefined
-                  }
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  Add to Cart
-                </Button>
-              )}
+              {/* Add to Cart button removed - cart system scorched */}
 
               <Button
                 onClick={() => setShowPurchaseModal(true)}

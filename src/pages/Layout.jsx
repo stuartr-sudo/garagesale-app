@@ -52,7 +52,7 @@ import {
 } from "@/components/ui/sidebar";
 import NerdBackground from "@/components/ui/NerdBackground"; // Import the new component
 import FloatingCameraButton from "@/components/camera/FloatingCameraButton";
-import CartIcon from "@/components/cart/CartIcon";
+// CartIcon removed - cart system scorched
 import SuspensionBanner from "@/components/SuspensionBanner";
 import AccountRestrictionBanner from "@/components/payment/AccountRestrictionBanner";
 import { checkUserStatus, checkExpiredOrders } from "@/api/penalties";
@@ -81,11 +81,6 @@ const navigationItems = [
   {
     title: "My Orders",
     url: createPageUrl("MyOrders"),
-    icon: ShoppingCart,
-  },
-  {
-    title: "Shopping Cart",
-    url: createPageUrl("Cart"),
     icon: ShoppingCart,
   },
   {
@@ -491,12 +486,7 @@ function LayoutContent({ currentUser, currentPageName, visibleNavItems, handleLo
             </div>
           )}
 
-          {/* Fixed Cart Icon - Only show if logged in and NOT on Home page */}
-          {currentUser && currentPageName !== 'Home' && (
-            <div className="fixed top-6 right-6 z-50">
-              <CartIcon />
-            </div>
-          )}
+          {/* Cart icon removed - cart system scorched */}
 
           <div className="flex-1">
             {/* Account Restriction Banner */}
