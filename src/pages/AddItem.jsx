@@ -87,7 +87,7 @@ export default function AddItem() {
     }
   };
 
-  // Voice input handler
+  // Voice input handler (for Step 1 - main voice description)
   const handleVoiceTranscript = (transcript) => {
     setVoiceTranscription(transcript);
     setHasVoiceInput(true);
@@ -99,20 +99,34 @@ export default function AddItem() {
     });
   };
 
-  // Add more details voice handler (appends to description)
+  // Voice handler for Step 2 - appends to title or description
   const handleAdditionalVoice = (transcript) => {
+    if (voiceTargetField === 'title') {
+      // Append to title
       setItemData(prev => ({ 
         ...prev, 
-      description: prev.description 
-        ? `${prev.description}\n\n${transcript}` 
-        : transcript
-    }));
+        title: prev.title 
+          ? `${prev.title} ${transcript}` 
+          : transcript
+      }));
+      toast({
+        title: "Details Added to Title! 🎤",
+        description: "Voice input appended to title.",
+      });
+    } else if (voiceTargetField === 'description') {
+      // Append to description
+      setItemData(prev => ({ 
+        ...prev, 
+        description: prev.description 
+          ? `${prev.description} ${transcript}` 
+          : transcript
+      }));
+        toast({
+        title: "Details Added to Description! 🎤",
+        description: "Voice input appended to description.",
+      });
+    }
     setShowVoiceInput(false);
-    
-    toast({
-      title: "Details Added! 🎤",
-      description: "Additional information appended to description.",
-    });
   };
 
   // Combined AI Analysis (Voice + Images)
@@ -163,6 +177,9 @@ export default function AddItem() {
         title: "AI Analysis Complete! ✨",
         description: `Generated ${hasVoiceInput ? 'with voice + images' : 'from images'}. Review and edit as needed.`,
         });
+
+        // Auto-advance to Step 2
+        setCurrentStep(2);
 
       } catch (error) {
       toast({
@@ -474,14 +491,15 @@ export default function AddItem() {
     </div>
   );
 
-  // Step 1: Upload Images
+  // Step 1: Upload Images + Voice Description + Generate
   const renderStep1 = () => (
-          <div className="space-y-4">
+    <div className="space-y-6">
             <div className="text-center mb-4">
-        <h2 className="text-xl font-bold text-white mb-1">Upload Photos</h2>
-        <p className="text-gray-400 text-sm">Add images of your item. First image will be the main photo.</p>
+        <h2 className="text-xl font-bold text-white mb-1">Upload Photos & Describe</h2>
+        <p className="text-gray-400 text-sm">Add images and optionally record a voice description</p>
           </div>
 
+      {/* Image Upload */}
                 <ImageUpload
                   images={itemData.image_urls}
                   onUpload={handleImageUpload}
@@ -496,23 +514,13 @@ export default function AddItem() {
           {itemData.image_urls.length} image{itemData.image_urls.length > 1 ? 's' : ''} uploaded
                   </div>
                 )}
-          </div>
-        );
-
-  // Step 2: Voice + AI Content Generation
-  const renderStep2 = () => (
-    <div className="space-y-6">
-            <div className="text-center mb-4">
-        <h2 className="text-xl font-bold text-white mb-1">Item Details</h2>
-        <p className="text-gray-400 text-sm">Add voice description or let AI generate from images</p>
-            </div>
 
       {/* Voice Input Section */}
       <Card className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 border-purple-500/30">
         <CardContent className="p-6">
           <div className="text-center">
             <Mic className="w-12 h-12 text-purple-400 mx-auto mb-3" />
-            <h3 className="text-white font-semibold mb-2">Add Voice Description</h3>
+            <h3 className="text-white font-semibold mb-2">Add Voice Description (Optional)</h3>
             <p className="text-gray-400 text-sm mb-4">
               Describe your item by voice to personalize the AI-generated content
             </p>
@@ -523,7 +531,7 @@ export default function AddItem() {
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-green-400" />
                     <span className="text-green-400 font-medium text-sm">Voice captured!</span>
-                      </div>
+            </div>
                   <Button
                     size="sm"
                     variant="ghost"
@@ -539,8 +547,8 @@ export default function AddItem() {
                     </div>
                 <div className="p-2 bg-gray-800 rounded text-xs text-gray-300 text-left max-h-24 overflow-y-auto">
                   "{voiceTranscription}"
-                  </div>
-                </div>
+                      </div>
+                    </div>
             ) : null}
             
             <Button
@@ -553,11 +561,11 @@ export default function AddItem() {
               <Mic className="w-4 h-4 mr-2" />
               {hasVoiceInput ? 'Re-record Voice' : 'Record Voice Description'}
             </Button>
-              </div>
+                  </div>
         </CardContent>
       </Card>
 
-      {/* AI Generation Button */}
+      {/* Generate Listing Button */}
       <div className="flex justify-center">
               <Button
                 type="button"
@@ -569,31 +577,47 @@ export default function AddItem() {
           {isAnalyzing ? (
             <>
               <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              Analyzing...
+              Generating Listing...
                   </>
                 ) : (
                   <>
               <Sparkles className="w-5 h-5 mr-2" />
-              {hasVoiceInput ? 'Generate with AI + Voice' : 'Generate with AI'}
+              Generate Listing
                   </>
                 )}
               </Button>
             </div>
+    </div>
+  );
 
-      {aiGenerated && (
-        <div className="text-center text-sm text-blue-400 flex items-center justify-center gap-2">
-          <Sparkles className="w-4 h-4" />
-          AI-generated content - edit as needed below
-              </div>
-            )}
+  // Step 2: Review & Edit AI-Generated Fields
+  const renderStep2 = () => (
+    <div className="space-y-6">
+      <div className="text-center mb-4">
+        <h2 className="text-xl font-bold text-white mb-1">Review & Edit Details</h2>
+        <p className="text-gray-400 text-sm">Review AI-generated content and make any changes</p>
+                </div>
 
       {/* Editable Fields */}
       <div className="space-y-4 bg-gray-800/50 p-6 rounded-lg border border-gray-700">
-        {/* Title */}
+        {/* Title with Add More Voice button */}
         <div>
-          <Label htmlFor="title" className="text-gray-300 mb-2 block">
-            Title {aiGenerated && <Sparkles className="inline w-3 h-3 text-purple-400" />}
-          </Label>
+          <div className="flex items-center justify-between mb-2">
+            <Label htmlFor="title" className="text-gray-300">Title</Label>
+                <Button
+                  type="button"
+                  size="sm"
+              variant="ghost"
+              onClick={() => {
+                setVoiceTargetField('title');
+                setShowVoiceInput(true);
+              }}
+              className="text-purple-400 hover:text-purple-300 h-auto py-1"
+            >
+              <Mic className="w-3 h-3 mr-1" />
+              Add More Details by Voice
+                </Button>
+              </div>
               <Input
                 id="title"
                 value={itemData.title}
@@ -605,11 +629,24 @@ export default function AddItem() {
           <p className="text-xs text-gray-500 mt-1">{itemData.title.length}/50 characters</p>
             </div>
 
-        {/* Description */}
+        {/* Description with Add More Voice button */}
         <div>
-          <Label htmlFor="description" className="text-gray-300 mb-2 block">
-            Description {aiGenerated && <Sparkles className="inline w-3 h-3 text-purple-400" />}
-          </Label>
+          <div className="flex items-center justify-between mb-2">
+            <Label htmlFor="description" className="text-gray-300">Description</Label>
+                <Button
+                  type="button"
+                  size="sm"
+              variant="ghost"
+              onClick={() => {
+                setVoiceTargetField('description');
+                setShowVoiceInput(true);
+              }}
+              className="text-purple-400 hover:text-purple-300 h-auto py-1"
+            >
+              <Mic className="w-3 h-3 mr-1" />
+              Add More Details by Voice
+                </Button>
+              </div>
               <Textarea
                 id="description"
                 value={itemData.description}
@@ -697,66 +734,10 @@ export default function AddItem() {
                         ))}
                       </SelectContent>
                     </Select>
-          </div>
                   </div>
-
-        {/* Tags */}
-        <div>
-          <Label className="text-gray-300 mb-2 block">
-            Tags {aiGenerated && <Sparkles className="inline w-3 h-3 text-purple-400" />}
-          </Label>
-          <div className="flex gap-2 mb-2">
-                    <Input
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-              placeholder="Add a tag..."
-              className="bg-gray-900 border-gray-700 text-white"
-            />
-            <Button
-              type="button"
-              onClick={addTag}
-              variant="outline"
-              className="border-gray-700"
-            >
-              <Plus className="w-4 h-4" />
-            </Button>
             </div>
-          {itemData.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {itemData.tags.map((tag, idx) => (
-                <span
-                  key={idx}
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-purple-900/30 border border-purple-500/30 rounded-full text-sm text-purple-300"
-                >
-                  {tag}
-                  <button
-                    onClick={() => removeTag(tag)}
-                    className="hover:text-white"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              ))}
-              </div>
-            )}
-        </div>
-      </div>
 
-      {/* Additional Voice Notes */}
-      <div className="text-center">
-        <Button
-          onClick={() => {
-            setShowVoiceInput(true);
-            setVoiceTargetField('additional');
-          }}
-          variant="outline"
-          className="border-gray-700 text-gray-300"
-        >
-          <Mic className="w-4 h-4 mr-2" />
-          Add More Details by Voice
-        </Button>
-      </div>
+              </div>
           </div>
         );
 
@@ -769,58 +750,41 @@ export default function AddItem() {
             </div>
 
       <div className="space-y-4 bg-gray-800/50 p-6 rounded-lg border border-gray-700">
-        {/* Category Dropdown */}
-        <div>
-          <Label className="text-gray-300 mb-2 block">Category *</Label>
-          <Select value={itemData.category} onValueChange={(val) => setItemData(prev => ({ ...prev, category: val }))}>
-            <SelectTrigger className="bg-gray-900 border-gray-700 text-white">
-              <SelectValue placeholder="Select category" />
-            </SelectTrigger>
-            <SelectContent>
-              {categories.map((cat) => (
-                <SelectItem key={cat.value} value={cat.value}>
-                  {cat.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
         {/* Collection Date with visible calendar icon */}
-        <div>
+                  <div>
           <Label htmlFor="collection_date" className="text-gray-300 mb-2 block">
             Collection Date *
           </Label>
-          <Input
-            id="collection_date"
+                <Input
+                  id="collection_date"
             type="date"
-            value={itemData.collection_date}
-            onChange={(e) => setItemData(prev => ({ ...prev, collection_date: e.target.value }))}
+                  value={itemData.collection_date}
+                  onChange={(e) => setItemData(prev => ({ ...prev, collection_date: e.target.value }))}
             className="bg-gray-900 border-gray-700 text-white [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:brightness-100 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
             min={new Date().toISOString().split('T')[0]}
           />
-        </div>
+              </div>
 
         {/* Collection Address (auto-filled from user settings) */}
         <div>
           <Label htmlFor="collection_address" className="text-gray-300 mb-2 block">
             Collection Address *
           </Label>
-          <Textarea
-            id="collection_address"
-            value={itemData.collection_address}
-            onChange={(e) => setItemData(prev => ({ ...prev, collection_address: e.target.value }))}
+              <Textarea
+                id="collection_address"
+                value={itemData.collection_address}
+                onChange={(e) => setItemData(prev => ({ ...prev, collection_address: e.target.value }))}
             placeholder="Enter the pickup location..."
             className="bg-gray-900 border-gray-700 text-white"
-            rows={3}
-          />
+                rows={3}
+              />
           <p className="text-xs text-gray-500 mt-1">
             Full address will be revealed 24 hours before collection date
-          </p>
-        </div>
+              </p>
+            </div>
 
         {/* Suburb (not postcode) */}
-        <div>
+                <div>
           <Label htmlFor="suburb" className="text-gray-300 mb-2 block">
             Suburb *
           </Label>
@@ -830,7 +794,7 @@ export default function AddItem() {
             onChange={(e) => setItemData(prev => ({ ...prev, postcode: e.target.value }))}
             className="bg-gray-900 border-gray-700 text-white"
           />
-        </div>
+                </div>
 
                   <div className="flex items-start gap-3">
           <input
@@ -938,23 +902,24 @@ export default function AddItem() {
           </CardContent>
         </Card>
 
-        {/* Navigation Buttons */}
+        {/* Navigation Buttons - Only show on Steps 2 and 3 */}
+        {currentStep > 1 && (
         <div className="flex justify-between gap-4">
               <Button
                 variant="outline"
-            onClick={goToPreviousStep}
-            disabled={currentStep === 1 || isSubmitting}
-            className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700 hover:text-white disabled:opacity-50"
+              onClick={goToPreviousStep}
+              disabled={isSubmitting}
+              className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700 hover:text-white disabled:opacity-50"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Previous
+              Previous
           </Button>
 
           {currentStep < totalSteps ? (
             <Button
-              onClick={goToNextStep}
-              disabled={isSubmitting}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                onClick={goToNextStep}
+                disabled={isSubmitting}
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
             >
               Next
               <ArrowRight className="w-4 h-4 ml-2" />
@@ -962,32 +927,33 @@ export default function AddItem() {
           ) : (
               <Button
               onClick={handleSubmit}
-              disabled={isSubmitting || !ownershipConfirmed}
+                disabled={isSubmitting || !ownershipConfirmed}
               className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
               >
                 {isSubmitting ? (
                   <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Creating...
+                    Creating...
                   </>
                 ) : (
                   <>
                   <CheckCircle className="w-4 h-4 mr-2" />
-                  Create Listing
+                    Create Listing
                   </>
                 )}
               </Button>
           )}
         </div>
+        )}
       </div>
 
       {/* Voice Input Modal */}
       {showVoiceInput && (
         <VoiceInputField
-          onTranscript={voiceTargetField === 'additional' ? handleAdditionalVoice : handleVoiceTranscript}
+          onTranscript={voiceTargetField === 'main' ? handleVoiceTranscript : handleAdditionalVoice}
           onClose={() => setShowVoiceInput(false)}
           targetField={voiceTargetField}
-          placeholder={voiceTargetField === 'additional' ? 'Add more details...' : 'Describe your item...'}
+          placeholder={voiceTargetField === 'main' ? 'Describe your item...' : 'Add more details...'}
         />
       )}
     </div>
