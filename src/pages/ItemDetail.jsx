@@ -290,13 +290,13 @@ export default function ItemDetail() {
         return;
       }
 
+      // Immediately update button state
       setIsInCart(true);
+      
       toast({
         title: "Added to Cart!",
         description: `${item.title} has been reserved for 10 minutes`
       });
-
-      // Keep the button in "Added" state - don't reset it
     } catch (error) {
       console.error('Error adding to cart:', error);
       toast({
@@ -648,7 +648,7 @@ export default function ItemDetail() {
                   className="w-full h-10 md:h-12 bg-green-600 hover:bg-green-700 text-white font-semibold text-sm md:text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
                 >
                   <ShoppingCart className="w-4 h-4 mr-1" />
-                  View Cart
+                  Go to Cart
                 </Button>
               ) : (
                 <Button
