@@ -233,10 +233,15 @@ export default function ItemDetail() {
   };
 
   const handleAcceptOffer = (acceptedAmount) => {
-    // Set the negotiated price and show purchase modal (same as Buy Now)
+    // Set the negotiated price and mark offer as accepted
+    // This will replace "Buy Now" button with "Accept Offer $X" button
     setNegotiatedPrice(acceptedAmount);
     setOfferAccepted(true);
-    setShowPurchaseModal(true);
+    
+    toast({
+      title: "Offer Accepted!",
+      description: `Click "Accept Offer $${acceptedAmount.toFixed(2)}" to proceed to checkout`,
+    });
   };
 
   // Swipe gesture handlers
@@ -328,7 +333,7 @@ export default function ItemDetail() {
     }
   };
 
-  const handleAcceptOffer = async () => {
+  const handleAcceptOfferCheckout = async () => {
     if (!currentUser) {
       toast({
         title: "Please Sign In",
@@ -734,7 +739,7 @@ export default function ItemDetail() {
                 </Button>
               ) : offerAccepted && negotiatedPrice ? (
                 <Button
-                  onClick={handleAcceptOffer}
+                  onClick={handleAcceptOfferCheckout}
                   disabled={itemUnavailable}
                   className={`w-full h-10 md:h-12 text-white font-semibold text-sm md:text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] ${
                     itemUnavailable ? 'opacity-50 cursor-not-allowed' : ''
