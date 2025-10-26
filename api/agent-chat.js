@@ -236,7 +236,7 @@ export default async function handler(req, res) {
       }
       
       // ============================================
-      // SPECIAL CASE: NO MINIMUM PRICE SET
+      // SPECIAL CASE: NO MINIMUM PRICE SET - NEGOTIATE!
       // ============================================
       else if (!knowledge?.minimum_price) {
         if (offerAmount >= askingPrice) {
@@ -245,9 +245,22 @@ export default async function handler(req, res) {
           negotiationStrategy = `✅ ACCEPT IMMEDIATELY - Offer ($${offerAmount.toFixed(2)}) is at or above asking price ($${askingPrice.toFixed(2)}). No minimum is set, so accept this offer enthusiastically.`;
           console.log('✅ NO MIN SET: Accepting at/above asking');
         } else {
-          // Decline all offers below asking (no minimum to negotiate from)
-          negotiationStrategy = `❌ DECLINE POLITELY - No minimum price is set, so you can only accept the full asking price of $${askingPrice.toFixed(2)}. This offer of $${offerAmount.toFixed(2)} is below that. Politely explain the price is firm and encourage them to reconsider.`;
-          console.log('❌ NO MIN SET: Declining below asking');
+          // NEGOTIATE when no minimum is set - be flexible!
+          const gapToAsking = askingPrice - offerAmount;
+          const percentageGap = (gapToAsking / askingPrice) * 100;
+          
+          // If offer is very close to asking (within 15%), accept it
+          if (percentageGap <= 15) {
+            offerAccepted = true;
+            negotiationStrategy = `✅ ACCEPT - Your offer of $${offerAmount.toFixed(2)} is very close to the asking price of $${askingPrice.toFixed(2)}. Since no minimum is set, I'm happy to accept this offer!`;
+            console.log('✅ NO MIN SET: Accepting close offer');
+          } else {
+            // Counter-offer somewhere between their offer and asking price
+            const counterAmount = Math.round((offerAmount + askingPrice) / 2 * 100) / 100;
+            counterOfferAmount = counterAmount;
+            negotiationStrategy = `🔄 COUNTER-OFFER - Your offer of $${offerAmount.toFixed(2)} is below the asking price of $${askingPrice.toFixed(2)}. How about we meet in the middle at $${counterAmount.toFixed(2)}? This is a fair compromise that works for both of us.`;
+            console.log('🔄 NO MIN SET: Counter-offering');
+          }
         }
       }
       
@@ -399,7 +412,7 @@ export default async function handler(req, res) {
             
             // CRITICAL CHECK: If gap to asking is too small to counter meaningfully, accept instead
             // For example: $5 offer on $6 item = $1 gap. After counter logic, might overshoot.
-            const minimumCounterGap = Math.max(2, askingPrice * 0.10); // At least $2 or 10% of asking
+            const minimumCounterGap = Math.max(1, askingPrice * 0.05); // At least $1 or 5% of asking
             if (gapToAsking < minimumCounterGap) {
               offerAccepted = true;
               negotiationStrategy = `✅ ACCEPT - Offer of $${offerAmount.toFixed(2)} is very close to asking price ($${askingPrice.toFixed(2)}). The gap is too small to counter-offer meaningfully. Accept this excellent offer!`;
