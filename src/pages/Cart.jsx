@@ -68,33 +68,40 @@ export default function Cart() {
       // Note: Manual expiration is handled by frontend, not database trigger
 
       // Load cart items with item details and check availability
-      const { data: items, error } = await supabase
+      const { data: cartItemsData, error: cartError } = await supabase
         .from('cart_items')
-        .select(`
-          id,
-          quantity,
-          added_at,
-          negotiated_price,
-          price_source,
-          reserved_until,
-          reservation_status,
-          item:items(
-            id,
-            title,
-            description,
-            price,
-            image_urls,
-            condition,
-            category,
-            seller_id,
-            is_sold,
-            sold_at
-          )
-        `)
+        .select('*')
         .eq('buyer_id', user.id)
         .order('added_at', { ascending: false });
 
-      if (error) throw error;
+      if (cartError) {
+        console.error('Cart error:', cartError);
+        throw cartError;
+      }
+
+      // Load item details separately
+      if (!cartItemsData || cartItemsData.length === 0) {
+        setCartItems([]);
+        setIsLoading(false);
+        return;
+      }
+
+      const itemIds = cartItemsData.map(ci => ci.item_id);
+      const { data: itemsData, error: itemsError } = await supabase
+        .from('items')
+        .select('id, title, description, price, image_urls, condition, category, seller_id, is_sold, sold_at, collection_address, collection_date, location')
+        .in('id', itemIds);
+
+      if (itemsError) {
+        console.error('Items error:', itemsError);
+        throw itemsError;
+      }
+
+      // Combine cart items with item data
+      const items = cartItemsData.map(cartItem => ({
+        ...cartItem,
+        item: itemsData.find(item => item.id === cartItem.item_id)
+      })).filter(ci => ci.item); // Filter out any cart items where item wasn't found
 
       // Filter out sold items and expired reservations
       const availableItems = (items || []).filter(cartItem => {
