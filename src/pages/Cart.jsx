@@ -132,8 +132,8 @@ export default function Cart() {
       // Check for applicable offers
       await checkApplicableOffers(availableItems, user.id);
       
-      // Set up real-time subscription for item availability
-      setupRealtimeSubscription(user.id);
+      // Set up real-time subscription for item availability (pass items to prevent empty filter)
+      setupRealtimeSubscription(user.id, availableItems);
       
     } catch (error) {
       console.error('Error loading cart:', error);
@@ -150,7 +150,21 @@ export default function Cart() {
   // ============================================
   // REAL-TIME SUBSCRIPTION FOR ITEM CHANGES
   // ============================================
-  const setupRealtimeSubscription = (userId) => {
+  const setupRealtimeSubscription = (userId, items) => {
+    // Unsubscribe from previous subscription if exists
+    if (realtimeSubscriptionRef.current) {
+      realtimeSubscriptionRef.current.unsubscribe();
+      realtimeSubscriptionRef.current = null;
+    }
+
+    // Only set up subscription if there are items in cart
+    if (!items || items.length === 0) {
+      console.log('📭 No items in cart, skipping realtime subscription');
+      return;
+    }
+
+    const itemIds = items.map(ci => ci.item.id);
+    
     // Subscribe to changes in items table (sold status changes)
     realtimeSubscriptionRef.current = supabase
       .channel('cart-items-changes')
@@ -160,7 +174,7 @@ export default function Cart() {
           event: 'UPDATE',
           schema: 'public',
           table: 'items',
-          filter: `id=in.(${cartItems.map(ci => ci.item.id).join(',')})`
+          filter: `id=in.(${itemIds.join(',')})`
         },
         (payload) => {
           console.log('🔄 Item updated:', payload);
@@ -168,7 +182,17 @@ export default function Cart() {
           loadCart();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('✅ Realtime subscription active for cart items');
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('❌ Realtime subscription error');
+        } else if (status === 'TIMED_OUT') {
+          console.error('⏱️ Realtime subscription timed out');
+        } else if (status === 'CLOSED') {
+          console.log('🔒 Realtime subscription closed');
+        }
+      });
   };
 
   // ============================================
