@@ -41,19 +41,23 @@
 
 ---
 
-## 🔌 API Integration
+## 🔌 Edge Function Integration
 
-### Endpoint
+### Supabase Edge Function (Secure ✅)
 ```
-POST /api/analyze-image-with-voice
+supabase.functions.invoke('analyze-image-with-voice')
 ```
+
+**Security:** OpenAI API keys are stored in Supabase secrets (server-side), never exposed to client.
 
 ### Request
-```json
-{
-  "imageUrl": "https://your-image-url.jpg",
-  "voiceTranscript": "Optional voice description" // Can be null
-}
+```javascript
+const { data, error } = await supabase.functions.invoke('analyze-image-with-voice', {
+  body: {
+    imageUrl: "https://your-image-url.jpg",
+    voiceTranscript: "Optional voice description" // Can be null
+  }
+});
 ```
 
 ### Response
@@ -99,22 +103,23 @@ const recordVoice = async () => {
 };
 ```
 
-### AI Analysis Call
+### AI Analysis Call (Supabase Edge Function)
 ```javascript
 const generateWithAI = async () => {
   setIsLoading(true);
   
   try {
-    const response = await fetch(`${API_URL}/api/analyze-image-with-voice`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    // Call secure Supabase Edge Function
+    const { data, error } = await supabase.functions.invoke('analyze-image-with-voice', {
+      body: {
         imageUrl: images[0],
         voiceTranscript: voiceTranscript || null
-      })
+      }
     });
     
-    const data = await response.json();
+    if (error) {
+      throw new Error(error.message);
+    }
     
     if (data.success) {
       setTitle(data.title);

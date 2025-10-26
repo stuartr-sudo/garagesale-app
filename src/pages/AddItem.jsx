@@ -117,7 +117,7 @@ export default function AddItem() {
   // Combined AI Analysis (Voice + Images)
   const analyzeWithVoiceAndImages = async () => {
     if (itemData.image_urls.length === 0) {
-        toast({
+      toast({
         title: "No Images",
         description: "Please upload at least one image first.",
         variant: "destructive"
@@ -128,20 +128,17 @@ export default function AddItem() {
     setIsAnalyzing(true);
     
     try {
-      const response = await fetch('/api/analyze-image-with-voice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      // Call Supabase Edge Function (secure, server-side)
+      const { data: analysis, error } = await supabase.functions.invoke('analyze-image-with-voice', {
+        body: {
           imageUrl: itemData.image_urls[0], // Main image
           voiceTranscript: voiceTranscription || null
-        })
+        }
       });
 
-      if (!response.ok) {
-        throw new Error('Analysis failed');
+      if (error) {
+        throw new Error(error.message || 'Analysis failed');
       }
-
-      const analysis = await response.json();
       
       if (!analysis.success) {
         throw new Error(analysis.error || 'Analysis failed');

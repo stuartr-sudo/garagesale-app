@@ -1,41 +1,51 @@
-/**
- * Combined Image + Voice Analysis API Endpoint
- * Analyzes images and voice transcripts together for intelligent listing generation
- */
+// @ts-ignore
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 
-import OpenAI from 'openai';
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
 
-const openaiApiKey = process.env.OPENAI_API_KEY;
-const openai = new OpenAI({ apiKey: openaiApiKey });
-
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const { imageUrl, voiceTranscript } = req.body;
-
-    if (!imageUrl) {
-      return res.status(400).json({ error: 'Image URL is required' });
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
+    if (!openaiApiKey) {
+      throw new Error('OPENAI_API_KEY not configured')
     }
 
-    console.log('🔄 Analyzing image with voice enhancement...');
-    console.log('Voice transcript length:', voiceTranscript?.length || 0);
+    const { imageUrl, voiceTranscript } = await req.json()
+
+    if (!imageUrl) {
+      return new Response(
+        JSON.stringify({ error: 'Image URL is required' }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
+      )
+    }
+
+    console.log('🔄 Analyzing image with voice enhancement...')
+    console.log('Voice transcript length:', voiceTranscript?.length || 0)
 
     // ============================================
     // STEP 1: ANALYZE IMAGE
     // ============================================
-    const imageAnalysis = await analyzeImage(imageUrl);
-    console.log('✅ Image analysis complete:', imageAnalysis.title);
+    const imageAnalysis = await analyzeImage(imageUrl, openaiApiKey)
+    console.log('✅ Image analysis complete:', imageAnalysis.title)
 
     // ============================================
     // STEP 2: ANALYZE VOICE (if provided)
     // ============================================
-    let voiceAnalysis = null;
+    let voiceAnalysis = null
     if (voiceTranscript && voiceTranscript.trim()) {
-      voiceAnalysis = await analyzeVoice(voiceTranscript);
-      console.log('✅ Voice analysis complete:', voiceAnalysis.title);
+      voiceAnalysis = await analyzeVoice(voiceTranscript, openaiApiKey)
+      console.log('✅ Voice analysis complete:', voiceAnalysis.title)
     }
 
     // ============================================
@@ -43,33 +53,44 @@ export default async function handler(req, res) {
     // ============================================
     const finalAnalysis = voiceAnalysis 
       ? mergeAnalyses(imageAnalysis, voiceAnalysis)
-      : imageAnalysis;
+      : imageAnalysis
 
-    console.log('✅ Final merged analysis:', finalAnalysis.title);
+    console.log('✅ Final merged analysis:', finalAnalysis.title)
 
-    return res.status(200).json({
-      success: true,
-      ...finalAnalysis,
-      sources_used: {
-        image: true,
-        voice: !!voiceAnalysis
-      }
-    });
+    return new Response(
+      JSON.stringify({
+        success: true,
+        ...finalAnalysis,
+        sources_used: {
+          image: true,
+          voice: !!voiceAnalysis
+        }
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      },
+    )
 
   } catch (error) {
-    console.error('❌ Analysis error:', error);
-    return res.status(500).json({
-      success: false,
-      error: error.message || 'Failed to analyze content',
-      details: error.toString()
-    });
+    console.error('❌ Analysis error:', error)
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message || 'Failed to analyze content',
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      },
+    )
   }
-}
+})
 
 // ============================================
 // IMAGE ANALYSIS FUNCTION
 // ============================================
-async function analyzeImage(imageUrl) {
+async function analyzeImage(imageUrl: string, apiKey: string) {
   const prompt = `Analyze this product image and respond with ONLY valid JSON (no markdown, no explanation).
 
 **Required JSON format:**
@@ -109,38 +130,51 @@ async function analyzeImage(imageUrl) {
 **Tags**: 3-5 searchable keywords (lowercase)
 **Selling Points**: 2-4 key highlights that make this item attractive
 
-Return ONLY the JSON object.`;
+Return ONLY the JSON object.`
 
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4o',
-    messages: [
-      {
-        role: 'user',
-        content: [
-          { type: 'text', text: prompt },
-          { type: 'image_url', image_url: { url: imageUrl } }
-        ]
-      }
-    ],
-    max_tokens: 500,
-    temperature: 0.3
-  });
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o',
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: prompt },
+            { type: 'image_url', image_url: { url: imageUrl } }
+          ]
+        }
+      ],
+      max_tokens: 500,
+      temperature: 0.3
+    })
+  })
 
-  const aiResponse = response.choices[0].message.content.trim();
+  const data = await response.json()
+  
+  if (data.error) {
+    throw new Error(data.error.message || 'Image analysis failed')
+  }
+
+  const aiResponse = data.choices[0].message.content.trim()
   const cleanJson = aiResponse
     .replace(/```json\n?/g, '')
     .replace(/```\n?/g, '')
-    .trim();
+    .trim()
   
-  const parsed = JSON.parse(cleanJson);
+  const parsed = JSON.parse(cleanJson)
   
-  return sanitizeAnalysis(parsed);
+  return sanitizeAnalysis(parsed)
 }
 
 // ============================================
 // VOICE ANALYSIS FUNCTION
 // ============================================
-async function analyzeVoice(transcript) {
+async function analyzeVoice(transcript: string, apiKey: string) {
   const prompt = `You are analyzing a voice transcript from someone describing an item they want to sell.
 
 **User said:**
@@ -172,72 +206,86 @@ ${transcript}
 **tags**: 3-5 searchable keywords (lowercase)
 **selling_points**: 2-4 key highlights they emphasize
 
-Return ONLY the JSON object.`;
+Return ONLY the JSON object.`
 
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [
-      { role: 'user', content: prompt }
-    ],
-    max_tokens: 350,
-    temperature: 0.3
-  });
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'user', content: prompt }
+      ],
+      max_tokens: 350,
+      temperature: 0.3
+    })
+  })
 
-  const aiResponse = response.choices[0].message.content.trim();
+  const data = await response.json()
+  
+  if (data.error) {
+    throw new Error(data.error.message || 'Voice analysis failed')
+  }
+
+  const aiResponse = data.choices[0].message.content.trim()
   const cleanJson = aiResponse
     .replace(/```json\n?/g, '')
     .replace(/```\n?/g, '')
-    .trim();
+    .trim()
   
-  const parsed = JSON.parse(cleanJson);
+  const parsed = JSON.parse(cleanJson)
   
-  return sanitizeAnalysis(parsed);
+  return sanitizeAnalysis(parsed)
 }
 
 // ============================================
 // INTELLIGENT MERGE FUNCTION
 // ============================================
-function mergeAnalyses(imageAnalysis, voiceAnalysis) {
-  console.log('🔀 Merging analyses...');
+function mergeAnalyses(imageAnalysis: any, voiceAnalysis: any) {
+  console.log('🔀 Merging analyses...')
   
   // TITLE: Prioritize voice if more specific, else use image
   const title = (voiceAnalysis.title && voiceAnalysis.title.length > 10)
     ? voiceAnalysis.title
-    : imageAnalysis.title;
+    : imageAnalysis.title
 
   // DESCRIPTION: Combine both for richer context
-  // Start with image features, add personal context from voice
   const description = combineDescriptions(
     imageAnalysis.description, 
     voiceAnalysis.description
-  );
+  )
 
   // PRICE: Prioritize voice if explicitly mentioned, else use image
   const price = voiceAnalysis.price && voiceAnalysis.price > 0
     ? voiceAnalysis.price
-    : imageAnalysis.price;
+    : imageAnalysis.price
 
   // MINIMUM PRICE: Use voice if mentioned, else calculate from final price
-  let minimum_price;
+  let minimum_price
   if (voiceAnalysis.minimum_price && voiceAnalysis.minimum_price > 0) {
-    minimum_price = voiceAnalysis.minimum_price;
+    minimum_price = voiceAnalysis.minimum_price
   } else if (imageAnalysis.minimum_price && imageAnalysis.minimum_price > 0) {
-    minimum_price = imageAnalysis.minimum_price;
+    minimum_price = imageAnalysis.minimum_price
   } else {
-    minimum_price = Math.round(price * 0.7);
+    minimum_price = Math.round(price * 0.7)
   }
 
   // Ensure minimum doesn't exceed price
   if (minimum_price > price) {
-    [price, minimum_price] = [minimum_price, price];
+    const temp = minimum_price
+    minimum_price = price
+    price = temp
   }
 
   // CATEGORY & CONDITION: Use most specific
   const category = voiceAnalysis.category !== 'other' 
     ? voiceAnalysis.category 
-    : imageAnalysis.category;
+    : imageAnalysis.category
 
-  const condition = voiceAnalysis.condition || imageAnalysis.condition;
+  const condition = voiceAnalysis.condition || imageAnalysis.condition
 
   // TAGS: Combine and deduplicate
   const allTags = [
@@ -245,7 +293,7 @@ function mergeAnalyses(imageAnalysis, voiceAnalysis) {
       ...imageAnalysis.tags,
       ...voiceAnalysis.tags
     ])
-  ].slice(0, 6);
+  ].slice(0, 6)
 
   // SELLING POINTS: Combine unique points
   const allSellingPoints = [
@@ -253,7 +301,7 @@ function mergeAnalyses(imageAnalysis, voiceAnalysis) {
       ...imageAnalysis.selling_points,
       ...voiceAnalysis.selling_points
     ])
-  ].slice(0, 5);
+  ].slice(0, 5)
 
   return {
     title,
@@ -264,33 +312,29 @@ function mergeAnalyses(imageAnalysis, voiceAnalysis) {
     condition,
     tags: allTags,
     selling_points: allSellingPoints
-  };
+  }
 }
 
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
 
-function combineDescriptions(imageDesc, voiceDesc) {
-  // If both exist, intelligently combine them
+function combineDescriptions(imageDesc: string, voiceDesc: string) {
   if (imageDesc && voiceDesc) {
-    // Check if voice description is significantly different
-    const imageLower = imageDesc.toLowerCase();
-    const voiceLower = voiceDesc.toLowerCase();
+    const imageLower = imageDesc.toLowerCase()
+    const voiceLower = voiceDesc.toLowerCase()
     
-    // If voice adds new information, append it
     if (!imageLower.includes(voiceLower.substring(0, 30))) {
-      return `${imageDesc} ${voiceDesc}`.trim();
+      return `${imageDesc} ${voiceDesc}`.trim()
     }
     
-    // Otherwise, voice is more personal, use it
-    return voiceDesc;
+    return voiceDesc
   }
   
-  return voiceDesc || imageDesc;
+  return voiceDesc || imageDesc
 }
 
-function sanitizeAnalysis(data) {
+function sanitizeAnalysis(data: any) {
   return {
     title: String(data.title || 'Item for Sale').substring(0, 50),
     description: String(data.description || '').substring(0, 500),
@@ -299,35 +343,35 @@ function sanitizeAnalysis(data) {
     category: validateCategory(data.category),
     condition: validateCondition(data.condition),
     tags: Array.isArray(data.tags) 
-      ? data.tags.slice(0, 6).map(t => String(t).toLowerCase().trim())
+      ? data.tags.slice(0, 6).map((t: any) => String(t).toLowerCase().trim())
       : [],
     selling_points: Array.isArray(data.selling_points)
-      ? data.selling_points.slice(0, 5).map(p => String(p).trim())
+      ? data.selling_points.slice(0, 5).map((p: any) => String(p).trim())
       : []
-  };
+  }
 }
 
-function validatePrice(price) {
-  const parsed = parseFloat(price);
-  if (isNaN(parsed) || parsed < 0) return 25;
-  if (parsed > 999999) return 999999;
-  return Math.round(parsed * 100) / 100;
+function validatePrice(price: any): number {
+  const parsed = parseFloat(price)
+  if (isNaN(parsed) || parsed < 0) return 25
+  if (parsed > 999999) return 999999
+  return Math.round(parsed * 100) / 100
 }
 
-function validateCategory(category) {
+function validateCategory(category: any): string {
   const validCategories = [
     'electronics', 'clothing', 'furniture', 'books', 
     'toys', 'sports', 'home_garden', 'automotive', 
     'collectibles', 'other'
-  ];
+  ]
   
-  const normalized = String(category || 'other').toLowerCase().replace(/\s+/g, '_');
-  return validCategories.includes(normalized) ? normalized : 'other';
+  const normalized = String(category || 'other').toLowerCase().replace(/\s+/g, '_')
+  return validCategories.includes(normalized) ? normalized : 'other'
 }
 
-function validateCondition(condition) {
-  const validConditions = ['new', 'like_new', 'good', 'fair', 'poor'];
-  const normalized = String(condition || 'good').toLowerCase().replace(/[\s-]/g, '_');
-  return validConditions.includes(normalized) ? normalized : 'good';
+function validateCondition(condition: any): string {
+  const validConditions = ['new', 'like_new', 'good', 'fair', 'poor']
+  const normalized = String(condition || 'good').toLowerCase().replace(/[\s-]/g, '_')
+  return validConditions.includes(normalized) ? normalized : 'good'
 }
 

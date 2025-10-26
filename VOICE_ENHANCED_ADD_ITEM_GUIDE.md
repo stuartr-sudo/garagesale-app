@@ -108,22 +108,23 @@ const recordVoice = async () => {
 - Loading state with spinner
 - Dynamic text based on voice presence
 
-**API Call:**
+**Edge Function Call:**
 ```javascript
 const analyzeContent = async () => {
   setIsAnalyzing(true);
   
   try {
-    const response = await fetch('/api/analyze-image-with-voice', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    // Call Supabase Edge Function (secure)
+    const { data: analysis, error } = await supabase.functions.invoke('analyze-image-with-voice', {
+      body: {
         imageUrl: images[0], // Main image
         voiceTranscript: voiceTranscript || null
-      })
+      }
     });
     
-    const analysis = await response.json();
+    if (error) {
+      throw new Error(error.message);
+    }
     
     if (analysis.success) {
       // Auto-fill all fields
@@ -419,14 +420,18 @@ const goToStep = (stepNumber) => {
 
 ---
 
-## API Endpoint: `/api/analyze-image-with-voice`
+## Supabase Edge Function: `analyze-image-with-voice`
+
+**Security:** This is a Supabase Edge Function (server-side), NOT a Vercel API endpoint. OpenAI API keys are securely stored in Supabase secrets and never exposed to the client.
 
 ### Request
-```json
-{
-  "imageUrl": "https://...",
-  "voiceTranscript": "This is my iPhone 12 Pro..." // Optional
-}
+```javascript
+const { data, error } = await supabase.functions.invoke('analyze-image-with-voice', {
+  body: {
+    imageUrl: "https://...",
+    voiceTranscript: "This is my iPhone 12 Pro..." // Optional
+  }
+});
 ```
 
 ### Response
