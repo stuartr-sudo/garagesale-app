@@ -121,7 +121,7 @@ export default function RecentlySold({ limit = 10, showLocation = true }) {
         </div>
 
         <p className="text-gray-400 text-sm mb-4">
-          Real purchases from our community in the last 24 hours
+          Sold or traded in the past 24 hours
         </p>
 
         {/* Sales List */}
