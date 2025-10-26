@@ -1,6 +1,15 @@
 import Stripe from 'stripe';
+import { createClient } from '@supabase/supabase-js';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripeSecret = process.env.STRIPE_SECRET_KEY;
+const stripe = new Stripe(stripeSecret);
+
+// Optional: server-side Supabase for future seller split logic
+const supabaseUrl = process.env.VITE_SUPABASE_URL?.trim();
+const supabaseServiceKey = process.env.NEW_SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_KEY;
+const supabase = (supabaseUrl && supabaseServiceKey)
+  ? createClient(supabaseUrl, supabaseServiceKey, { auth: { autoRefreshToken: false, persistSession: false } })
+  : null;
 
 export default async function handler(req, res) {
   // Enable CORS
@@ -31,6 +40,11 @@ export default async function handler(req, res) {
       return res.status(400).json({ 
         error: 'Items array is required' 
       });
+    }
+
+    // Basic runtime checks to surface config issues early
+    if (!stripeSecret || !stripeSecret.startsWith('sk_')) {
+      return res.status(500).json({ error: 'Stripe secret key not configured' });
     }
 
     // Create payment intent
