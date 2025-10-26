@@ -828,7 +828,6 @@ export default function AddItem() {
             id="suburb"
             value={itemData.postcode}
             onChange={(e) => setItemData(prev => ({ ...prev, postcode: e.target.value }))}
-            placeholder="e.g., Sydney"
             className="bg-gray-900 border-gray-700 text-white"
           />
         </div>
