@@ -91,13 +91,14 @@ export default function SearchFilters({ onFilterChange, itemCount }) {
   };
 
   useEffect(() => {
-    // Debounce search
+    // Only auto-apply for search term and sort (immediate feedback)
+    // Other filters require clicking "Apply Filters" button
     const timer = setTimeout(() => {
       applyFilters();
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchTerm, category, condition, priceRange, sortBy, location, locationScope]);
+  }, [searchTerm, sortBy]); // Removed other dependencies - they now require manual apply
 
   const applyFilters = () => {
     // Determine the actual location filter value based on scope
@@ -353,6 +354,27 @@ export default function SearchFilters({ onFilterChange, itemCount }) {
                 <span>$0</span>
                 <span>$10,000+</span>
               </div>
+            </div>
+
+            {/* Apply Filters Button */}
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-700">
+              <Button
+                variant="outline"
+                onClick={() => setShowFilters(false)}
+                className="bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  applyFilters();
+                  setShowFilters(false);
+                }}
+                className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold"
+              >
+                <Search className="w-4 h-4 mr-2" />
+                Apply Filters
+              </Button>
             </div>
           </CardContent>
         </Card>
