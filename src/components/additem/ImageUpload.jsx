@@ -33,6 +33,29 @@ export default function ImageUpload({ images = [], onUpload, onRemove, onSetMain
 
   return (
     <div className="space-y-4">
+      {safeImages.length === 0 ? (
+        // EMPTY STATE: Show a single centered button (no placeholder box)
+        <div className="flex items-center justify-center py-6">
+          <Button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            className="px-5 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium flex items-center justify-center text-sm whitespace-nowrap"
+          >
+            {isUploading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin flex-shrink-0" />
+                <span>Uploading...</span>
+              </>
+            ) : (
+              <>
+                <Upload className="w-4 h-4 mr-2 flex-shrink-0" />
+                <span>Add from library</span>
+              </>
+            )}
+          </Button>
+        </div>
+      ) : (
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {safeImages.map((imageUrl, index) => (
           <div key={index} className={`relative aspect-square rounded-xl overflow-hidden bg-gray-100 ${index === 0 ? 'ring-2 ring-emerald-500' : ''}`}>
@@ -77,30 +100,29 @@ export default function ImageUpload({ images = [], onUpload, onRemove, onSetMain
         ))}
         
         {safeImages.length < 8 && (
-          <div className="aspect-square border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 p-4 overflow-hidden">
-            <div className="w-full h-full flex items-center justify-center">
-              <Button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                className="w-4/5 max-w-[220px] px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium flex items-center justify-center text-sm"
-              >
-                {isUploading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin flex-shrink-0" />
-                    <span>Uploading...</span>
-                  </>
-                ) : (
-                  <>
-                    <Upload className="w-4 h-4 mr-2 flex-shrink-0" />
-                    <span className="truncate">Add from library</span>
-                  </>
-                )}
-              </Button>
-            </div>
+          <div className="flex items-center justify-center">
+            <Button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium flex items-center justify-center text-sm whitespace-nowrap"
+            >
+              {isUploading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin flex-shrink-0" />
+                  <span>Uploading...</span>
+                </>
+              ) : (
+                <>
+                  <Upload className="w-4 h-4 mr-2 flex-shrink-0" />
+                  <span>Add more</span>
+                </>
+              )}
+            </Button>
           </div>
         )}
       </div>
+      )}
 
       <input
         ref={fileInputRef}
