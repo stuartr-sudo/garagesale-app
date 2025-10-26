@@ -441,12 +441,8 @@ export default function Cart() {
         }
       }
 
-      // Step 2: Proceed to checkout
-      // TODO: Implement actual checkout flow
-      toast({
-        title: "Coming Soon",
-        description: "Secure checkout integration coming soon!"
-      });
+      // Step 2: Navigate to payment wizard
+      navigate(createPageUrl('PaymentWizardDemo'));
       
     } catch (error) {
       console.error('Checkout error:', error);

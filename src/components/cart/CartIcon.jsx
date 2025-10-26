@@ -14,20 +14,41 @@ export default function CartIcon() {
   useEffect(() => {
     loadCartCount();
     
-    // Subscribe to cart changes
-    const channel = supabase
-      .channel('cart_changes')
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'cart_items'
-      }, () => {
-        loadCartCount();
-      })
-      .subscribe();
+    // Subscribe to cart changes (only if user is logged in)
+    let channel = null;
+    
+    const setupSubscription = async () => {
+      try {
+        const user = await UserEntity.me();
+        if (user) {
+          channel = supabase
+            .channel('cart_changes_icon')
+            .on('postgres_changes', {
+              event: '*',
+              schema: 'public',
+              table: 'cart_items',
+              filter: `buyer_id=eq.${user.id}`
+            }, () => {
+              loadCartCount();
+            })
+            .subscribe((status) => {
+              if (status === 'SUBSCRIBED') {
+                console.log('✅ Cart icon realtime active');
+              }
+            });
+        }
+      } catch (error) {
+        // User not logged in - skip subscription
+        console.log('📭 Cart icon: User not logged in, skipping subscription');
+      }
+    };
+    
+    setupSubscription();
 
     return () => {
-      supabase.removeChannel(channel);
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
     };
   }, []);
 
