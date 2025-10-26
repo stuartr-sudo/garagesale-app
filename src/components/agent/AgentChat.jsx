@@ -332,7 +332,19 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
                       e.preventDefault();
                       e.stopPropagation();
                       const offerAmount = msg.counter_offer;
-                      sendMessage(`I accept your offer of $${offerAmount}`);
+                      
+                      // Directly accept the offer and go to cart
+                      setOfferAccepted(true);
+                      if (onAcceptOffer) {
+                        onAcceptOffer(offerAmount);
+                      }
+                      
+                      // Add confirmation message to chat
+                      setMessages(prev => [...prev, {
+                        sender: 'user',
+                        content: `I accept your offer of $${offerAmount}`,
+                        timestamp: new Date().toISOString()
+                      }]);
                     }}
                     className="mt-2 w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold shadow-lg"
                     disabled={loading}
