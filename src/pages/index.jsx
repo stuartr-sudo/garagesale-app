@@ -245,7 +245,7 @@ function PagesContent() {
                 
                 <Route path="/MyOrders" element={<MyOrders />} />
                 
-                <Route path="/Cart" element={<Cart />} />
+                <Route path="/cart" element={<Cart />} />
                 
                 <Route path="/SpecialOffers" element={<SpecialOffers />} />
                 
