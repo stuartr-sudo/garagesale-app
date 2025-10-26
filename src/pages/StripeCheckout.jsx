@@ -101,12 +101,23 @@ export default function StripeCheckout() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [paymentComplete, setPaymentComplete] = useState(false);
-
-  const clientSecret = location.state?.clientSecret;
-  const amount = location.state?.amount || 0;
+  const [clientSecret, setClientSecret] = useState(location.state?.clientSecret || null);
+  const [amount, setAmount] = useState(location.state?.amount || 0);
 
   useEffect(() => {
+    // Fallback: recover from sessionStorage if navigation state missing
     if (!clientSecret) {
+      const stored = sessionStorage.getItem('pendingCartCheckout');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed?.clientSecret) setClientSecret(parsed.clientSecret);
+          if (typeof parsed?.totalAmount === 'number') setAmount(parsed.totalAmount);
+        } catch {}
+      }
+    }
+
+    if (!clientSecret && !sessionStorage.getItem('pendingCartCheckout')) {
       toast({
         title: "Error",
         description: "Invalid checkout session",
@@ -228,7 +239,7 @@ export default function StripeCheckout() {
               </div>
             </div>
 
-            <Elements stripe={stripePromise}>
+            <Elements stripe={stripePromise} options={clientSecret ? { clientSecret } : undefined}>
               <CheckoutForm 
                 clientSecret={clientSecret} 
                 amount={amount}
