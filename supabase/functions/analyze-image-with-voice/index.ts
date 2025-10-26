@@ -104,13 +104,16 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('❌ Analysis error:', error)
+    // Return a 200 with success:false so the client can show a friendly error
+    // and we can see the exact server-side message in the response body.
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message || 'Failed to analyze content',
+        error: (error as any)?.message || 'Failed to analyze content',
+        details: String(error)
       }),
       {
-        status: 500,
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       },
     )
