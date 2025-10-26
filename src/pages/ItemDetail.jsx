@@ -295,22 +295,11 @@ export default function ItemDetail() {
     }
 
     try {
-      // Create buy_now reservation (10 minutes)
-      const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
-      
-      const { error } = await supabase
-        .from('item_reservations')
-        .upsert({
-          item_id: item.id,
-          user_id: currentUser.id,
-          reservation_type: 'buy_now',
-          expires_at: expiresAt
-        }, {
-          onConflict: 'item_id'
-        });
+      // Use the RPC function to create reservation (properly handles RLS)
+      const { reserveItem } = await import('@/api/functions');
+      const reserved = await reserveItem(item.id, 'buy_now', 10);
 
-      if (error) {
-        console.error('Reservation error:', error);
+      if (!reserved) {
         toast({
           title: "Item Unavailable",
           description: "This item is currently reserved. Please try again later.",
