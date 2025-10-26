@@ -117,6 +117,10 @@ export default function AddItem() {
 
   // Combined AI Analysis (Voice + Images)
   const analyzeWithVoiceAndImages = async () => {
+    console.log('🔥 analyzeWithVoiceAndImages CALLED');
+    console.log('Images:', itemData.image_urls);
+    console.log('Voice:', voiceTranscription);
+    
     if (itemData.image_urls.length === 0) {
       toast({
         title: "No Images",
@@ -127,6 +131,7 @@ export default function AddItem() {
     }
 
     setIsAnalyzing(true);
+    console.log('🔥 Calling Edge Function...');
     
     try {
       // Call Supabase Edge Function (secure, server-side)
@@ -136,6 +141,8 @@ export default function AddItem() {
           voiceTranscript: voiceTranscription || null
         }
       });
+
+      console.log('🔥 Edge Function response:', { analysis, error });
 
       if (error) {
         throw new Error(error.message || 'Analysis failed');
@@ -165,13 +172,14 @@ export default function AddItem() {
       });
 
     } catch (error) {
-      console.error('Analysis error:', error);
+      console.error('❌ Analysis error:', error);
       toast({
         title: "Analysis Failed",
         description: error.message || "Could not analyze content. Please try again.",
         variant: "destructive"
       });
     } finally {
+      console.log('🔥 setIsAnalyzing(false)');
       setIsAnalyzing(false);
     }
   };
@@ -561,7 +569,13 @@ export default function AddItem() {
       {/* AI Generation Button */}
       <div className="flex justify-center">
               <Button
-          onClick={analyzeWithVoiceAndImages}
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🔥 BUTTON CLICKED!');
+            analyzeWithVoiceAndImages();
+          }}
           disabled={isAnalyzing || itemData.image_urls.length === 0}
           size="lg"
           className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
