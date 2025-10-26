@@ -6,6 +6,7 @@ import Layout from "./Layout.jsx";
 import Marketplace from "./Marketplace"; // Eager load - most visited page
 import ItemDetail from "./ItemDetail"; // Eager load - frequently accessed
 import MyItems from "./MyItems"; // Eager load - seller's main page
+import Cart from "./Cart"; // Eager load to avoid dynamic import 404s on /cart
 
 // Lazy load less frequently accessed pages for code splitting
 const AddItem = lazy(() => import("./AddItem"));
@@ -35,7 +36,6 @@ const AccountTypeSelection = lazy(() => import("./AccountTypeSelection"));
 const TradeOffers = lazy(() => import("./TradeOffers"));
 const SignIn = lazy(() => import("./SignIn"));
 const MyOrders = lazy(() => import("./MyOrders"));
-const Cart = lazy(() => import("./Cart"));
 const SpecialOffers = lazy(() => import("./SpecialOffers"));
 const ThemeSettings = lazy(() => import("./ThemeSettings"));
 const PaymentConfirmations = lazy(() => import("./PaymentConfirmations"));
