@@ -444,16 +444,20 @@ export default function Cart() {
       // Step 2: Create orders for each item
       const orderPromises = cartItems.map(async (cartItem) => {
         const effectivePrice = cartItem.negotiated_price || cartItem.item.price;
+        const item = cartItem.item;
         
         const { data: order, error } = await supabase
           .from('orders')
           .insert({
-            item_id: cartItem.item.id,
+            item_id: item.id,
             buyer_id: currentUser.id,
-            seller_id: cartItem.item.seller_id,
-            price: effectivePrice,
-            status: 'pending_payment',
-            price_source: cartItem.price_source || 'original'
+            seller_id: item.seller_id,
+            total_amount: effectivePrice,
+            shipping_cost: 0,
+            delivery_method: 'collect', // Default to collect, can be changed later
+            collection_address: item.collection_address || item.location || null,
+            collection_date: item.collection_date || null,
+            status: 'awaiting_payment'
           })
           .select()
           .single();
