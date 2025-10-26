@@ -441,49 +441,41 @@ export default function Cart() {
         }
       }
 
-      // Step 2: Create orders for each item
-      const orderPromises = cartItems.map(async (cartItem) => {
-        const effectivePrice = cartItem.negotiated_price || cartItem.item.price;
-        const item = cartItem.item;
-        
-        const { data: order, error } = await supabase
-          .from('orders')
-          .insert({
-            item_id: item.id,
-            buyer_id: currentUser.id,
-            seller_id: item.seller_id,
-            total_amount: effectivePrice,
-            shipping_cost: 0,
-            delivery_method: 'collect', // Default to collect, can be changed later
-            collection_address: item.collection_address || item.location || null,
-            collection_date: item.collection_date || null,
-            status: 'awaiting_payment'
-          })
-          .select()
-          .single();
-
-        if (error) throw error;
-        return order;
+      // Step 2: Calculate total and create Stripe payment intent
+      const totalAmount = parseFloat(pricing.total);
+      
+      // Create payment intent via API
+      const response = await fetch('/api/stripe/create-payment-intent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: totalAmount,
+          items: cartItems.map(ci => ({
+            id: ci.item.id,
+            title: ci.item.title,
+            price: ci.negotiated_price || ci.item.price,
+            seller_id: ci.item.seller_id
+          }))
+        })
       });
 
-      const orders = await Promise.all(orderPromises);
-      console.log('✅ Orders created:', orders);
+      if (!response.ok) {
+        throw new Error('Failed to create payment intent');
+      }
 
-      // Step 3: Clear cart
-      const { error: clearError } = await supabase
-        .from('cart_items')
-        .delete()
-        .eq('buyer_id', currentUser.id);
+      const { clientSecret } = await response.json();
 
-      if (clearError) throw clearError;
+      // Store cart data in sessionStorage for payment completion
+      sessionStorage.setItem('pendingCartCheckout', JSON.stringify({
+        cartItems,
+        totalAmount,
+        clientSecret
+      }));
 
-      // Step 4: Navigate to My Orders page where they can pay
-      toast({
-        title: "Orders Created!",
-        description: `${orders.length} order(s) created. Complete payment to finalize.`,
-      });
-
-      navigate(createPageUrl('MyOrders'));
+      // Navigate to Stripe payment page with client secret
+      navigate('/stripe-checkout', { state: { clientSecret, amount: totalAmount } });
       
     } catch (error) {
       console.error('Checkout error:', error);
