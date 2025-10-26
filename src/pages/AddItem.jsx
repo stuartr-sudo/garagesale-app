@@ -117,8 +117,6 @@ export default function AddItem() {
 
   // Combined AI Analysis (Voice + Images)
   const analyzeWithVoiceAndImages = async () => {
-    alert(`Function called! Images: ${itemData.image_urls.length}, Voice: ${voiceTranscription ? 'YES' : 'NO'}`);
-    
     if (itemData.image_urls.length === 0) {
       toast({
         title: "No Images",
@@ -771,49 +769,69 @@ export default function AddItem() {
             </div>
 
       <div className="space-y-4 bg-gray-800/50 p-6 rounded-lg border border-gray-700">
-                  <div>
+        {/* Category Dropdown */}
+        <div>
+          <Label className="text-gray-300 mb-2 block">Category *</Label>
+          <Select value={itemData.category} onValueChange={(val) => setItemData(prev => ({ ...prev, category: val }))}>
+            <SelectTrigger className="bg-gray-900 border-gray-700 text-white">
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((cat) => (
+                <SelectItem key={cat.value} value={cat.value}>
+                  {cat.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Collection Date with visible calendar icon */}
+        <div>
           <Label htmlFor="collection_date" className="text-gray-300 mb-2 block">
             Collection Date *
           </Label>
-                <Input
-                  id="collection_date"
+          <Input
+            id="collection_date"
             type="date"
-                  value={itemData.collection_date}
-                  onChange={(e) => setItemData(prev => ({ ...prev, collection_date: e.target.value }))}
-            className="bg-gray-900 border-gray-700 text-white"
+            value={itemData.collection_date}
+            onChange={(e) => setItemData(prev => ({ ...prev, collection_date: e.target.value }))}
+            className="bg-gray-900 border-gray-700 text-white [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:brightness-100 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
             min={new Date().toISOString().split('T')[0]}
           />
-              </div>
+        </div>
 
+        {/* Collection Address (auto-filled from user settings) */}
         <div>
           <Label htmlFor="collection_address" className="text-gray-300 mb-2 block">
             Collection Address *
           </Label>
-              <Textarea
-                id="collection_address"
-                value={itemData.collection_address}
-                onChange={(e) => setItemData(prev => ({ ...prev, collection_address: e.target.value }))}
+          <Textarea
+            id="collection_address"
+            value={itemData.collection_address}
+            onChange={(e) => setItemData(prev => ({ ...prev, collection_address: e.target.value }))}
             placeholder="Enter the pickup location..."
             className="bg-gray-900 border-gray-700 text-white"
-                rows={3}
-              />
+            rows={3}
+          />
           <p className="text-xs text-gray-500 mt-1">
             Full address will be revealed 24 hours before collection date
-              </p>
-            </div>
+          </p>
+        </div>
 
-                <div>
-          <Label htmlFor="postcode" className="text-gray-300 mb-2 block">
-            Postcode
+        {/* Suburb (not postcode) */}
+        <div>
+          <Label htmlFor="suburb" className="text-gray-300 mb-2 block">
+            Suburb *
           </Label>
           <Input
-            id="postcode"
+            id="suburb"
             value={itemData.postcode}
             onChange={(e) => setItemData(prev => ({ ...prev, postcode: e.target.value }))}
-            placeholder="e.g., 2000"
+            placeholder="e.g., Sydney"
             className="bg-gray-900 border-gray-700 text-white"
           />
-                </div>
+        </div>
 
                   <div className="flex items-start gap-3">
           <input
@@ -927,7 +945,7 @@ export default function AddItem() {
                 variant="outline"
             onClick={goToPreviousStep}
             disabled={currentStep === 1 || isSubmitting}
-            className="border-gray-700 text-gray-300"
+            className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700 hover:text-white disabled:opacity-50"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Previous
