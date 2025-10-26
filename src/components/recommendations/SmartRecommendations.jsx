@@ -267,7 +267,7 @@ export default function SmartRecommendations({
   const Icon = getAlgorithmIcon();
 
   return (
-    <div className="my-8">
+    <div className="mt-8 mb-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
