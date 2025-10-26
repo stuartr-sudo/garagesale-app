@@ -61,6 +61,7 @@ export default function AddItem() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [showVoiceInput, setShowVoiceInput] = useState(false);
+  const [voiceTargetField, setVoiceTargetField] = useState('main'); // 'main' or 'additional'
   const [voiceTranscription, setVoiceTranscription] = useState('');
   const [hasVoiceInput, setHasVoiceInput] = useState(false);
   const [ownershipConfirmed, setOwnershipConfirmed] = useState(false);
@@ -544,7 +545,10 @@ export default function AddItem() {
             ) : null}
             
             <Button
-              onClick={() => setShowVoiceInput(true)}
+              onClick={() => {
+                setVoiceTargetField('main');
+                setShowVoiceInput(true);
+              }}
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
             >
               <Mic className="w-4 h-4 mr-2" />
