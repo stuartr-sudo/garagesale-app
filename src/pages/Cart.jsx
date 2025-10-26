@@ -16,6 +16,7 @@ export default function Cart() {
   const [cartItems, setCartItems] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [availablePaymentMethods, setAvailablePaymentMethods] = useState([]);
 
   useEffect(() => {
     loadCart();
@@ -44,6 +45,9 @@ export default function Cart() {
         sessionStorage.setItem('cart_items', JSON.stringify(itemsFromState));
       }
 
+      // Determine available payment methods based on seller configuration
+      await determineAvailablePaymentMethods(itemsFromState.length > 0 ? itemsFromState : JSON.parse(sessionStorage.getItem('cart_items') || '[]'));
+
     } catch (error) {
       console.error('Error loading cart:', error);
       toast({
@@ -56,13 +60,16 @@ export default function Cart() {
     }
   };
 
-  const removeItem = (itemId) => {
+  const removeItem = async (itemId) => {
     const updatedItems = cartItems.filter(item => item.id !== itemId);
     setCartItems(updatedItems);
     sessionStorage.setItem('cart_items', JSON.stringify(updatedItems));
 
     // Release reservation
     releaseReservation(itemId);
+
+    // Update available payment methods
+    await determineAvailablePaymentMethods(updatedItems);
 
     toast({
       title: "Item Removed",
@@ -99,6 +106,68 @@ export default function Cart() {
 
   const calculateTotal = () => {
     return cartItems.reduce((sum, item) => sum + (item.price || 0), 0);
+  };
+
+  const determineAvailablePaymentMethods = async (items) => {
+    if (!items || items.length === 0) {
+      setAvailablePaymentMethods([]);
+      return;
+    }
+
+    try {
+      // Get unique seller IDs from cart items
+      const sellerIds = [...new Set(items.map(item => item.seller_id))];
+      
+      // Fetch seller payment configurations
+      const { data: sellers, error } = await supabase
+        .from('profiles')
+        .select('id, accepted_payment_methods, bank_details, crypto_wallet_addresses')
+        .in('id', sellerIds);
+
+      if (error) {
+        console.error('Error fetching seller payment methods:', error);
+        // Fallback to showing all methods if there's an error
+        setAvailablePaymentMethods(['stripe', 'crypto', 'bank']);
+        return;
+      }
+
+      // Determine which payment methods are available across all sellers
+      const availableMethods = new Set();
+      
+      // Check each seller's configuration
+      sellers.forEach(seller => {
+        const acceptedMethods = seller.accepted_payment_methods || [];
+        
+        // Check Stripe (always available if accepted)
+        if (acceptedMethods.includes('stripe')) {
+          availableMethods.add('stripe');
+        }
+        
+        // Check Bank Transfer (only if bank details are configured)
+        if (acceptedMethods.includes('bank_transfer') && 
+            seller.bank_details && 
+            seller.bank_details.account_name && 
+            seller.bank_details.bsb && 
+            seller.bank_details.account_number) {
+          availableMethods.add('bank');
+        }
+        
+        // Check Cryptocurrency (only if at least one wallet address is configured)
+        if (acceptedMethods.includes('crypto') && 
+            seller.crypto_wallet_addresses) {
+          const hasWalletAddress = Object.values(seller.crypto_wallet_addresses).some(address => address && address.trim() !== '');
+          if (hasWalletAddress) {
+            availableMethods.add('crypto');
+          }
+        }
+      });
+
+      setAvailablePaymentMethods(Array.from(availableMethods));
+    } catch (error) {
+      console.error('Error determining payment methods:', error);
+      // Fallback to showing all methods if there's an error
+      setAvailablePaymentMethods(['stripe', 'crypto', 'bank']);
+    }
   };
 
   const handlePaymentMethodSelect = async (method) => {
@@ -240,29 +309,48 @@ export default function Cart() {
                 <div className="space-y-3">
                   <h3 className="text-white font-semibold mb-4">Select Payment Method:</h3>
                   
-                  <Button
-                    onClick={() => handlePaymentMethodSelect('stripe')}
-                    className="w-full h-16 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-lg"
-                  >
-                    <CreditCard className="w-6 h-6 mr-3" />
-                    Pay with Credit Card (Stripe)
-                  </Button>
+                  {availablePaymentMethods.length === 0 ? (
+                    <div className="p-4 rounded-xl bg-yellow-900/20 border border-yellow-800">
+                      <div className="flex items-center gap-3">
+                        <div className="w-5 h-5 text-yellow-400">⚠️</div>
+                        <p className="text-yellow-200 text-sm">
+                          No payment methods are currently available. Sellers need to configure their payment details in their settings.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {availablePaymentMethods.includes('stripe') && (
+                        <Button
+                          onClick={() => handlePaymentMethodSelect('stripe')}
+                          className="w-full h-16 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-lg"
+                        >
+                          <CreditCard className="w-6 h-6 mr-3" />
+                          Pay with Credit Card (Stripe)
+                        </Button>
+                      )}
 
-                  <Button
-                    onClick={() => handlePaymentMethodSelect('crypto')}
-                    className="w-full h-16 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white font-semibold text-lg"
-                  >
-                    <Coins className="w-6 h-6 mr-3" />
-                    Pay with Cryptocurrency
-                  </Button>
+                      {availablePaymentMethods.includes('crypto') && (
+                        <Button
+                          onClick={() => handlePaymentMethodSelect('crypto')}
+                          className="w-full h-16 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white font-semibold text-lg"
+                        >
+                          <Coins className="w-6 h-6 mr-3" />
+                          Pay with Cryptocurrency
+                        </Button>
+                      )}
 
-                  <Button
-                    onClick={() => handlePaymentMethodSelect('bank')}
-                    className="w-full h-16 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-semibold text-lg"
-                  >
-                    <Building2 className="w-6 h-6 mr-3" />
-                    Pay with Bank Transfer
-                  </Button>
+                      {availablePaymentMethods.includes('bank') && (
+                        <Button
+                          onClick={() => handlePaymentMethodSelect('bank')}
+                          className="w-full h-16 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-semibold text-lg"
+                        >
+                          <Building2 className="w-6 h-6 mr-3" />
+                          Pay with Bank Transfer
+                        </Button>
+                      )}
+                    </>
+                  )}
                 </div>
               </>
             )}

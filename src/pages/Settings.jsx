@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User as UserIcon, Save, MapPin, Globe, Bot, CreditCard, DollarSign, TrendingUp, Calendar, RefreshCw } from "lucide-react";
+import { User as UserIcon, Save, MapPin, Globe, Bot, CreditCard, DollarSign, TrendingUp, Calendar, RefreshCw, Coins, Building2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { formatDistanceToNow } from "date-fns";
 
@@ -36,7 +36,20 @@ export default function Settings() {
     accepted_payment_methods: ["bank_transfer", "stripe", "crypto"],
     open_to_trades: false,
     enable_ai_upsell: false,
-    upsell_commission_rate: 15.00
+    upsell_commission_rate: 15.00,
+    // Payment details
+    bank_details: {
+      account_name: "",
+      bsb: "",
+      account_number: ""
+    },
+    crypto_wallet_addresses: {
+      btc: "",
+      eth: "",
+      usdt: "",
+      usdc: "",
+      xrp: ""
+    }
   });
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -76,7 +89,24 @@ export default function Settings() {
         postcode: user.postcode || "",
         phone: user.phone || "",
         collection_address: user.collection_address || "",
-        negotiation_aggressiveness: user.negotiation_aggressiveness || "balanced"
+        negotiation_aggressiveness: user.negotiation_aggressiveness || "balanced",
+        accepted_payment_methods: user.accepted_payment_methods || ["bank_transfer", "stripe", "crypto"],
+        open_to_trades: user.open_to_trades || false,
+        enable_ai_upsell: user.enable_ai_upsell || false,
+        upsell_commission_rate: user.upsell_commission_rate || 15.00,
+        // Payment details
+        bank_details: user.bank_details || {
+          account_name: "",
+          bsb: "",
+          account_number: ""
+        },
+        crypto_wallet_addresses: user.crypto_wallet_addresses || {
+          btc: "",
+          eth: "",
+          usdt: "",
+          usdc: "",
+          xrp: ""
+        }
       });
 
       if (user.country) {
@@ -138,7 +168,9 @@ export default function Settings() {
         accepted_payment_methods: formData.accepted_payment_methods,
         open_to_trades: formData.open_to_trades,
         enable_ai_upsell: formData.enable_ai_upsell,
-        upsell_commission_rate: formData.upsell_commission_rate
+        upsell_commission_rate: formData.upsell_commission_rate,
+        bank_details: formData.bank_details,
+        crypto_wallet_addresses: formData.crypto_wallet_addresses
       });
       
       setShowSuccess(true);
@@ -694,6 +726,167 @@ export default function Settings() {
                             <p className="text-red-200 text-sm">
                               You must select at least one payment method to accept payments from buyers.
                             </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Bank Details Configuration */}
+                      {formData.accepted_payment_methods.includes('bank_transfer') && (
+                        <div className="mt-6 p-4 rounded-xl bg-gray-800/50 border border-gray-700">
+                          <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
+                            <Building2 className="w-5 h-5" />
+                            Bank Account Details
+                          </h4>
+                          <p className="text-sm text-gray-400 mb-4">
+                            Enter your bank account details to receive bank transfer payments. These details will be shared with buyers.
+                          </p>
+                          
+                          <div className="space-y-4">
+                            <div>
+                              <Label htmlFor="bank_account_name" className="text-gray-300 mb-2 block">
+                                Account Name *
+                              </Label>
+                              <Input
+                                id="bank_account_name"
+                                value={formData.bank_details.account_name}
+                                onChange={(e) => setFormData(prev => ({
+                                  ...prev,
+                                  bank_details: { ...prev.bank_details, account_name: e.target.value }
+                                }))}
+                                placeholder="Your full name as it appears on the account"
+                                className="bg-gray-900 border-gray-700 text-white"
+                              />
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <Label htmlFor="bank_bsb" className="text-gray-300 mb-2 block">
+                                  BSB *
+                                </Label>
+                                <Input
+                                  id="bank_bsb"
+                                  value={formData.bank_details.bsb}
+                                  onChange={(e) => setFormData(prev => ({
+                                    ...prev,
+                                    bank_details: { ...prev.bank_details, bsb: e.target.value }
+                                  }))}
+                                  placeholder="123-456"
+                                  className="bg-gray-900 border-gray-700 text-white"
+                                  maxLength={7}
+                                />
+                              </div>
+                              
+                              <div>
+                                <Label htmlFor="bank_account_number" className="text-gray-300 mb-2 block">
+                                  Account Number *
+                                </Label>
+                                <Input
+                                  id="bank_account_number"
+                                  value={formData.bank_details.account_number}
+                                  onChange={(e) => setFormData(prev => ({
+                                    ...prev,
+                                    bank_details: { ...prev.bank_details, account_number: e.target.value }
+                                  }))}
+                                  placeholder="12345678"
+                                  className="bg-gray-900 border-gray-700 text-white"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Cryptocurrency Wallet Configuration */}
+                      {formData.accepted_payment_methods.includes('crypto') && (
+                        <div className="mt-6 p-4 rounded-xl bg-gray-800/50 border border-gray-700">
+                          <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
+                            <Coins className="w-5 h-5" />
+                            Cryptocurrency Wallet Addresses
+                          </h4>
+                          <p className="text-sm text-gray-400 mb-4">
+                            Enter your wallet addresses for the cryptocurrencies you want to accept. Only addresses you provide will be shown to buyers.
+                          </p>
+                          
+                          <div className="space-y-4">
+                            <div>
+                              <Label htmlFor="crypto_btc" className="text-gray-300 mb-2 block">
+                                Bitcoin (BTC) Address
+                              </Label>
+                              <Input
+                                id="crypto_btc"
+                                value={formData.crypto_wallet_addresses.btc}
+                                onChange={(e) => setFormData(prev => ({
+                                  ...prev,
+                                  crypto_wallet_addresses: { ...prev.crypto_wallet_addresses, btc: e.target.value }
+                                }))}
+                                placeholder="1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"
+                                className="bg-gray-900 border-gray-700 text-white"
+                              />
+                            </div>
+                            
+                            <div>
+                              <Label htmlFor="crypto_eth" className="text-gray-300 mb-2 block">
+                                Ethereum (ETH) Address
+                              </Label>
+                              <Input
+                                id="crypto_eth"
+                                value={formData.crypto_wallet_addresses.eth}
+                                onChange={(e) => setFormData(prev => ({
+                                  ...prev,
+                                  crypto_wallet_addresses: { ...prev.crypto_wallet_addresses, eth: e.target.value }
+                                }))}
+                                placeholder="0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"
+                                className="bg-gray-900 border-gray-700 text-white"
+                              />
+                            </div>
+                            
+                            <div>
+                              <Label htmlFor="crypto_usdt" className="text-gray-300 mb-2 block">
+                                Tether (USDT) Address
+                              </Label>
+                              <Input
+                                id="crypto_usdt"
+                                value={formData.crypto_wallet_addresses.usdt}
+                                onChange={(e) => setFormData(prev => ({
+                                  ...prev,
+                                  crypto_wallet_addresses: { ...prev.crypto_wallet_addresses, usdt: e.target.value }
+                                }))}
+                                placeholder="0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"
+                                className="bg-gray-900 border-gray-700 text-white"
+                              />
+                            </div>
+                            
+                            <div>
+                              <Label htmlFor="crypto_usdc" className="text-gray-300 mb-2 block">
+                                USD Coin (USDC) Address
+                              </Label>
+                              <Input
+                                id="crypto_usdc"
+                                value={formData.crypto_wallet_addresses.usdc}
+                                onChange={(e) => setFormData(prev => ({
+                                  ...prev,
+                                  crypto_wallet_addresses: { ...prev.crypto_wallet_addresses, usdc: e.target.value }
+                                }))}
+                                placeholder="0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"
+                                className="bg-gray-900 border-gray-700 text-white"
+                              />
+                            </div>
+                            
+                            <div>
+                              <Label htmlFor="crypto_xrp" className="text-gray-300 mb-2 block">
+                                XRP Address
+                              </Label>
+                              <Input
+                                id="crypto_xrp"
+                                value={formData.crypto_wallet_addresses.xrp}
+                                onChange={(e) => setFormData(prev => ({
+                                  ...prev,
+                                  crypto_wallet_addresses: { ...prev.crypto_wallet_addresses, xrp: e.target.value }
+                                }))}
+                                placeholder="rN7n7otQDd6FczFgLdlqtyMVrn3Q7sPCHGH"
+                                className="bg-gray-900 border-gray-700 text-white"
+                              />
+                            </div>
                           </div>
                         </div>
                       )}
