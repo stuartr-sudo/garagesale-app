@@ -441,14 +441,51 @@ export default function Cart() {
         }
       }
 
-      // Step 2: Navigate to payment wizard
-      navigate(createPageUrl('PaymentWizardDemo'));
+      // Step 2: Create orders for each item
+      const orderPromises = cartItems.map(async (cartItem) => {
+        const effectivePrice = cartItem.negotiated_price || cartItem.item.price;
+        
+        const { data: order, error } = await supabase
+          .from('orders')
+          .insert({
+            item_id: cartItem.item.id,
+            buyer_id: currentUser.id,
+            seller_id: cartItem.item.seller_id,
+            price: effectivePrice,
+            status: 'pending_payment',
+            price_source: cartItem.price_source || 'original'
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        return order;
+      });
+
+      const orders = await Promise.all(orderPromises);
+      console.log('✅ Orders created:', orders);
+
+      // Step 3: Clear cart
+      const { error: clearError } = await supabase
+        .from('cart_items')
+        .delete()
+        .eq('buyer_id', currentUser.id);
+
+      if (clearError) throw clearError;
+
+      // Step 4: Navigate to My Orders page where they can pay
+      toast({
+        title: "Orders Created!",
+        description: `${orders.length} order(s) created. Complete payment to finalize.`,
+      });
+
+      navigate(createPageUrl('MyOrders'));
       
     } catch (error) {
       console.error('Checkout error:', error);
       toast({
         title: "Checkout Error",
-        description: "Failed to process checkout",
+        description: error.message || "Failed to process checkout",
         variant: "destructive"
       });
     }
