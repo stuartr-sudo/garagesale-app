@@ -328,7 +328,7 @@ export default function MyItems() {
               <Button
                 onClick={handleBulkSelectToggle}
                 variant="outline"
-                className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                className="border-gray-400 text-white bg-gray-800/50 hover:bg-gray-700 hover:border-gray-300"
               >
                 <CheckSquare className="w-4 h-4 mr-2" />
                 Bulk Select Items
