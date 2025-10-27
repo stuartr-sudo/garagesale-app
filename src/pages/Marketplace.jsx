@@ -19,7 +19,6 @@ import SmartRecommendations from "../components/recommendations/SmartRecommendat
 import RecentlySold from "../components/marketplace/RecentlySold";
 import BundleCard from "../components/bundles/BundleCard";
 import BundlePurchaseModal from "../components/bundles/BundlePurchaseModal";
-import { supabase } from '@/lib/supabase';
 
 // Define a set of demo items to display if no real items are available
 const DEMO_ITEMS = [
