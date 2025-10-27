@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Item } from "@/api/entities";
 import { User } from "@/api/entities";
+import { supabase } from "@/lib/supabase";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -192,7 +193,33 @@ export default function Marketplace() {
         itemsData = DEMO_ITEMS;
       }
 
-      setItems(itemsData);
+      // Load negotiation data for each item
+      const itemsWithNegotiation = await Promise.all(
+        itemsData.map(async (item) => {
+          try {
+            const { data: knowledge } = await supabase
+              .from('item_knowledge')
+              .select('negotiation_enabled, minimum_price')
+              .eq('item_id', item.id)
+              .single();
+            
+            return {
+              ...item,
+              negotiation_enabled: knowledge?.negotiation_enabled || false,
+              minimum_price: knowledge?.minimum_price || null
+            };
+          } catch (error) {
+            // If no knowledge record exists, negotiation is disabled
+            return {
+              ...item,
+              negotiation_enabled: false,
+              minimum_price: null
+            };
+          }
+        })
+      );
+
+      setItems(itemsWithNegotiation);
 
       // Load seller information for real users only
       const sellerIds = [...new Set(itemsData.map((item) => item.seller_id))];

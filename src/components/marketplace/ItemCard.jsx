@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tag, Star, Eye, Gift, TrendingDown, Clock, ShoppingCart } from "lucide-react";
+import { Tag, Star, Eye, Gift, TrendingDown, Clock, ShoppingCart, Handshake } from "lucide-react";
 import { formatDistanceToNow } from 'date-fns';
 import { getItemSpecialOffers, formatOfferText, getOfferBadgeColor } from '@/api/offers';
 import { getItemReservation } from '@/api/functions';
@@ -198,11 +198,18 @@ const ItemCard = memo(function ItemCard({ item, seller, isSold = false, currentU
           )}
 
           <div className="flex items-center justify-between mt-3">
-            <div 
-              className="text-2xl font-bold"
-              style={{ color: theme.accentColor }}
-            >
-              {item.price === 0 ? "Free" : `$${item.price}`}
+            <div className="flex items-center gap-2">
+              <div 
+                className="text-2xl font-bold"
+                style={{ color: theme.accentColor }}
+              >
+                {item.price === 0 ? "Free" : `$${item.price}`}
+              </div>
+              {item.negotiation_enabled && (
+                <div className="flex items-center" title="Negotiation available">
+                  <Handshake className="w-4 h-4 text-cyan-400" />
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-1 text-gray-500 text-xs">
               <Tag className="w-3 h-3" />
