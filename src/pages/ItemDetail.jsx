@@ -489,18 +489,22 @@ export default function ItemDetail() {
                     {validImages.map((img, idx) => (
                       <div
                         key={idx}
-                        className={`flex-shrink-0 transition-all ${
-                          selectedImage === idx
-                            ? 'scale-105'
-                            : ''
-                        }`}
+                        className="flex-shrink-0"
+                        style={{
+                          // Reserve space for the scaled selected item
+                          width: selectedImage === idx ? '60px' : '56px', // 56px + 4px for scale
+                          height: selectedImage === idx ? '60px' : '56px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
                       >
                         <button
                           onClick={() => setSelectedImage(idx)}
-                          className={`w-14 h-14 rounded-lg overflow-hidden border-2 transition-all ${
+                          className={`rounded-lg overflow-hidden border-2 transition-all ${
                             selectedImage === idx
-                              ? 'border-pink-500'
-                              : 'border-gray-700 hover:border-gray-700'
+                              ? 'border-pink-500 w-14 h-14 scale-105'
+                              : 'border-gray-700 hover:border-gray-700 w-14 h-14'
                           }`}
                         >
                           <img
