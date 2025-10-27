@@ -572,22 +572,46 @@ export default function ItemDetail() {
                   {item.collection_address && (
                     <div className="text-white text-sm font-medium mb-1">
                       {(() => {
-                        // Extract suburb and postcode from collection address
-                        // Look for patterns like "Suburb, 1234" or "Suburb 1234"
                         const address = item.collection_address;
                         const postcodeMatch = address.match(/(\d{4})/);
                         const postcode = postcodeMatch ? postcodeMatch[1] : '';
                         
-                        // Try to find suburb before the postcode
-                        let suburb = '';
-                        if (postcode) {
-                          const beforePostcode = address.substring(0, address.indexOf(postcode)).trim();
-                          // Get the last word before postcode (likely the suburb)
-                          const words = beforePostcode.split(/[,\s]+/).filter(word => word.length > 0);
-                          suburb = words[words.length - 1] || '';
+                        if (!postcode) return 'Location TBA';
+                        
+                        // Split address into parts and filter out numbers, units, etc.
+                        const beforePostcode = address.substring(0, address.indexOf(postcode)).trim();
+                        const parts = beforePostcode.split(/[,\s]+/).filter(part => {
+                          // Filter out numbers, units, common address prefixes
+                          const lowerPart = part.toLowerCase();
+                          return !lowerPart.match(/^\d+$/) && // No pure numbers
+                                 !lowerPart.match(/^(unit|apt|apartment|suite|level|floor|shop|lot)\d*$/i) && // No units
+                                 !lowerPart.match(/^[a-z]\d+$/i) && // No letter+number combinations like "1/7"
+                                 part.length > 1; // Must be more than 1 character
+                        });
+                        
+                        if (parts.length === 0) return 'Location TBA';
+                        
+                        // Try to find suburb (usually the last meaningful word)
+                        let location = '';
+                        if (parts.length >= 2) {
+                          // If we have multiple parts, try the last one as suburb
+                          const lastPart = parts[parts.length - 1];
+                          // Check if it looks like a suburb (not a street type)
+                          const streetTypes = ['street', 'st', 'road', 'rd', 'avenue', 'ave', 'drive', 'dr', 'lane', 'ln', 'court', 'ct', 'place', 'pl', 'crescent', 'cres', 'way', 'boulevard', 'blvd'];
+                          if (!streetTypes.includes(lastPart.toLowerCase())) {
+                            location = lastPart;
+                          } else if (parts.length >= 3) {
+                            // If last part is a street type, try the one before it
+                            location = parts[parts.length - 2];
+                          } else {
+                            // Fall back to street name if no suburb found
+                            location = parts[parts.length - 1];
+                          }
+                        } else {
+                          location = parts[0];
                         }
                         
-                        return suburb && postcode ? `${suburb}, ${postcode}` : address;
+                        return `${location}, ${postcode}`;
                       })()}
                     </div>
                   )}
