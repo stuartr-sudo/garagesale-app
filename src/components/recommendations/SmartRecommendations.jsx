@@ -81,10 +81,11 @@ export default function SmartRecommendations({
             // For demo items, add some negotiation data to show the icons
             if (item.id && item.id.startsWith('demo_item_')) {
               const negotiableItems = ['demo_item_1', 'demo_item_2', 'demo_item_5', 'demo_item_7'];
+              const hasMinimumPrice = negotiableItems.includes(item.id);
               return {
                 ...item,
-                negotiation_enabled: negotiableItems.includes(item.id),
-                minimum_price: negotiableItems.includes(item.id) ? item.price * 0.8 : null
+                negotiation_enabled: hasMinimumPrice,
+                minimum_price: hasMinimumPrice ? item.price * 0.8 : null
               };
             }
             
@@ -377,7 +378,7 @@ export default function SmartRecommendations({
                     <div className="text-lg font-bold text-cyan-400">
                       ${item.price}
                     </div>
-                    {item.negotiation_enabled && (
+                    {item.negotiation_enabled && item.minimum_price && (
                       <div className="flex items-center" title="Negotiation available">
                         <Handshake className="w-5 h-5 text-cyan-400" />
                       </div>

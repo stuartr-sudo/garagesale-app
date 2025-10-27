@@ -221,7 +221,7 @@ export default function MoreFromSeller({ sellerId, currentItemId }) {
                     <div className="text-lg font-bold text-cyan-400">
                       ${item.price}
                     </div>
-                    {item.negotiation_enabled && (
+                    {item.negotiation_enabled && item.minimum_price && (
                       <div className="flex items-center" title="Negotiation available">
                         <Handshake className="w-5 h-5 text-cyan-400" />
                       </div>

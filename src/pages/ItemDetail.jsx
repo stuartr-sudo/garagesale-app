@@ -187,7 +187,7 @@ export default function ItemDetail() {
         .eq('item_id', id)
         .single();
 
-      setHasAgentEnabled(!!knowledge);
+      setHasAgentEnabled(!!knowledge && !!knowledge.minimum_price);
       if (knowledge?.minimum_price) {
         setMinimumPrice(knowledge.minimum_price.toString());
       }

@@ -210,12 +210,13 @@ export default function Marketplace() {
           } catch (error) {
             // For demo items, add some negotiation data to show the icons
             if (item.id.startsWith('demo_item_')) {
-              // Enable negotiation for some demo items
+              // Enable negotiation for some demo items with minimum prices
               const negotiableItems = ['demo_item_1', 'demo_item_2', 'demo_item_5', 'demo_item_7'];
+              const hasMinimumPrice = negotiableItems.includes(item.id);
               return {
                 ...item,
-                negotiation_enabled: negotiableItems.includes(item.id),
-                minimum_price: negotiableItems.includes(item.id) ? item.price * 0.8 : null
+                negotiation_enabled: hasMinimumPrice,
+                minimum_price: hasMinimumPrice ? item.price * 0.8 : null
               };
             }
             
