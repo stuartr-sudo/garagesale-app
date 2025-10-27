@@ -208,6 +208,17 @@ export default function Marketplace() {
               minimum_price: knowledge?.minimum_price || null
             };
           } catch (error) {
+            // For demo items, add some negotiation data to show the icons
+            if (item.id.startsWith('demo_item_')) {
+              // Enable negotiation for some demo items
+              const negotiableItems = ['demo_item_1', 'demo_item_2', 'demo_item_5', 'demo_item_7'];
+              return {
+                ...item,
+                negotiation_enabled: negotiableItems.includes(item.id),
+                minimum_price: negotiableItems.includes(item.id) ? item.price * 0.8 : null
+              };
+            }
+            
             // If no knowledge record exists, negotiation is disabled
             return {
               ...item,
@@ -218,6 +229,13 @@ export default function Marketplace() {
         })
       );
 
+      console.log('Items with negotiation data:', itemsWithNegotiation.map(item => ({
+        id: item.id,
+        title: item.title,
+        negotiation_enabled: item.negotiation_enabled,
+        minimum_price: item.minimum_price
+      })));
+      
       setItems(itemsWithNegotiation);
 
       // Load seller information for real users only
