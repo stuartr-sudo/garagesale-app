@@ -64,7 +64,10 @@ export default function EditItem() {
     category: "other",
     location: "",
     tags: [],
-    image_urls: []
+    image_urls: [],
+    collection_date: "",
+    collection_address: "",
+    collection_flexible: false
   });
 
   // Safety function to ensure arrays are always arrays
@@ -162,7 +165,10 @@ export default function EditItem() {
         category: ensureString(item.category) || "other",
         location: ensureString(item.location) || ensureString(user.postcode),
         tags: ensureArray(item.tags),
-        image_urls: ensureArray(validImageUrls)
+        image_urls: ensureArray(validImageUrls),
+        collection_date: ensureString(item.collection_date),
+        collection_address: ensureString(item.collection_address),
+        collection_flexible: Boolean(item.collection_flexible)
       };
       
       console.log("Setting item data:", newItemData);
@@ -482,6 +488,15 @@ Return only JSON, no other text.`
       return;
     }
 
+    if (!itemData.collection_date || !itemData.collection_address) {
+      toast({
+        title: "Collection Details Required",
+        description: "Please provide collection date and address.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -498,6 +513,9 @@ Return only JSON, no other text.`
           location: itemData.location || null,
           tags: itemData.tags,
           image_urls: itemData.image_urls,
+          collection_date: itemData.collection_date || null,
+          collection_address: itemData.collection_address || null,
+          collection_flexible: itemData.collection_flexible,
           updated_at: new Date().toISOString()
         })
         .eq('id', id)
@@ -753,6 +771,61 @@ Return only JSON, no other text.`
                 placeholder="e.g., London, UK or SW1A 1AA"
                 className="mt-2 bg-gray-800 border-gray-700 text-white placeholder-gray-500"
               />
+            </div>
+
+            {/* Collection Details */}
+            <div className="space-y-4 bg-gray-800/50 p-6 rounded-lg border border-gray-700">
+              <h3 className="text-white text-lg font-semibold">Collection Details</h3>
+              
+              {/* Collection Date */}
+              <div>
+                <Label htmlFor="collection_date" className="text-gray-300 mb-2 block">
+                  Collection Date *
+                </Label>
+                <Input
+                  id="collection_date"
+                  type="date"
+                  value={itemData.collection_date}
+                  onChange={(e) => setItemData(prev => ({ ...prev, collection_date: e.target.value }))}
+                  className="bg-gray-900 border-gray-700 text-white [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:brightness-100 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                  min={new Date().toISOString().split('T')[0]}
+                  max={new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  Collection date can be set up to 21 days in the future
+                </p>
+              </div>
+
+              {/* Collection Address */}
+              <div>
+                <Label htmlFor="collection_address" className="text-gray-300 mb-2 block">
+                  Collection Address *
+                </Label>
+                <Textarea
+                  id="collection_address"
+                  value={itemData.collection_address}
+                  onChange={(e) => setItemData(prev => ({ ...prev, collection_address: e.target.value }))}
+                  placeholder="Enter the full collection address..."
+                  className="bg-gray-900 border-gray-700 text-white placeholder-gray-500 min-h-[100px]"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  Full address will be revealed 24 hours before collection date
+                </p>
+              </div>
+
+              {/* Collection Flexible Checkbox */}
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="collection_flexible"
+                  checked={itemData.collection_flexible}
+                  onChange={(e) => setItemData(prev => ({ ...prev, collection_flexible: e.target.checked }))}
+                  className="w-4 h-4 text-cyan-600 bg-gray-900 border-gray-700 rounded focus:ring-cyan-500 focus:ring-2"
+                />
+                <Label htmlFor="collection_flexible" className="text-gray-300 text-sm">
+                  Collection time is flexible
+                </Label>
+              </div>
             </div>
 
             {/* Voice Input Section */}
