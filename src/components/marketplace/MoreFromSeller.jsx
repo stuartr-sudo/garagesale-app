@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Check, Gift } from "lucide-react";
+import { Plus, Check, Gift, Handshake } from "lucide-react";
 import { supabase } from '@/lib/supabase';
 import { User as UserEntity } from '@/api/entities';
 import { useToast } from '@/hooks/use-toast';
@@ -34,11 +34,36 @@ export default function MoreFromSeller({ sellerId, currentItemId }) {
         .limit(6);
 
       if (!error && data) {
-        setItems(data);
+        // Load negotiation data for each item
+        const itemsWithNegotiation = await Promise.all(
+          data.map(async (item) => {
+            try {
+              const { data: knowledge } = await supabase
+                .from('item_knowledge')
+                .select('negotiation_enabled, minimum_price')
+                .eq('item_id', item.id)
+                .single();
+              
+              return {
+                ...item,
+                negotiation_enabled: knowledge?.negotiation_enabled || false,
+                minimum_price: knowledge?.minimum_price || null
+              };
+            } catch (error) {
+              return {
+                ...item,
+                negotiation_enabled: false,
+                minimum_price: null
+              };
+            }
+          })
+        );
+        
+        setItems(itemsWithNegotiation);
         
         // Load special offers for each item
         const offersData = {};
-        for (const item of data) {
+        for (const item of itemsWithNegotiation) {
           try {
             const offers = await getItemSpecialOffers(item.id);
             if (offers && offers.length > 0) {
@@ -192,8 +217,15 @@ export default function MoreFromSeller({ sellerId, currentItemId }) {
                   {item.title}
                 </h3>
                 <div className="flex items-center justify-between">
-                  <div className="text-lg font-bold text-cyan-400">
-                    ${item.price}
+                  <div className="flex items-center gap-2">
+                    <div className="text-lg font-bold text-cyan-400">
+                      ${item.price}
+                    </div>
+                    {item.negotiation_enabled && (
+                      <div className="flex items-center" title="Negotiation available">
+                        <Handshake className="w-4 h-4 text-cyan-400" />
+                      </div>
+                    )}
                   </div>
                   <Button
                     size="sm"

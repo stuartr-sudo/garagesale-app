@@ -229,13 +229,6 @@ export default function Marketplace() {
         })
       );
 
-      console.log('Items with negotiation data:', itemsWithNegotiation.map(item => ({
-        id: item.id,
-        title: item.title,
-        negotiation_enabled: item.negotiation_enabled,
-        minimum_price: item.minimum_price
-      })));
-      
       setItems(itemsWithNegotiation);
 
       // Load seller information for real users only

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Sparkles, TrendingUp, Eye, Heart, ShoppingCart, ArrowRight } from 'lucide-react';
+import { Sparkles, TrendingUp, Eye, Heart, ShoppingCart, ArrowRight, Handshake } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -62,7 +62,42 @@ export default function SmartRecommendations({
           items = await getSimilarItems();
       }
 
-      setRecommendations(items.slice(0, limit));
+      // Load negotiation data for each item
+      const itemsWithNegotiation = await Promise.all(
+        items.map(async (item) => {
+          try {
+            const { data: knowledge } = await supabase
+              .from('item_knowledge')
+              .select('negotiation_enabled, minimum_price')
+              .eq('item_id', item.id)
+              .single();
+            
+            return {
+              ...item,
+              negotiation_enabled: knowledge?.negotiation_enabled || false,
+              minimum_price: knowledge?.minimum_price || null
+            };
+          } catch (error) {
+            // For demo items, add some negotiation data to show the icons
+            if (item.id && item.id.startsWith('demo_item_')) {
+              const negotiableItems = ['demo_item_1', 'demo_item_2', 'demo_item_5', 'demo_item_7'];
+              return {
+                ...item,
+                negotiation_enabled: negotiableItems.includes(item.id),
+                minimum_price: negotiableItems.includes(item.id) ? item.price * 0.8 : null
+              };
+            }
+            
+            return {
+              ...item,
+              negotiation_enabled: false,
+              minimum_price: null
+            };
+          }
+        })
+      );
+
+      setRecommendations(itemsWithNegotiation.slice(0, limit));
     } catch (error) {
       console.error('Error loading recommendations:', error);
     } finally {
@@ -338,8 +373,15 @@ export default function SmartRecommendations({
                   {item.title}
                 </h3>
                 <div className="flex items-center justify-between">
-                  <div className="text-lg font-bold text-cyan-400">
-                    ${item.price}
+                  <div className="flex items-center gap-2">
+                    <div className="text-lg font-bold text-cyan-400">
+                      ${item.price}
+                    </div>
+                    {item.negotiation_enabled && (
+                      <div className="flex items-center" title="Negotiation available">
+                        <Handshake className="w-4 h-4 text-cyan-400" />
+                      </div>
+                    )}
                   </div>
                   {item.condition && (
                     <Badge className="text-xs bg-blue-900/50 text-blue-300 border-blue-700">

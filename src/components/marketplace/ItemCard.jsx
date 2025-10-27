@@ -12,13 +12,6 @@ import { getItemReservation } from '@/api/functions';
 const ItemCard = memo(function ItemCard({ item, seller, isSold = false, currentUser = null }) {
   const primaryImage = item.image_urls?.[0] || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop";
   
-  // Debug logging
-  console.log('ItemCard received item:', {
-    id: item.id,
-    title: item.title,
-    negotiation_enabled: item.negotiation_enabled,
-    minimum_price: item.minimum_price
-  });
   
   // Load theme from localStorage (now using hex colors)
   const [theme, setTheme] = useState(() => {
