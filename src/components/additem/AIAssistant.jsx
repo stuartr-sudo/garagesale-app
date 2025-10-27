@@ -76,7 +76,7 @@ export default function AIAssistant({ images, onAssist }) {
             <Sparkles className="w-5 h-5 text-white" />
           </div>
           <div className="flex-1">
-            <h4 className="font-semibold text-white">AI-Powered Listing Assistant</h4>
+            <h4 className="font-semibold text-white">Knowzee - AI-Powered Listing Assistant</h4>
             <p className="text-sm text-gray-300 mt-1">
               Upload photos or describe your item, and I'll help generate a compelling listing with title, description, pricing suggestions, and tags.
             </p>

@@ -48,7 +48,7 @@ const OnboardingTour = ({ onComplete }) => {
     {
       target: '[data-tour="sidebar-add-item"]',
       title: "List New Items",
-      content: "Add items you want to sell or trade. Our AI assistant can help write descriptions and suggest prices!",
+      content: "Add items you want to sell or trade. Knowzee can help write descriptions and suggest prices!",
       position: "right",
       pulse: true
     },

@@ -120,7 +120,7 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
     // Add welcome message
     setMessages([{
       sender: 'ai',
-      content: `Hi! I'm the AI assistant for "${itemTitle}". I can answer any questions you have about this item, including pricing. Feel free to make an offer!`,
+      content: `Hi! I'm Knowzee, your AI assistant for "${itemTitle}". I can answer any questions you have about this item, including pricing. Feel free to make an offer!`,
       timestamp: new Date().toISOString()
     }]);
   }, [itemTitle]);
@@ -267,7 +267,7 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
             <Bot className="w-8 h-8 text-white animate-pulse" />
           </div>
           <div className="ml-3">
-            <div className="text-white font-bold text-lg">AI Assistant</div>
+            <div className="text-white font-bold text-lg">Knowzee</div>
             <div className="text-white/80 text-sm">Negotiate</div>
           </div>
         </CardTitle>
@@ -298,7 +298,7 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
                   {msg.sender === 'ai' && (
                     <div className="flex items-center gap-2 mb-1 text-purple-400 text-xs">
                       <Bot className="w-3 h-3" />
-                      <span>AI Assistant</span>
+                      <span>Knowzee</span>
                     </div>
                   )}
                   <div className="text-sm leading-relaxed whitespace-pre-wrap">

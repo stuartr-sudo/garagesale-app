@@ -756,7 +756,7 @@ export default function ItemDetail() {
           ) : (
             <Card className="bg-gray-800/50 border-gray-800 p-6 text-center">
               <p className="text-gray-400">
-                AI Assistant not available for this item
+                Knowzee not available for this item
               </p>
             </Card>
           )}
