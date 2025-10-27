@@ -256,6 +256,7 @@ function BundleCreator({
                       value={bundleData.collectionDate}
                       onChange={(e) => setBundleData(prev => ({ ...prev, collectionDate: e.target.value }))}
                       min={new Date().toISOString().slice(0, 16)}
+                      max={new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16)}
                       className="bg-gray-800 border-gray-700 text-white [color-scheme:dark] text-lg h-14 font-medium"
                       style={{ colorScheme: 'dark' }}
                     />

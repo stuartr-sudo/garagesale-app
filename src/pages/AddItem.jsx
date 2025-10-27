@@ -762,6 +762,7 @@ export default function AddItem() {
                   onChange={(e) => setItemData(prev => ({ ...prev, collection_date: e.target.value }))}
             className="bg-gray-900 border-gray-700 text-white [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:brightness-100 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
             min={new Date().toISOString().split('T')[0]}
+            max={new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
           />
               </div>
 
