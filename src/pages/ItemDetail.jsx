@@ -591,23 +591,28 @@ export default function ItemDetail() {
                         
                         if (parts.length === 0) return 'Location TBA';
                         
-                        // Try to find suburb (usually the last meaningful word)
+                        // Try to find suburb or street name
                         let location = '';
+                        const streetTypes = ['street', 'st', 'road', 'rd', 'avenue', 'ave', 'drive', 'dr', 'lane', 'ln', 'court', 'ct', 'place', 'pl', 'crescent', 'cres', 'way', 'boulevard', 'blvd'];
+                        
                         if (parts.length >= 2) {
-                          // If we have multiple parts, try the last one as suburb
                           const lastPart = parts[parts.length - 1];
-                          // Check if it looks like a suburb (not a street type)
-                          const streetTypes = ['street', 'st', 'road', 'rd', 'avenue', 'ave', 'drive', 'dr', 'lane', 'ln', 'court', 'ct', 'place', 'pl', 'crescent', 'cres', 'way', 'boulevard', 'blvd'];
-                          if (!streetTypes.includes(lastPart.toLowerCase())) {
-                            location = lastPart;
-                          } else if (parts.length >= 3) {
-                            // If last part is a street type, try the one before it
-                            location = parts[parts.length - 2];
+                          
+                          // Check if last part is a street type
+                          if (streetTypes.includes(lastPart.toLowerCase())) {
+                            // If it's a street type, get the street name + type
+                            if (parts.length >= 2) {
+                              const streetName = parts[parts.length - 2];
+                              location = `${streetName} ${lastPart}`;
+                            } else {
+                              location = lastPart;
+                            }
                           } else {
-                            // Fall back to street name if no suburb found
-                            location = parts[parts.length - 1];
+                            // Last part is likely a suburb
+                            location = lastPart;
                           }
-                        } else {
+                        } else if (parts.length === 1) {
+                          // Single part - could be suburb or street
                           location = parts[0];
                         }
                         
