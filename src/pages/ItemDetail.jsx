@@ -487,21 +487,29 @@ export default function ItemDetail() {
                 <div className="p-3 bg-gray-800/50 border-t border-gray-700">
                   <div className="flex gap-2 overflow-x-auto">
                     {validImages.map((img, idx) => (
-                      <button
+                      <div
                         key={idx}
-                        onClick={() => setSelectedImage(idx)}
-                        className={`flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all ${
+                        className={`flex-shrink-0 transition-all ${
                           selectedImage === idx
-                            ? 'border-pink-500 scale-105'
-                            : 'border-gray-700 hover:border-gray-700'
+                            ? 'scale-105'
+                            : ''
                         }`}
                       >
-                        <img
-                          src={img}
-                          alt={`${item.title} ${idx + 1}`}
-                          className="w-full h-full object-contain"
-                        />
-                      </button>
+                        <button
+                          onClick={() => setSelectedImage(idx)}
+                          className={`w-14 h-14 rounded-lg overflow-hidden border-2 transition-all ${
+                            selectedImage === idx
+                              ? 'border-pink-500'
+                              : 'border-gray-700 hover:border-gray-700'
+                          }`}
+                        >
+                          <img
+                            src={img}
+                            alt={`${item.title} ${idx + 1}`}
+                            className="w-full h-full object-contain"
+                          />
+                        </button>
+                      </div>
                     ))}
                   </div>
                 </div>
