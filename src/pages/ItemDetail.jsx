@@ -565,12 +565,29 @@ export default function ItemDetail() {
                 </CardContent>
               </Card>
 
-              {/* Category Card - Button Style */}
-              <div className="bg-lime-500 hover:bg-lime-600 transition-colors duration-200 rounded-lg p-4 text-center cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
-                <div className="text-white font-semibold text-sm">
-                  {item.category?.replace('_', ' ').toUpperCase()}
-                </div>
-              </div>
+              {/* Collection Details Card */}
+              <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
+                <CardContent className="p-4 text-center">
+                  <div className="text-xs text-gray-400 mb-1">Collection Details</div>
+                  {item.collection_address && (
+                    <div className="text-white text-sm font-medium mb-1">
+                      {item.collection_address}
+                    </div>
+                  )}
+                  {item.collection_date && (
+                    <div className="text-white text-sm">
+                      {new Date(item.collection_date).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </div>
+                  )}
+                  {!item.collection_address && !item.collection_date && (
+                    <div className="text-gray-500 text-sm">Not set</div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
 
             {/* Description Card */}
