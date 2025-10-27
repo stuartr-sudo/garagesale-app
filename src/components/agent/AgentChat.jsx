@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Bot, Send, Loader2, CheckCircle, Sparkles, Clock, TrendingUp } from 'lucide-react';
+import { MessageCircle, Send, Loader2, CheckCircle, Sparkles, Clock, TrendingUp } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 // Countdown Timer Component with Animated Progress Bar
@@ -264,11 +264,11 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
               background: `linear-gradient(to right, ${theme?.agentIconFrom || '#a855f7'}, ${theme?.agentIconTo || '#ec4899'})`
             }}
           >
-            <Bot className="w-8 h-8 text-white animate-pulse" />
+            <MessageCircle className="w-8 h-8 text-white animate-pulse" />
           </div>
           <div className="ml-3">
             <div className="text-white font-bold text-lg">Knowzee</div>
-            <div className="text-white/80 text-sm">Negotiate</div>
+            <div className="text-white/80 text-sm">Curious? Ask Away!</div>
           </div>
         </CardTitle>
       </CardHeader>
@@ -297,7 +297,7 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
                 >
                   {msg.sender === 'ai' && (
                     <div className="flex items-center gap-2 mb-1 text-purple-400 text-xs">
-                      <Bot className="w-3 h-3" />
+                      <MessageCircle className="w-3 h-3" />
                       <span>Knowzee</span>
                     </div>
                   )}
