@@ -571,7 +571,24 @@ export default function ItemDetail() {
                   <div className="text-xs text-gray-400 mb-1">Collection Details</div>
                   {item.collection_address && (
                     <div className="text-white text-sm font-medium mb-1">
-                      {item.collection_address}
+                      {(() => {
+                        // Extract suburb and postcode from collection address
+                        // Look for patterns like "Suburb, 1234" or "Suburb 1234"
+                        const address = item.collection_address;
+                        const postcodeMatch = address.match(/(\d{4})/);
+                        const postcode = postcodeMatch ? postcodeMatch[1] : '';
+                        
+                        // Try to find suburb before the postcode
+                        let suburb = '';
+                        if (postcode) {
+                          const beforePostcode = address.substring(0, address.indexOf(postcode)).trim();
+                          // Get the last word before postcode (likely the suburb)
+                          const words = beforePostcode.split(/[,\s]+/).filter(word => word.length > 0);
+                          suburb = words[words.length - 1] || '';
+                        }
+                        
+                        return suburb && postcode ? `${suburb}, ${postcode}` : address;
+                      })()}
                     </div>
                   )}
                   {item.collection_date && (
