@@ -565,15 +565,12 @@ export default function ItemDetail() {
                 </CardContent>
               </Card>
 
-              {/* Category Card */}
-              <Card className="bg-gray-900/95 border-2 border-cyan-500/20 shadow-2xl shadow-cyan-500/15 ring-1 ring-cyan-400/10">
-                <CardContent className="p-4 text-center">
-                  <div className="text-xs text-gray-400 mb-1">Category</div>
-                  <Badge variant="outline" className="capitalize bg-purple-900/50 text-purple-300 border-purple-700">
-                    {item.category?.replace('_', ' ')}
-                  </Badge>
-                </CardContent>
-              </Card>
+              {/* Category Card - Button Style */}
+              <div className="bg-lime-500 hover:bg-lime-600 transition-colors duration-200 rounded-lg p-4 text-center cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                <div className="text-white font-semibold text-sm">
+                  {item.category?.replace('_', ' ').toUpperCase()}
+                </div>
+              </div>
             </div>
 
             {/* Description Card */}
