@@ -206,11 +206,11 @@ const ItemCard = memo(function ItemCard({ item, seller, isSold = false, currentU
               >
                 {item.price === 0 ? "Free" : `$${item.price}`}
               </div>
-              {item.negotiation_enabled && (
-                <div className="flex items-center" title="Negotiation available">
-                  <Handshake className="w-4 h-4 text-cyan-400" />
-                </div>
-              )}
+        {item.negotiation_enabled && (
+          <div className="flex items-center" title="Negotiation available">
+            <Handshake className="w-5 h-5 text-cyan-400" />
+          </div>
+        )}
             </div>
             <div className="flex items-center gap-1 text-gray-500 text-xs">
               <Tag className="w-3 h-3" />

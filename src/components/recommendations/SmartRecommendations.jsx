@@ -379,7 +379,7 @@ export default function SmartRecommendations({
                     </div>
                     {item.negotiation_enabled && (
                       <div className="flex items-center" title="Negotiation available">
-                        <Handshake className="w-4 h-4 text-cyan-400" />
+                        <Handshake className="w-5 h-5 text-cyan-400" />
                       </div>
                     )}
                   </div>
