@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Bot, Send, Loader2, CheckCircle, Sparkles, Clock, TrendingUp } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/hooks/useAuth';
 
 // Countdown Timer Component with Animated Progress Bar
 function CountdownTimer({ expiresAt }) {
@@ -77,7 +76,7 @@ function CountdownTimer({ expiresAt }) {
 }
 
 export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer }) {
-  const { currentUser } = useAuth();
+  const [currentUser, setCurrentUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -97,6 +96,18 @@ export default function AgentChat({ itemId, itemTitle, itemPrice, onAcceptOffer 
       });
     }
   };
+
+  useEffect(() => {
+    // Load current user
+    const loadCurrentUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setCurrentUser(session.user);
+      }
+    };
+    
+    loadCurrentUser();
+  }, []);
 
   useEffect(() => {
     // Only auto-scroll if there are messages (not on initial load)
