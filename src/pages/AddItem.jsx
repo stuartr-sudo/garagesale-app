@@ -52,7 +52,7 @@ export default function AddItem() {
     postcode: "",
     tags: [],
     image_urls: [],
-    collection_date: "",
+    collection_date: new Date().toISOString().split('T')[0], // Default to today's date
     collection_address: "",
     collection_flexible: false
   });
@@ -74,16 +74,46 @@ export default function AddItem() {
 
   const loadUser = async () => {
     try {
-      const user = await User.me();
-      setCurrentUser(user);
-      if (user.postcode) {
-        setItemData(prev => ({ ...prev, postcode: user.postcode }));
+      // Get current session using Supabase directly
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session?.user) {
+        // Not authenticated, redirect to sign in
+        navigate(createPageUrl("SignIn"));
+        return;
       }
-      if (user.collection_address) {
-        setItemData(prev => ({ ...prev, collection_address: user.collection_address }));
+
+      // Get user profile from profiles table
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profileError) {
+        console.error('Error fetching user profile:', profileError);
+        // Use basic user info from auth
+        const basicUser = {
+          id: session.user.id,
+          email: session.user.email,
+          full_name: session.user.user_metadata?.full_name || session.user.email,
+          account_type: 'individual',
+          role: 'user'
+        };
+        setCurrentUser(basicUser);
+      } else {
+        setCurrentUser(profile);
+        if (profile.postcode) {
+          setItemData(prev => ({ ...prev, postcode: profile.postcode }));
+        }
+        if (profile.collection_address) {
+          setItemData(prev => ({ ...prev, collection_address: profile.collection_address }));
+        }
       }
     } catch (error) {
       console.error("Error loading user:", error);
+      setCurrentUser(null);
+      navigate(createPageUrl("SignIn"));
     }
   };
 
@@ -382,6 +412,17 @@ export default function AddItem() {
 
   // Submit handler
   const handleSubmit = async () => {
+    // Check if user is authenticated
+    if (!currentUser) {
+      toast({ 
+        title: "Authentication Required",
+        description: "Please sign in to create listings.",
+        variant: "destructive" 
+      });
+      navigate(createPageUrl("SignIn"));
+      return;
+    }
+
     // Final validation
     if (!ownershipConfirmed) {
         toast({ 
