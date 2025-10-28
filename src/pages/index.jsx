@@ -27,7 +27,6 @@ const MyPurchases = lazy(() => import("./MyPurchases"));
 const Connect = lazy(() => import("./Connect"));
 const AddProduct = lazy(() => import("./AddProduct"));
 const Store = lazy(() => import("./Store"));
-const Success = lazy(() => import("./Success"));
 const Onboarding = lazy(() => import("./Onboarding"));
 const BusinessOnboarding = lazy(() => import("./BusinessOnboarding"));
 const BusinessSignup = lazy(() => import("./BusinessSignup"));
@@ -109,8 +108,6 @@ const PAGES = {
     AddProduct: AddProduct,
     
     Store: Store,
-    
-    Success: Success,
     
     Onboarding: Onboarding,
     
@@ -227,8 +224,6 @@ function PagesContent() {
                 <Route path="/AddProduct" element={<AddProduct />} />
                 
                 <Route path="/Store" element={<Store />} />
-                
-                <Route path="/Success" element={<Success />} />
                 
                 <Route path="/Onboarding" element={<Onboarding />} />
                 

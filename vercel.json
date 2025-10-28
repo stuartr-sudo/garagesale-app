@@ -1,4 +1,7 @@
 {
+  "buildCommand": "npm run build --workspace=@garagesale/web",
+  "outputDirectory": "apps/web/dist",
+  "installCommand": "npm install",
   "crons": [
     {
       "path": "/api/cron/collection-reminders",
