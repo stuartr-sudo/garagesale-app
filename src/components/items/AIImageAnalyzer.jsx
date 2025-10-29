@@ -2,16 +2,6 @@
  * AI Image Analyzer Component
  * 
  * Provides a button to analyze uploaded images with AI and auto-fill item details.
- * Used in both Add Item and Edit Item pages.
- */
-
-import { useState } from 'react';
-import { Sparkles, Loader2, AlertCircle, CheckCircle, Info } from 'lucide-react';
-
-/**
- * AI Image Analyzer Component
- * 
- * Provides a button to analyze uploaded images with AI and auto-fill item details.
  * Uses Supabase edge function for voice + image + SERP API integration.
  * Used in both Add Item and Edit Item pages.
  */
