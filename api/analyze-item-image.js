@@ -98,8 +98,9 @@ export default async function handler(req, res) {
           ]
         }
       ],
+      response_format: { type: 'json_object' },
       max_tokens: 800,
-      temperature: 0.7,
+      temperature: 0.4,
     });
 
     const aiResponse = response.choices[0].message.content;
@@ -171,51 +172,73 @@ function buildAnalysisPrompt(existingData) {
     ? `\n\nThe seller has already provided: ${JSON.stringify(existingData)}. Use this as context but provide your own analysis.`
     : '';
 
-  return `Analyze this item photo for an online marketplace listing. Provide a detailed analysis in JSON format.
+  return `Analyze this product image and respond with ONLY valid JSON (no markdown, no explanation).
 
-Available categories: ${CATEGORIES.join(', ')}
-Available conditions: ${CONDITIONS.join(', ')}
-
-Respond with ONLY valid JSON (no markdown, no explanation) in this exact structure:
-
+**Required JSON format:**
 {
-  "title": "Concise item title (40 chars max, include brand/model if visible)",
-  "description": "Compelling 2-3 sentence description highlighting key features and appeal",
-  "category": "One of the available categories that best fits",
-  "condition": "One of the available conditions based on visible wear/damage",
-  "attributes": {
-    "brand": "Brand name if visible/identifiable, or null",
-    "model": "Model number/name if visible, or null",
-    "color": "Primary color(s)",
-    "material": "Primary material (wood, metal, plastic, fabric, etc.) or null",
-    "size": "Size if applicable (S/M/L, dimensions, etc.) or null"
-  },
+  "title": "Brand Model - Key Feature (Condition)",
+  "description": "Detailed paragraph description (4-6 sentences, 150-300 words)",
+  "category": "One of: ${CATEGORIES.join(', ')}",
+  "condition": "One of: ${CONDITIONS.join(', ')}",
   "priceRange": {
-    "min": 10,
-    "max": 50,
-    "currency": "USD",
-    "reasoning": "Brief explanation of price estimate based on condition, brand, market"
-  },
-  "qualityFlags": {
-    "isBlurry": false,
-    "isPoorLighting": false,
-    "hasClutteredBackground": false,
-    "isStockPhoto": false,
-    "isProhibited": false,
-    "prohibitedReason": null
+    "min": number - minimum suggested price in AUD,
+    "max": number - maximum suggested price in AUD
   },
   "tags": ["tag1", "tag2", "tag3"],
-  "marketingTips": "One sentence on how to make this listing more appealing",
-  "confidence": 0.85
+  "selling_points": ["point1", "point2", "point3"],
+  "attributes": {
+    "brand": "string - brand name if identifiable",
+    "model": "string - model name if identifiable",
+    "color": "string - primary color",
+    "size": "string - size if applicable",
+    "material": "string - material if identifiable"
+  },
+  "marketingTips": "string - helpful tip for better listing presentation",
+  "qualityFlags": {
+    "isBlurry": boolean,
+    "isPoorLighting": boolean,
+    "hasClutteredBackground": boolean,
+    "isStockPhoto": boolean,
+    "isProhibited": boolean,
+    "prohibitedReason": "string - reason if prohibited"
+  }
 }
+
+**Analysis guidelines:**
+
+**Title** (max 50 chars):
+- Format: [Brand] [Model/Type] - [Key Feature]
+- Include brand if visible
+- Be specific (not "Phone" but "iPhone 12 Pro")
+- Include color/size if prominent
+
+**Description** (detailed paragraph, 4-6 sentences, 150-300 words):
+- Paragraph structure:
+  * Opening: What the item is, its primary purpose, and standout feature
+  * Features: List 3-5 specific features, specifications, or benefits
+  * Condition: Detailed condition assessment - be specific about any wear, marks, functionality
+  * Value proposition: Why this is a good buy, what makes it special
+  * Use case: Who would love this item or what situations it's perfect for
+- Write in an engaging, descriptive style that sells the item
+- Be honest and transparent about condition
+- Include measurements, dimensions, or specs if visible
+- Mention any accessories, original packaging, or extras shown
+- Use natural, flowing language (not bullet points)
+
+**Price & Minimum Price**:
+- Research typical market value for the condition
+- priceRange.min: Fair asking price
+- priceRange.max: 130% of asking price (negotiation ceiling)
+- Both must be numbers
+
+**Category**: Choose the best fit from the allowed categories
+**Condition**: Be strict and honest
+**Tags**: 3-5 searchable keywords (lowercase)
+**Selling Points**: 2-4 key highlights that make this item attractive
 
 Prohibited items: weapons, drugs, counterfeit goods, adult content, live animals, prescription medications.
 
-Price range guidance:
-- Electronics: Research typical used prices for the model/age
-- Furniture: Consider material, condition, size (typically $20-500)
-- Clothing: Brand matters (fast fashion $5-20, designer $50-500)
-- Collectibles: Condition is critical (mint = 2-5x used price)
+Return ONLY the JSON object.
 
 ${contextNote}`;
 }

@@ -8,7 +8,7 @@
 import { useState } from 'react';
 import { Sparkles, Loader2, AlertCircle, CheckCircle, Info } from 'lucide-react';
 
-export default function AIImageAnalyzer({ imageUrl, onAnalysisComplete, disabled }) {
+export default function AIImageAnalyzer({ imageUrl, voiceTranscript, onAnalysisComplete, disabled }) {
   const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState(null);
   const [lastAnalysis, setLastAnalysis] = useState(null);
@@ -23,18 +23,39 @@ export default function AIImageAnalyzer({ imageUrl, onAnalysisComplete, disabled
     setError(null);
 
     try {
-      const response = await fetch('/api/analyze-item-image', {
+      // Use the edge function endpoint that combines image + voice + SERP API
+      const response = await fetch('/api/analyze-image-with-voice', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ imageUrl }),
+        body: JSON.stringify({ 
+          imageUrl,
+          voiceTranscript: voiceTranscript || null
+        }),
       });
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to analyze image');
+      if (!response.ok || !data.success) {
+        // Fallback to basic image analysis if edge function fails
+        console.warn('Edge function failed, falling back to basic analysis:', data.error);
+        const fallbackResponse = await fetch('/api/analyze-item-image', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ imageUrl }),
+        });
+        const fallbackData = await fallbackResponse.json();
+        if (!fallbackResponse.ok) {
+          throw new Error(fallbackData.error || 'Failed to analyze image');
+        }
+        setLastAnalysis(fallbackData);
+        if (onAnalysisComplete) {
+          onAnalysisComplete(fallbackData.analysis);
+        }
+        return;
       }
 
       setLastAnalysis(data);
