@@ -8,6 +8,18 @@
 import { useState } from 'react';
 import { Sparkles, Loader2, AlertCircle, CheckCircle, Info } from 'lucide-react';
 
+/**
+ * AI Image Analyzer Component
+ * 
+ * Provides a button to analyze uploaded images with AI and auto-fill item details.
+ * Uses Supabase edge function for voice + image + SERP API integration.
+ * Used in both Add Item and Edit Item pages.
+ */
+
+import { useState } from 'react';
+import { Sparkles, Loader2, AlertCircle, CheckCircle, Info } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+
 export default function AIImageAnalyzer({ imageUrl, voiceTranscript, onAnalysisComplete, disabled }) {
   const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState(null);
@@ -23,46 +35,69 @@ export default function AIImageAnalyzer({ imageUrl, voiceTranscript, onAnalysisC
     setError(null);
 
     try {
-      // Use the edge function endpoint that combines image + voice + SERP API
-      const response = await fetch('/api/analyze-image-with-voice', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
+      // Call Supabase edge function directly
+      console.log('🔄 Calling Supabase edge function analyze-image-with-voice...');
+      
+      const { data, error: edgeError } = await supabase.functions.invoke('analyze-image-with-voice', {
+        body: {
           imageUrl,
           voiceTranscript: voiceTranscript || null
-        }),
+        }
       });
 
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        // Fallback to basic image analysis if edge function fails
-        console.warn('Edge function failed, falling back to basic analysis:', data.error);
-        const fallbackResponse = await fetch('/api/analyze-item-image', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ imageUrl }),
-        });
-        const fallbackData = await fallbackResponse.json();
-        if (!fallbackResponse.ok) {
-          throw new Error(fallbackData.error || 'Failed to analyze image');
-        }
-        setLastAnalysis(fallbackData);
-        if (onAnalysisComplete) {
-          onAnalysisComplete(fallbackData.analysis);
-        }
-        return;
+      if (edgeError) {
+        throw new Error(edgeError.message || 'Failed to analyze with edge function');
       }
 
-      setLastAnalysis(data);
+      if (!data || !data.success) {
+        throw new Error(data?.error || 'Edge function returned unsuccessful response');
+      }
+
+      console.log('✅ Analysis complete:', {
+        title: data.title?.substring(0, 50),
+        hasVoice: !!voiceTranscript,
+        hasMarketData: !!data.market_research
+      });
+
+      // Transform the response to match expected format
+      const analysis = {
+        category: data.category || 'Other',
+        title: data.title || '',
+        description: data.description || '',
+        condition: data.condition || 'Good',
+        priceRange: data.price ? {
+          min: data.minimum_price || Math.round(data.price * 0.7),
+          max: data.price || Math.round((data.minimum_price || data.price) * 1.3)
+        } : {
+          min: 0,
+          max: 0
+        },
+        tags: data.tags || [],
+        selling_points: data.selling_points || [],
+        attributes: data.attributes || {},
+        marketingTips: data.marketing_tips || '',
+        qualityFlags: data.quality_flags || {},
+        market_research: data.market_research || null
+      };
+
+      // Calculate confidence based on sources used
+      let confidence = 0.7;
+      if (data.sources_used?.image) confidence += 0.15;
+      if (data.sources_used?.voice) confidence += 0.1;
+      if (data.market_research) confidence += 0.05;
+
+      const result = {
+        analysis,
+        confidence: Math.min(confidence, 1.0),
+        sources_used: data.sources_used || {},
+        market_research: data.market_research || null
+      };
+
+      setLastAnalysis(result);
       
       // Call the parent component's callback with the analysis
       if (onAnalysisComplete) {
-        onAnalysisComplete(data.analysis);
+        onAnalysisComplete(analysis);
       }
 
     } catch (err) {
